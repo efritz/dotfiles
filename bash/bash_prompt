@@ -1,4 +1,39 @@
 #!/bin/bash
 
-# Custom (colored) prompt
-export PS1="\[\033[36m\]\u\[\033[m\]@\[\e[36;1m\]\h:\[\e[32;1m\]\w$ \[\e[0m\]"
+prompt1() {
+    if [[ "${USER}" == "root" ]]; then
+        userStyle=$(tput setaf 124) # red
+    else
+        userStyle=$(tput setaf 33)  # blue
+    fi
+
+    if [[ "${SSH_TTY}" ]]; then
+        hostStyle=$(tput bold)$(tput setaf 124) # red + bold
+    else
+        hostStyle=$(tput setaf 61)              # violet
+    fi
+
+    paths=$(tput setaf 37) # cyan
+    reset=$(tput sgr0)
+
+    PS1=""
+    PS1+="\[$userStyle\]\u" # (user)
+    PS1+="\[${reset}\] on " # on
+    PS1+="\[$hostStyle\]\h" # (host)
+    PS1+="\[${reset}\] in " # in
+    PS1+="\[$paths\]\w"     # (path)
+    PS1+="\[${reset}\]\n$ " # $
+    PS1+=""
+
+    export PS1
+}
+
+prompt2() {
+    export PS2="→ "
+}
+
+prompt1
+prompt2
+
+unset prompt1
+unset prompt2
