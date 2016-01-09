@@ -20,3 +20,5 @@ alias mv='mv -i'
 alias cp='cp -i'
 alias ls='ls -GFh'
 alias grep='grep --color=auto'
+# Remove DS_Store files
+alias cleanup="find . -type f -name '*.DS_Store' -ls -delete"
