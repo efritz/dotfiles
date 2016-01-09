@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Sanitize
+rm -r ~/bin ~/.shell
+
 # Update shell
 cp -r bin ~/bin
 cp -r bash ~/.shell
