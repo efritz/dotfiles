@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Allow aliases to be used with sudo
+alias sudo="sudo "
+
+# Easier navigation
+alias ..="cd .."
+alias ...="cd ../.."
+alias ~="cd ~"
+
+# Frequent commands
+alias o='open -a Finder .'
+alias s='open -a "Sublime Text" .'
+alias c='open -a "Google Chrome"'
+alias b='open -a "Google Chrome"'
+
+# Sane default flags
+alias rm='rm -i'
+alias mv='mv -i'
+alias cp='cp -i'
+alias ls='ls -GFh'
+alias grep='grep --color=auto'

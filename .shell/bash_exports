@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Make sublime the default editor
+export EDITOR='subl -w'
+
+# Ignore duplicate commands in the history
+export HISTCONTROL=ignoredups
+
+# INcrease the maximum number of lines contained in the history file
+export HISTFILESIZE=10000
+
+# Increase the maximum number of commands to remember
+export HISTSIZE=10000
+
+# Make new shells get the history lines from all previous shells
+export PROMPT_COMMAND="history -a; $PROMPT_COMMAND"

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Custom (colored) prompt
+export PS1="\[\033[36m\]\u\[\033[m\]@\[\e[36;1m\]\h:\[\e[32;1m\]\w$ \[\e[0m\]"

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+export GOPATH=~/go
+
+declare -a paths=(
+    $HOME/bin
+    $GOPATH/bin
+    "/Applications/Sublime Text.app/Contents/SharedSupport/bin"
+)
+
+for index in ${!paths[*]}
+do
+    if [[ -d ${paths[$index]} ]]; then
+        PATH="${paths[$index]}:$PATH"
+    fi
+done
+
+export PATH
