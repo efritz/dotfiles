@@ -14,3 +14,6 @@ export HISTSIZE=10000
 
 # Make new shells get the history lines from all previous shells
 export PROMPT_COMMAND="history -a; $PROMPT_COMMAND"
+
+# Set the encrypted password filepath
+export PASS_SAFE=~/Google\ Drive/pass.safe
