@@ -1,18 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+for path in {$HOME/bin,$GOPATH/bin}; do
+    [ -d "$path" ] && PATH="$path:$PATH"
+done;
+unset path;
+
+export PATH;
 export GOPATH=~/go
-
-declare -a paths=(
-    $HOME/bin
-    $GOPATH/bin
-    "/Applications/Sublime Text.app/Contents/SharedSupport/bin"
-)
-
-for index in ${!paths[*]}
-do
-    if [[ -d ${paths[$index]} ]]; then
-        PATH="${paths[$index]}:$PATH"
-    fi
-done
-
-export PATH
