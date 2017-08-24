@@ -1,0 +1,25 @@
+[user]
+	name = Eric Fritz
+	email = eric@eric-fritz.com
+
+[github]
+	user = efritz
+
+[core]
+	excludesfile = /Users/efritz/.gitignore_global
+	# Treat spaces before tabs and all kinds of trailing whitespace as an error
+	# [default] trailing-space: looks for spaces at the end of a line
+	# [default] space-before-tab: looks for spaces before tabs at the beginning of a line
+	whitespace = space-before-tab,-indent-with-non-tab,trailing-space
+
+[filter "lfs"]
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+
+[alias]
+	s = status -sb
+	l = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset%s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
+	open = !open `git config remote.origin.url`
+	contriubtors = shortlog -sn
