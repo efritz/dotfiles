@@ -5,14 +5,16 @@ cd "$(dirname "${BASH_SOURCE}")";
 git pull origin master;
 
 function doIt() {
-    rsync \
-        --exclude ".git/" \
-        --exclude ".DS_Store" \
-        --exclude ".osx" \
-        --exclude "bootstrap.sh" \
-        --exclude "README.md" \
-        --exclude "LICENSE" \
-        -avh --no-perms . ~;
+    # Everything in bash and git go directly into
+    # $HOME with a dot prefixed to the basename.
+    for file in bash/** git/**; do
+        echo "cp $file ~/.$(basename $file)";
+    done;
+    
+    # Merge binaries
+    rsync -avh --no-perms bin ~/
+
+    # Apply settings immediately
     source ~/.bash_profile;
 }
 
