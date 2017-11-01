@@ -7,10 +7,41 @@
 
 [core]
 	excludesfile = /Users/efritz/.gitignore_global
+
 	# Treat spaces before tabs and all kinds of trailing whitespace as an error
 	# [default] trailing-space: looks for spaces at the end of a line
 	# [default] space-before-tab: looks for spaces before tabs at the beginning of a line
 	whitespace = space-before-tab,-indent-with-non-tab,trailing-space
+
+	# Enable parallel I/O for operations like "git diff".
+	# See http://stackoverflow.com/q/18257622/276478
+	preloadindex = true
+
+	# Use 12 characters for the abbreviated commit hash. I can currently make
+	# do with 10, but this should provide a certain level of safety for the
+	# near-ish future. See the interesting and well-researched article at
+	# http://blog.cuviper.com/2013/11/10/how-short-can-git-abbreviate/
+	abbrev = 12
+
+	# Use (a copy of) the "diff-highlight" contrib script for more readable diffs.
+	# Get it at <https://raw.githubusercontent.com/git/git/master/contrib/diff-highlight/diff-highlight>
+	pager = diff-highlight | less
+
+[diff]
+	# Use more time to create better diffs. E.g. matching opening/closing braces
+	# from neighbour functions.
+	algorithm = patience
+
+	# Tells Git to detect renames. If set to "true", it will enable basic
+	# rename detection. If set to "copies", it will detect copies, as well.
+	renames = copies
+
+[push]
+	# Make "git push" or "git push <remote>" only push the current branch to
+	# the tracked branch (regardless of its remote name) as opposed to pushing
+	# all branches with a matching name on the remote. See "An asymmetry
+	# between git pull and push": http://longair.net/blog/?p=572
+	default = tracking
 
 [filter "lfs"]
 	smudge = git-lfs smudge -- %f
@@ -19,7 +50,19 @@
 	clean = git-lfs clean -- %f
 
 [alias]
+	# Collapse "git git log"
+	git = !git
+
+	# Quickly view the latest commits using a helper script to massage the
+	# "git log" output.
+	l = tilde-log
+
+	# Quickly view the latest commits using a helper script to massage the
+	# "git log" output.
+	ll = tilde-log --graph
+
+	# Show a concise status fo the working directory, along with the branch
+	# and the number of commits behind and/or ahead.
 	s = status -sb
-	l = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset%s %Cgreen(%cr) %C(bold blue)<%an>%Creset'
 	open = !open `git config remote.origin.url`
-	contriubtors = shortlog -sn
+	contributors = shortlog -sn
