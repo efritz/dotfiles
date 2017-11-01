@@ -8,7 +8,7 @@ function doIt() {
     # Everything in bash and git go directly into
     # $HOME with a dot prefixed to the basename.
     for file in bash/** git/**; do
-        echo "cp $file ~/.$(basename $file)";
+        cp $file ~/.$(basename $file)
     done;
     
     # Merge binaries
