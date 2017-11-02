@@ -1,0 +1,19 @@
+- defaults:
+    link:
+      create: true
+      relink: true
+
+- clean: ['~']
+
+- link:
+    ~/.dotfiles: ''
+    ~/.bash_aliases:
+    ~/.bash_exports:
+    ~/.bash_paths:
+    ~/.bash_profile:
+    ~/.bash_prompt:
+    ~/.gitconfig:
+    ~/.gitignore_global:
+
+- shell:
+  - git submodule update --init --recursive

@@ -64,5 +64,7 @@
 	# Show a concise status fo the working directory, along with the branch
 	# and the number of commits behind and/or ahead.
 	s = status -sb
+
+	# TODO - document these
 	open = !open `git config remote.origin.url`
 	contributors = shortlog -sn

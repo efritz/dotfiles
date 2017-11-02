@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-for path in {$HOME/bin,$GOPATH/bin}; do
+for path in {~/.dotfiles/bin,$GOPATH/bin}; do
     [ -d "$path" ] && PATH="$path:$PATH"
 done;
 unset path;
