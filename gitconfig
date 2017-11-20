@@ -68,3 +68,6 @@
 	# TODO - document these
 	open = !open `git config remote.origin.url`
 	contributors = shortlog -sn
+
+[include]
+	path = ~/.gitconfig_local
