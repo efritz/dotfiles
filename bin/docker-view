@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+while true; do
+	IDS=(`docker ps | grep $@ | cut -d' ' -f1`)
+	LEN=${#IDS[@]}
+
+	if [ $LEN -gt 1 ]; then
+		echo "ambiguous container name"
+		exit 1
+	fi
+
+	if [ -z $IDS ]; then
+		echo "no such container, waiting"
+		sleep 1
+	else
+		docker logs -f $IDS
+	fi
+done
