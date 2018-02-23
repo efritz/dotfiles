@@ -9,6 +9,7 @@ alias ...="cd ../.."
 alias ....="cd ../../.."
 alias ~="cd ~"
 alias -- -="cd -"
+alias cdp='cd `pwd -P`'
 
 # Sane default flags
 alias rm='rm -i'
