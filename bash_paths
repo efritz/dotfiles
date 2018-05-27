@@ -2,9 +2,10 @@
 
 export GOPATH=~/go
 
-for path in {$GOPATH/bin,~/.dotfiles/bin}; do
+for path in {$GOPATH/bin,~/.dotfiles/bin,~/.cargo/bin}; do
     [ -d "$path" ] && PATH="$path:$PATH"
 done;
+
 unset path;
 
 export PATH;
