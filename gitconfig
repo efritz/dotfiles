@@ -6,7 +6,7 @@
 	user = efritz
 
 [core]
-	excludesfile = /Users/efritz/.gitignore_global
+	excludesfile = ~/.gitignore_global
 
 	# Treat spaces before tabs and all kinds of trailing whitespace as an error
 	# [default] trailing-space: looks for spaces at the end of a line
@@ -22,10 +22,6 @@
 	# near-ish future. See the interesting and well-researched article at
 	# http://blog.cuviper.com/2013/11/10/how-short-can-git-abbreviate/
 	abbrev = 12
-
-	# Use (a copy of) the "diff-highlight" contrib script for more readable diffs.
-	# Get it at <https://raw.githubusercontent.com/git/git/master/contrib/diff-highlight/diff-highlight>
-	pager = diff-highlight | less
 
 [diff]
 	# Use more time to create better diffs. E.g. matching opening/closing braces
@@ -53,21 +49,12 @@
 	# Collapse "git git log"
 	git = !git
 
-	# Quickly view the latest commits using a helper script to massage the
-	# "git log" output.
-	l = tilde-log
-
-	# Quickly view the latest commits using a helper script to massage the
-	# "git log" output.
-	ll = tilde-log --graph
-
 	# Show a concise status fo the working directory, along with the branch
 	# and the number of commits behind and/or ahead.
 	s = status -sb
 
-	# TODO - document these
+	# Open the remote origin URL in a browser
 	open = !open `git config remote.origin.url`
-	contributors = shortlog -sn
 
 [include]
 	path = ~/.gitconfig_local
