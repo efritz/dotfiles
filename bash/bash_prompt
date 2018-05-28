@@ -37,7 +37,7 @@ prompt_git() {
     git rev-parse --is-inside-work-tree &>/dev/null || return;
 
     # Echo branch
-    echo -ne "${violet} on $(branch_name)";
+    echo -ne "\[${violet}\] on $(branch_name)";
 
     # Skip the next steps if we're inside the .git directory
     "$(git rev-parse --is-inside-git-dir 2> /dev/null)" != 'true' && return
@@ -55,7 +55,7 @@ prompt_git() {
     if $(git rev-parse --verify refs/stash &>/dev/null);     then s+='$'; fi; # Stashed files
 
     if [ -n "${s}" ]; then
-        echo -ne " ${red}[${s}]"
+        echo -ne " \[${red}\][${s}]"
     fi;
 }
 
@@ -65,7 +65,7 @@ PS1+="\[${reset}\]@"
 PS1+="\[$(host_style)\]\h"
 PS1+="\[${reset}\]:"
 PS1+="\w/"
-PS1+="\$(prompt_git)";
+PS1+="$(prompt_git)";
 PS1+="\[${white}\] \$ "
 PS1+="\[${reset}\]"
 export PS1;
