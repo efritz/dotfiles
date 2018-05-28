@@ -14,6 +14,8 @@
     ~/.bash_prompt: bash/bash_prompt
     ~/.gitconfig: git/gitconfig
     ~/.gitignore_global: git/gitignore_global
+    ~/.iterm2: iterm2
+    ~/Library/Application Support/Code/User/settings.json: vscode/settings.json
 
 - shell:
   - git submodule update --init --recursive
