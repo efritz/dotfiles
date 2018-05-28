@@ -1,9 +1,9 @@
 {
     "editor.renderWhitespace": "all",
-    "editor.fontFamily": "SF Mono",
+    "editor.fontFamily": "Source Code Pro",
     "editor.fontSize": 11,
     "workbench.iconTheme": "vscode-icons",
-    "window.zoomLevel": -1,
+    "window.zoomLevel": 0,
     "files.trimTrailingWhitespace": true,
     "extensions.ignoreRecommendations": true,
     "python.linting.pylintEnabled": false,
@@ -23,7 +23,7 @@
         "**/vendor": true
     },
     "sync.gist": "e94af44166b1edd23cc97639f52eb4e4",
-    "sync.lastUpload": "2018-02-16T01:54:43.653Z",
+    "sync.lastUpload": "2018-05-28T23:08:58.654Z",
     "sync.autoDownload": false,
     "sync.autoUpload": false,
     "sync.lastDownload": "",
@@ -33,5 +33,7 @@
     "sync.pathPrefix": "",
     "sync.quietSync": false,
     "sync.askGistName": false,
-    "workbench.colorTheme": "Nord Extra Dark"
+    "workbench.colorTheme": "Nord Extra Dark",
+    "sync.removeExtensions": true,
+    "sync.syncExtensions": true
 }
