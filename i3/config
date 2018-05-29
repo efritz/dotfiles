@@ -10,8 +10,8 @@
 # Please see http://i3wm.org/docs/userguide.html for a complete reference!
 
 set $white-color #ffffff
-set $bg-color #2f343f
-set $inactive-bg-color #2f343f
+set $bg-color #00000000
+set $inactive-bg-color #00000000
 set $text-color #f3f4f5
 set $inactive-text-color #676e7d
 set $urgent-bg-color #e53935
@@ -35,11 +35,8 @@ bindsym $mod+Shift+q kill
 # lock screen
 bindsym $mod+l exec ~/.i3/i3lock.sh
 
-# start dmenu (a program launcher)
-bindsym $mod+d exec dmenu_run
-# TODO
-# bindsym $mod+d exec --no-startup-id i3-dmenu-desktop --dmenu='rofi -i -dmenu -font "System San Francisco 13"'
-# bindsym $mod+space exec rofi -show run
+# program launcher
+bindsym $mod+d exec rofi -show run
 
 # change focus
 bindsym $mod+Left focus left
