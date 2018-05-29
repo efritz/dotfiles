@@ -26,14 +26,15 @@
     # VSCode
     ~/.config/Code/User/settings.json: vscode/settings.json
 
-    # I3
+    # Termite
+    ~/.config/termite/config: termite/config
+
+    # Interfaces
     ~/.i3/config: i3/config
     ~/.i3/i3lock.sh: i3/i3lock.sh
     ~/.i3/i3unlock.sh: i3/i3unlock.sh
     ~/.i3blocks.conf: i3/i3blocks.conf
-
-    # Termite
-    ~/.config/termite/config: termite/config
+    ~/.config/rofi/config: rofi/config
 
     # Fonts
     ~/.fonts: fonts
