@@ -1,0 +1,42 @@
+- shell:
+  - git submodule update --init --recursive dotbot
+
+- defaults:
+    link:
+      create: true
+      relink: true
+
+- clean: ['~']
+
+- link:
+    ~/.dotfiles: ''
+
+    # Bash
+    ~/.hushlogin: bash/hushlogin
+    ~/.bash_aliases: bash/bash_aliases
+    ~/.bash_exports: bash/bash_exports
+    ~/.bash_paths: bash/bash_paths
+    ~/.bash_profile: bash/bash_profile
+    ~/.bash_prompt: bash/bash_prompt
+
+    # Git
+    ~/.gitconfig: git/gitconfig
+    ~/.gitignore_global: git/gitignore_global
+
+    # VSCode
+    ~/.config/Code/User/settings.json: vscode/settings.json
+
+    # I3
+    ~/.i3/config: i3/config
+    ~/.i3/i3lock.sh: i3/i3lock.sh
+    ~/.i3/i3unlock.sh: i3/i3unlock.sh
+    ~/.i3blocks.conf: i3/i3blocks.conf
+
+    # Termite
+    ~/.config/termite/config: termite/config
+
+    # Fonts
+    ~/.fonts: fonts
+
+- shell:
+  - fc-cache -vf

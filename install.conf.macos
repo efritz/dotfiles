@@ -1,3 +1,6 @@
+- shell:
+  - git submodule update --init --recursive dotbot
+
 - defaults:
     link:
       create: true
@@ -7,16 +10,21 @@
 
 - link:
     ~/.dotfiles: ''
+
+    # Bash
+    ~/.hushlogin: bash/hushlogin
     ~/.bash_aliases: bash/bash_aliases
     ~/.bash_exports: bash/bash_exports
     ~/.bash_paths: bash/bash_paths
     ~/.bash_profile: bash/bash_profile
     ~/.bash_prompt: bash/bash_prompt
-    ~/.hushlogin: bash/hushlogin
+
+    # Git
     ~/.gitconfig: git/gitconfig
     ~/.gitignore_global: git/gitignore_global
-    ~/.iterm2: iterm2
+
+    # VSCode
     ~/Library/Application Support/Code/User/settings.json: vscode/settings.json
 
-- shell:
-  - git submodule update --init --recursive
+    # Terminals
+    ~/.iterm2: iterm2

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+./dotbot/bin/dotbot -d . -c install.conf.arch "${@}"
