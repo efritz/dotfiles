@@ -1,3 +1,3 @@
 #!/bin/bash
 
-tree -aC -I '.git|vendor|__pycache__|node_modules|bower_components' --dirsfirst "$@" | less -FRNX;
+tree -aC -I '.git|vendor|__pycache__|node_modules|bower_components|venv*' --dirsfirst "$@" | less -FRNX;
