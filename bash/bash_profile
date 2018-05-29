@@ -26,3 +26,7 @@ done;
 if [ -f ~/.bash_local ]; then
 	source ~/.bash_local
 fi;
+
+if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
+	exec startx
+fi
