@@ -1,9 +1,9 @@
 {
     "editor.renderWhitespace": "all",
     "editor.fontFamily": "Source Code Pro",
-    "editor.fontSize": 11,
+    "editor.fontSize": 13,
     "workbench.iconTheme": "vscode-icons",
-    "window.zoomLevel": 1,
+    "window.zoomLevel": 0,
     "files.trimTrailingWhitespace": true,
     "extensions.ignoreRecommendations": true,
     "python.linting.pylintEnabled": false,
@@ -22,7 +22,7 @@
         "**/vendor": true
     },
     "sync.gist": "e94af44166b1edd23cc97639f52eb4e4",
-    "sync.lastUpload": "2018-05-29T13:50:52.090Z",
+    "sync.lastUpload": "2018-05-29T21:32:32.547Z",
     "sync.autoDownload": false,
     "sync.autoUpload": false,
     "sync.lastDownload": "",
