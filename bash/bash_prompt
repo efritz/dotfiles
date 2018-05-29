@@ -27,19 +27,19 @@ host_style() {
     if [[ "${SSH_TTY}" ]]; then echo "${bold}${red}"; else echo "${cyan}"; fi;
 }
 
-branch_name() {
-    # Get a short symbolic ref, the short SHA for the latest commit, or just the string (unknown)
-    git symbolic-ref --quiet --short HEAD 2> /dev/null || git rev-parse --short HEAD 2> /dev/null || echo '(unknown)'
-}
-
-prompt_git() {
+prompt_git_branch() {
     # Check if the current directory is in a Git repository.
     git rev-parse --is-inside-work-tree &>/dev/null || return;
 
-    # Echo branch
-    echo -ne "\[${violet}\] on $(branch_name)";
+    # Get a short symbolic ref, the short SHA for the latest commit, or just the string (unknown)
+    echo " on $(git symbolic-ref --quiet --short HEAD 2> /dev/null || git rev-parse --short HEAD 2> /dev/null || echo '(unknown)')";
+}
 
-    # Skip the next steps if we're inside the .git directory
+prompt_git_status() {
+    # Check if the current directory is in a Git repository.
+    git rev-parse --is-inside-work-tree &>/dev/null || return;
+
+    # Skip if we're inside the .git directory
     "$(git rev-parse --is-inside-git-dir 2> /dev/null)" != 'true' && return
 
     # Ensure the index is up to date.
@@ -55,7 +55,7 @@ prompt_git() {
     if $(git rev-parse --verify refs/stash &>/dev/null);     then s+='$'; fi; # Stashed files
 
     if [ -n "${s}" ]; then
-        echo -ne " \[${red}\][${s}]"
+        echo " [${s}]";
     fi;
 }
 
@@ -65,7 +65,7 @@ PS1+="\[${reset}\]@"
 PS1+="\[$(host_style)\]\h"
 PS1+="\[${reset}\]:"
 PS1+="\w/"
-PS1+="$(prompt_git)";
+PS1+="\[${violet}\]\$(prompt_git_branch)\[${red}\]\$(prompt_git_status)"
 PS1+="\[${white}\] \$ "
 PS1+="\[${reset}\]"
 export PS1;
