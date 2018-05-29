@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 while true; do
 	IDS=(`docker ps | grep $1 | cut -d' ' -f1`)
