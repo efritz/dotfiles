@@ -112,7 +112,7 @@ bindsym $mod+Shift+8 move container to workspace 8
 bindsym $mod+Shift+9 move container to workspace 9
 bindsym $mod+Shift+0 move container to workspace 10
 
-assign [class="Firefox"] $workspace1
+assign [class="firefox"] $workspace1
 assign [class="code"] $workspace2
 
 # reload the configuration file
@@ -157,6 +157,7 @@ bar {
     status_command i3blocks
     position top
     tray_output primary
+    font pango:FontAwesome 10
     colors {
         background $bg-color
         separator #757575
@@ -171,7 +172,7 @@ bar {
 hide_edge_borders both
 
 # Gaps
-gaps inner 5
+gaps inner 0
 gaps outer 0
 smart_gaps on
 
