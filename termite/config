@@ -1,0 +1,26 @@
+[options]
+font = Monospace 9
+scrollback_lines = 10000
+clickable_url = true
+allow_bold = true
+
+[colors]
+foreground=#ffffff
+background=#000000
+cursor=#ffffff
+color0=#000000
+color1=#cc0403
+color2=#19cb00
+color3=#cecb00
+color4=#5854ec
+color5=#cb1ed1
+color6=#0dcdcd
+color7=#e5e5e5
+color8=#4d4d4d
+color9=#bc1a18
+color10=#23fd00
+color11=#fffd00
+color12=#687be9
+color13=#fd28ff
+color14=#14ffff
+color15=#ffffff
