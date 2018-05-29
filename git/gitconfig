@@ -53,7 +53,13 @@
 	# and the number of commits behind and/or ahead.
 	s = status -sb
 
-	# Open the remote origin URL in a browser
+        # Interactively add all changes in current directory.
+        ap = add . -p
+
+        # Pull from master.
+        pm = pull origin master
+
+	# Open the remote URL in a browser (uses open on macos and xdg-open on arch).
 	open = !open `git config remote.origin.url`
 
 [include]
