@@ -9,3 +9,6 @@ alias mv='mv -i'
 alias cp='cp -i'
 alias ls='ls -GFh'
 alias grep='grep --color=auto'
+
+# Actual aliases
+alias real='cd `pwd -P`'
