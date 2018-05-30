@@ -9,13 +9,6 @@
 #
 # Please see http://i3wm.org/docs/userguide.html for a complete reference!
 
-set $white-color #ffffff
-set $bg-color #00000000
-set $inactive-bg-color #00000000
-set $text-color #f3f4f5
-set $inactive-text-color #676e7d
-set $urgent-bg-color #e53935
-
 set $mod Mod4
 set $term termite
 
@@ -144,13 +137,12 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 
-
 # Window colors
-# border/background/text/indicator
-client.focused $bg-color $bg-color $text-color #00ff00
-client.unfocused $inactive-bg-color $inactive-bg-color $inactive-text-color #00ff00
-client.focused_inactive	$inactive-bg-color $inactive-bg-color $inactive-text-color #00ff00
-client.urgent $inactive-bg-color $urgent-bg-color $text-color #00ff00
+#                       border   bkg      text     ind
+client.focused          #000000  #ccccff  #000000  #00ff00
+client.focused_inactive	#000000  #404040  #ffffff  #00ff00
+client.unfocused        #000000  #000000  #ffffff  #00ff00
+client.urgent           #000000  #00ff00  #ffffff  #00ff00
 
 # Start i3bar to display a workspace bar (plus the system information i3status finds out, if available)
 bar {
@@ -158,13 +150,14 @@ bar {
     position top
     tray_output primary
     font pango:FontAwesome 10
+
     colors {
-        background $bg-color
-        separator #757575
-        # border/background/text
-        focused_workspace $bg-color $bg-color $text-color
-        inactive_workspace $inactive-bg-color $inactive-bg-color $inactive-text-color
-        urgent_workspace $inactive-bg-color $urgent-bg-color $text-color
+        background          #000000
+        separator           #757575
+        #                   border   bkg      text
+        focused_workspace   #000000  #000000  #ffffff
+        inactive_workspace  #000000  #000000  #999999
+        urgent_workspace    #000000  #000000  #ffffff
     }
 }
 
