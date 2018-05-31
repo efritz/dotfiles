@@ -1,14 +1,27 @@
 #!/usr/bin/env bash
 
-# Allow aliases to be used with sudo
-alias sudo="sudo "
+# Custom aliases
+alias real='cd `pwd -P`'
 
-# Sane default flags
-alias rm='rm -i'
-alias mv='mv -i'
+# Pass aliases over through sudo
+alias sudo='sudo '
+
+# Safety features
 alias cp='cp -i'
-alias ls='ls -GFh'
+alias mv='mv -i'
+alias rm='rm -I'
+alias ln='ln -i'
+alias chown='chown --preserve-root'
+alias chmod='chmod --preserve-root'
+alias chgrp='chgrp --preserve-root'
+
+# Color support
 alias grep='grep --color=auto'
 
-# Actual aliases
-alias real='cd `pwd -P`'
+if [ "$uname" = "Linux" ]; then
+    alias ls='ls -hF --group-directories-first --color=auto'
+elif command -v gls >/dev/null 2>&1; then
+    # macOS uses BSD ls which does not support the long flags
+    # Instead, install gls with `brew install coreutils`
+    alias ls='gls -hF --group-directories-first --color=auto'
+fi
