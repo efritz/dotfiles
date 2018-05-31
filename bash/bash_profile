@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Load the shell dotfiles, and then some:
-for file in ~/.bash_{aliases,exports,paths,prompt}; do
+for file in ~/.bash_{aliases,exports,functions,paths,prompt}; do
     [ -r "$file" ] && [ -f "$file" ] && source "$file";
 done;
 
