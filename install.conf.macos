@@ -1,6 +1,3 @@
-- shell:
-  - git submodule update --init --recursive dotbot
-
 - defaults:
     link:
       create: true

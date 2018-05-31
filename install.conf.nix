@@ -20,22 +20,3 @@
     # Git
     ~/.gitconfig: git/gitconfig
     ~/.gitignore_global: git/gitignore_global
-
-    # VSCode
-    ~/.config/Code/User/settings.json: vscode/settings.json
-
-    # Termite
-    ~/.config/termite/config: termite/config
-
-    # Interfaces
-    ~/.i3/config: i3/config
-    ~/.i3/i3lock.sh: i3/i3lock.sh
-    ~/.i3/i3unlock.sh: i3/i3unlock.sh
-    ~/.i3blocks.conf: i3/i3blocks.conf
-    ~/.config/rofi/config: rofi/config
-
-    # Fonts
-    ~/.fonts: fonts
-
-- shell:
-  - fc-cache -vf
