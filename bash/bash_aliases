@@ -18,10 +18,9 @@ alias chgrp='chgrp --preserve-root'
 # Color support
 alias grep='grep --color=auto'
 
-if [ "$(uname)" = "Linux" ]; then
-    alias ls='ls -hF --group-directories-first --color=auto'
-elif command -v gls >/dev/null 2>&1; then
-    # macOS uses BSD ls which does not support the long flags
-    # Instead, install gls with `brew install coreutils`
-    alias ls='gls -hF --group-directories-first --color=auto'
-fi
+# macOS uses BSD ls which does not support the long flags
+# Instead, install gls with `brew install coreutils`
+alias ls='gls -hF --group-directories-first --color=auto'
+
+# Actual aliases
+alias real='cd `pwd -P`'

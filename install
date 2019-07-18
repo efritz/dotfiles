@@ -1,4 +1,4 @@
 #!/bin/bash
 
 git submodule update --init --recursive dotbot
-./dotbot/bin/dotbot -d . -c install.conf.nix "${@}"
+./dotbot/bin/dotbot -d . -c install.conf "${@}"
