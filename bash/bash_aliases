@@ -2,6 +2,7 @@
 
 # Custom aliases
 alias real='cd `pwd -P`'
+alias code=code-insiders
 
 # Pass aliases over through sudo
 alias sudo='sudo '
