@@ -39,28 +39,15 @@
 	# between git pull and push": http://longair.net/blog/?p=572
 	default = tracking
 
+[alias]
+	# Collapse "git git log"
+	git = !git
+
 [filter "lfs"]
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
 	clean = git-lfs clean -- %f
-
-[alias]
-	# Collapse "git git log"
-	git = !git
-
-	# Show a concise status fo the working directory, along with the branch
-	# and the number of commits behind and/or ahead.
-	s = status -sb
-
-        # Interactively add all changes in current directory.
-        ap = add . -p
-
-        # Pull from master.
-        pm = pull origin master
-
-	# Open the remote URL in a browser (uses open on macos and xdg-open on arch).
-	open = !open `git config remote.origin.url`
 
 [include]
 	path = ~/.gitconfig_local
