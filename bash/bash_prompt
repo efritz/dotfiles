@@ -63,3 +63,6 @@ export PS1;
 
 PS2="\[${yellow}\]> \[${reset}\]";
 export PS2;
+
+export -f prompt_git_branch
+export -f prompt_git_status
