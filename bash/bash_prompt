@@ -34,6 +34,36 @@ host_style() {
     if [[ "${SSH_TTY}" ]]; then echo "${bold}${red}"; else echo "${cyan}"; fi;
 }
 
+current_git_branch() {
+    # Check if the current directory is in a Git repository.
+    git rev-parse --is-inside-work-tree &>/dev/null || return;
+
+    # Get a short symbolic ref, the short SHA for the latest commit, or just the string (unknown)
+    echo "$(git symbolic-ref --quiet --short HEAD 2> /dev/null || git rev-parse --short HEAD 2> /dev/null || echo '(unknown)')";
+}
+
+current_git_status() {
+    # Check if the current directory is in a Git repository.
+    git rev-parse --is-inside-work-tree &>/dev/null || return;
+
+    # Skip if we're inside the .git directory
+    "$(git rev-parse --is-inside-git-dir 2> /dev/null)" != 'true' && return
+
+    # Ensure the index is up to date.
+    git update-index --really-refresh -q &>/dev/null;
+
+    #
+    # Print state of current directory
+
+    local s=''
+    if ! $(git diff --quiet --ignore-submodules --cached);   then s+='+'; fi; # Uncommitted changes
+    if ! $(git diff-files --quiet --ignore-submodules --);   then s+='!'; fi; # Unstaged changes
+    if [ -n "$(git ls-files --others --exclude-standard)" ]; then s+='?'; fi; # Untracked files
+    if $(git rev-parse --verify refs/stash &>/dev/null);     then s+='$'; fi; # Stashed files
+
+    echo $s
+}
+
 prompt_git_branch() {
     local s="$(current_git_branch)"
 
