@@ -62,5 +62,14 @@
 	# Open the remote URL in a browser (uses open on macos and xdg-open on arch).
 	open = !open `git config remote.origin.url`
 
+[filter "lfs"]
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+
 [include]
 	path = ~/.gitconfig_local
