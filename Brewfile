@@ -1,4 +1,5 @@
 brew "coreutils"
+brew "direnv"
 brew "golang-migrate"
 brew "htop"
 brew "hugo"
