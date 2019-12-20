@@ -1,13 +1,15 @@
-
-# Play safe!
+# safe defaults
 alias 'rm=rm -i'
 alias 'mv=mv -i'
 alias 'cp=cp -i'
 
-# For convenience
+# make parent dirs
 alias 'mkdir=mkdir -p'
 
+# better colors
 alias ls='gls -hF --group-directories-first --color=auto'
+
+# navigation
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'

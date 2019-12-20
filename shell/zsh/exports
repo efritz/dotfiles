@@ -1,3 +1,4 @@
+export GOPATH=~/go
 
 export EDITOR=code
 export USE_EDITOR=$EDITOR

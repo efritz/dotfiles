@@ -6,4 +6,4 @@ ENABLE_CORRECTION="true"
 HYPHEN_INSENSITIVE="true"
 ZSH_THEME="robbyrussell"
 
-source ~/$ZSH/oh-my-zsh.sh
+source $ZSH/oh-my-zsh.sh

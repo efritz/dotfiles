@@ -1,8 +1,15 @@
-# export GOPATH=~/go
-# for path in {~/go/bin,~/.cargo/bin,~/.dotfiles/bin,}; do
-#     [ -d "$path" ] && PATH="$path:$PATH"
-# done;
-# unset path;
-# export PATH;
+paths=(
+    ~/$GOPATH/bin
+    ~/.cargo/bin
+    ~/.dotfiles/bin
+)
 
-export PATH=~/.dotfiles/bin:~/go/bin:$PATH
+for dir in $paths; do
+    if [[ -d "$dir" ]]; then
+        PATH="$dir:$PATH"
+    fi
+done;
+unset dir;
+unset paths;
+
+export PATH;
