@@ -1,0 +1,11 @@
+
+plugins=(
+    brew
+    docker
+    extract
+    git
+    kubectl
+    osx
+    pass
+    vscode
+)

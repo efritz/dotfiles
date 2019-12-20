@@ -1,0 +1,24 @@
+[aws]
+dislabed = true
+
+[directory]
+truncate_to_repo = true
+
+[git_status]
+staged_count.enabled = true
+show_sync_count = true
+
+[golang]
+disabled = true
+
+[package]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[python]
+disabled = true
+
+[rust]
+disabled = true

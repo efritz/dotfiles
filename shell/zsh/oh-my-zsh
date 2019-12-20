@@ -1,0 +1,9 @@
+export ZSH=~/.oh-my-zsh
+
+CASE_SENSITIVE="false"
+COMPLETION_WAITING_DOTS="true"
+ENABLE_CORRECTION="true"
+HYPHEN_INSENSITIVE="true"
+ZSH_THEME="robbyrussell"
+
+source ~/$ZSH/oh-my-zsh.sh

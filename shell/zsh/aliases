@@ -1,0 +1,14 @@
+
+# Play safe!
+alias 'rm=rm -i'
+alias 'mv=mv -i'
+alias 'cp=cp -i'
+
+# For convenience
+alias 'mkdir=mkdir -p'
+
+alias ls='gls -hF --group-directories-first --color=auto'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'

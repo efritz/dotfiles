@@ -1,0 +1,4 @@
+
+export EDITOR=code
+export USE_EDITOR=$EDITOR
+export VISUAL=$EDITOR

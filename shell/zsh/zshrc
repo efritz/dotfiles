@@ -1,0 +1,17 @@
+includes=(
+    ~/.zsh/aliases
+    ~/.zsh/exports
+    ~/.zsh/history
+    ~/.zsh/oh-my-zsh
+    ~/.zsh/paths
+    ~/.zsh/plugins
+    ~/.zsh/prompt
+    ~/google-cloud-sdk/completion.zsh.inc
+    ~/google-cloud-sdk/path.zsh.inc
+)
+
+for config in $includes; do
+    if [[ -f $config ]]; then
+        source $config
+    fi
+done
