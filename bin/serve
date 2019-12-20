@@ -1,5 +1,0 @@
-#!/bin/bash
-
-PORT=${1:-8000}
-sleep 1 && open "http://localhost:$PORT/" &
-python2.7 -m SimpleHTTPServer $PORT
