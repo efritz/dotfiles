@@ -1,5 +1,5 @@
 paths=(
-    ~/$GOPATH/bin
+    $GOPATH/bin
     ~/.cargo/bin
     ~/.dotfiles/bin
 )

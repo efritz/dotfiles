@@ -8,6 +8,8 @@ includes=(
     ~/.zsh/plugins
     ~/google-cloud-sdk/completion.zsh.inc
     ~/google-cloud-sdk/path.zsh.inc
+    /usr/local/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+    /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 )
 
 for config in $includes; do
