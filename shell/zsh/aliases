@@ -1,10 +1,13 @@
+# enable aliases to be sudo’ed
+alias sudo='sudo '
+
 # safe defaults
-alias 'rm=rm -i'
-alias 'mv=mv -i'
-alias 'cp=cp -i'
+alias rm='rm -i'
+alias mv='mv -i'
+alias cp='cp -i'
 
 # make parent dirs
-alias 'mkdir=mkdir -p'
+alias mkdir='mkdir -p'
 
 # better colors
 alias ls='gls -hF --group-directories-first --color=auto'
@@ -14,3 +17,11 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 alias .....='cd ../../../..'
+alias ~='cd ~'
+alias -- -='cd -'
+
+# shorthands
+alias g='git'
+
+# map function (e.g. `find . -name .gitattributes | map dirname`)
+alias map='xargs -n1'
