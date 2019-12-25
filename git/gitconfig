@@ -43,6 +43,27 @@
 	# Collapse "git git log"
 	git = !git
 
+	# Shorthands
+	s = status -sb
+	a = add
+	ap = add -p
+
+	# Amend the currently staged files to the latest commit
+	amend = commit --amend -C HEAD
+
+	# Push the current branch to the remote "origin", and set it to track
+	# the upstream branch
+	publish = !git push -u origin $(git git rev-parse --abbrev-ref HEAD)
+
+	# Reset changes to the lca commit between master and the current branch
+	reset-branch = !git reset $(git merge-base master HEAD)
+
+	# Rebase commits into the lca commit between master and the current branch
+	rebase-branch = !git rebase -i $(git merge-base master HEAD)
+
+	# Delete any branches that have been merged into master
+	delete-merged-branches = !git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d
+
 [filter "lfs"]
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
