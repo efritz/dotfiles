@@ -18,6 +18,20 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/too
 
 ### Installation
 
-Run `brew bundle` in this directory to install OS-level packags.
+Run `./install` to symlink config files from this repo into your home directory and install MacOS packages and VSCode extensions.
 
-Run `./install` to symlink config files from this repo into your home directory. This requires that this repo is in a stable location (otherwise symlinks will break). Running the install script a second time will remove dead links.
+This repo must be located in a stable location, otherwise symlinks will break. The install script is idempotent and running it after modification will remove dead links.
+
+### Updating
+
+The global gitignore file is generted via `gibo`. To add additional files from GitHub's [gitignore repo](https://github.com/github/gitignore), modify the following command.
+
+```bash
+gibo dump macOS VisualStudioCode JetBrains TeX > git/gitignore_global
+```
+
+After installing a Visual Studio Code extension, run the following command to update the extensions list.
+
+```bash
+code --list-extensions > vscode/extensions
+```
