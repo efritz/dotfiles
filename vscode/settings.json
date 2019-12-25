@@ -1,0 +1,10 @@
+{
+    "editor.cursorStyle": "line-thin",
+    "editor.fontFamily": "Source Code Pro",
+    "editor.minimap.enabled": false,
+    "editor.renderWhitespace": "all",
+    "go.formatTool": "goimports",
+    "go.useLanguageServer": true,
+    "workbench.colorTheme": "Nord Extra Dark",
+    "workbench.iconTheme": "vscode-icons"
+}
