@@ -1,5 +1,6 @@
 brew "coreutils"
 brew "direnv"
+brew "gibo"
 brew "golang-migrate"
 brew "graphviz"
 brew "htop"
