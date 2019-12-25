@@ -1,0 +1,2 @@
+# SSH to Kasdan
+alias kasdan='ssh kasdan.eric-fritz.com'
