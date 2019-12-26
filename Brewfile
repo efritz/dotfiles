@@ -1,6 +1,8 @@
 brew "coreutils"
+brew "diff-so-fancy"
 brew "direnv"
 brew "gibo"
+brew "git"
 brew "golang-migrate"
 brew "graphviz"
 brew "htop"

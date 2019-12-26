@@ -2,6 +2,8 @@ paths=(
     $GOPATH/bin
     ~/.cargo/bin
     ~/.dotfiles/bin
+    # replace the system git
+    /usr/local/Cellar/git/`ls /usr/local/Cellar/git/`/bin
 )
 
 for dir in $paths; do

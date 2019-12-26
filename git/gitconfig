@@ -23,6 +23,9 @@
 	# http://blog.cuviper.com/2013/11/10/how-short-can-git-abbreviate/
 	abbrev = 12
 
+[pager]
+	diff = diff-so-fancy | less --tabs=4 -RFXS --pattern '^(Date|added|deleted|modified): '
+
 [diff]
 	# Use more time to create better diffs. E.g. matching opening/closing braces
 	# from neighbour functions.
