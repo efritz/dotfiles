@@ -3,3 +3,5 @@ export GOPATH=~/go
 export EDITOR=code
 export USE_EDITOR=$EDITOR
 export VISUAL=$EDITOR
+
+export RIPGREP_CONFIG_PATH=~/.ripgreprc
