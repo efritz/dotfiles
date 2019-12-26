@@ -50,6 +50,10 @@
 	s = status -sb
 	a = add
 	ap = add -p
+	dc = diff --cached
+
+	# Produce patch file
+	patch = !git --no-pager diff --no-color
 
 	# Amend the currently staged files to the latest commit
 	amend = commit --amend -C HEAD
