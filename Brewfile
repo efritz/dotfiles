@@ -1,4 +1,5 @@
 brew "bash"
+brew "cloc"
 brew "coreutils"
 brew "diff-so-fancy"
 brew "direnv"
