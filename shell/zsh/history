@@ -1,12 +1,18 @@
+HISTFILE=~/.zsh_history
+HISTSIZE=100000
+SAVEHIST=150000
 HIST_IGNORE_SPACE="true"
 HIST_STAMPS="dd.mm.yyyy"
-HISTFILE=~/.zsh_history
-HISTORY_IGNORE="(ls|[bf]g|exit|git status)"
-HISTSIZE=25000
-SAVEHIST=100000
+HISTIGNORE='ls:cd:cd -:pwd:exit:date:* --help'
+HISTORY_IGNORE='(ls|cd -|cd|pwd|exit|date|* --help)'
 
-setopt HIST_IGNORE_ALL_DUPS
-setopt HIST_IGNORE_SPACE
-setopt HIST_REDUCE_BLANKS
-setopt HIST_VERIFY
-setopt INC_APPEND_HISTORY
+setopt append_history         # zsh sessions will append their history list to the history file, rather than replace it
+setopt extended_history       # save each command’s beginning timestamp (in seconds since the epoch) and the duration (in seconds) to the history file
+setopt hist_expire_dups_first # setting this option will cause the oldest history event that has a duplicate to be lost before losing a unique event from the list
+setopt hist_find_no_dups      # when searching for history entries in the line editor, do not display duplicates of a line previously found
+setopt hist_ignore_all_dups   # If a new command line being added to the history list duplicates an older one, the older command is removed from the list
+setopt hist_ignore_dups       # do not enter command lines into the history list if they are duplicates of the previous event
+setopt hist_ignore_space      # remove command lines from the history list when the first character on the line is a space
+setopt hist_save_no_dups      # older commands that duplicate newer ones are omitted when writing the history file
+setopt long_list_jobs         # print job notifications in the long format by default
+setopt share_history          # imports new commands from the history file, and also causes your typed commands to be appended to the history file
