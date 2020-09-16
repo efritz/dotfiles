@@ -10,7 +10,7 @@ alias cp='cp -i'
 alias mkdir='mkdir -p'
 
 # better colors
-alias ls='gls -hF --group-directories-first --color=auto'
+alias ls='gls -hF --color=always --group-directories-first'
 
 # navigation
 alias ..='cd ..'
@@ -19,9 +19,6 @@ alias ....='cd ../../..'
 alias .....='cd ../../../..'
 alias ~='cd ~'
 alias -- -='cd -'
-
-# shorthands
-alias g='git'
 
 # map function (e.g. `find . -name .gitattributes | map dirname`)
 alias map='xargs -n1'
