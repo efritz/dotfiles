@@ -1,2 +1,2 @@
-# SSH to Kasdan
-alias kasdan='ssh kasdan.eric-fritz.com'
+# SSH to Kubrick
+alias kubrick='ssh kubrick.eric-fritz.com'
