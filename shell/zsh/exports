@@ -1,5 +1,6 @@
 export GOPATH=~/go
 
+export LC_ALL=en_US.UTF-8
 export EDITOR=code
 export USE_EDITOR=$EDITOR
 export VISUAL=$EDITOR
