@@ -6,6 +6,7 @@ includes=(
     ~/.zsh/oh-my-zsh
     ~/.zsh/paths
     ~/.zsh/plugins
+    ~/.zsh/autocorrect
     ~/.fzf.zsh
     ~/google-cloud-sdk/completion.zsh.inc
     ~/google-cloud-sdk/path.zsh.inc
