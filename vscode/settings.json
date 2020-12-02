@@ -1,10 +1,35 @@
 {
     "editor.cursorStyle": "line-thin",
     "editor.fontFamily": "Source Code Pro",
+    // https://github.com/microsoft/vscode/issues/106583
+    "editor.fontLigatures": "'ccmp' off",
     "editor.minimap.enabled": false,
     "editor.renderWhitespace": "all",
     "go.formatTool": "goimports",
     "go.useLanguageServer": true,
     "workbench.colorTheme": "Nord Extra Dark",
-    "workbench.iconTheme": "vscode-icons"
+    "workbench.iconTheme": "vscode-icons",
+    "extensions.autoUpdate": false,
+    "window.zoomLevel": 0,
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[dockerfile]": {
+        "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+    },
+    "cmake.configureOnOpen": true,
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "cSpell.userWords": [
+        "unmarshals"
+    ],
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "workbench.startupEditor": "newUntitledFile",
+    "typescript.updateImportsOnFileMove.enabled": "never",
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
 }
