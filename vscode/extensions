@@ -9,8 +9,10 @@ ecmel.vscode-html-css
 EditorConfig.EditorConfig
 esbenp.prettier-vscode
 exiasr.hadolint
+felixfbecker.css-stacking-contexts
 foxundermoon.shell-format
 golang.go
+GraphQL.vscode-graphql
 hashicorp.terraform
 ms-azuretools.vscode-docker
 ms-dotnettools.csharp
@@ -20,7 +22,6 @@ ms-vscode.vscode-typescript-tslint-plugin
 ms-vsliveshare.vsliveshare
 oderwat.indent-rainbow
 Orta.vscode-jest
-Prisma.vscode-graphql
 redhat.vscode-yaml
 shd101wyy.markdown-preview-enhanced
 streetsidesoftware.code-spell-checker
