@@ -74,8 +74,8 @@
 	required = true
 	clean = git-lfs clean -- %f
 
-#[url "git@github.com:"]
-#	insteadOf = https://github.com/
+[url "git@github.com:"]
+	insteadOf = https://github.com/
 
 [include]
 	path = ~/.gitconfig_local
