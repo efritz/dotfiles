@@ -47,7 +47,7 @@ brew "gnu-getopt"
 brew "gnu-time"
 brew "guile"
 brew "p11-kit"
-brew "unbound"
+brew "unbound", restart_service: true
 brew "libusb"
 brew "gnupg"
 brew "go"

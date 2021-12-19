@@ -1,13 +1,13 @@
 #!/bin/bash
 
-branch=$(git branch-name)
+branch=$(git rev-parse --abbrev-ref HEAD)
 origin=$(git remote get-url origin | sed -e "s/^git@github.com://" -e "s/^https:\/\/github.com\///" -e "s/.git$//")
 dirlen=$(git rev-parse --show-toplevel | wc -c)
 
-for path in $@; do
-    open "https://github.com/$origin/tree/$branch/$(realpath "$path" | cut -c $dirlen-)"
+for path in "$@"; do
+    open "https://github.com/${origin}/tree/${branch}/$(realpath "${path}" | cut -c "${dirlen}"-)"
 done
 
 if [[ "$#" -eq 0 ]]; then
-    open "https://github.com/$origin/tree/$branch/$(pwd | cut -c $dirlen-)"
+    open "https://github.com/${origin}/tree/${branch}/$(pwd | cut -c "${dirlen}"-)"
 fi

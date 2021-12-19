@@ -1,4 +1,4 @@
-### https://raw.github.com/github/gitignore//Global/macOS.gitignore
+### https://raw.github.com/github/gitignore/218a941be92679ce67d0484547e3e142b2f5f6f0/Global/macOS.gitignore
 
 # General
 .DS_Store
@@ -28,7 +28,7 @@ Temporary Items
 .apdisk
 
 
-### https://raw.github.com/github/gitignore//Global/VisualStudioCode.gitignore
+### https://raw.github.com/github/gitignore/218a941be92679ce67d0484547e3e142b2f5f6f0/Global/VisualStudioCode.gitignore
 
 .vscode/*
 !.vscode/settings.json
@@ -41,7 +41,7 @@ Temporary Items
 .history/
 
 
-### https://raw.github.com/github/gitignore//Global/JetBrains.gitignore
+### https://raw.github.com/github/gitignore/218a941be92679ce67d0484547e3e142b2f5f6f0/Global/JetBrains.gitignore
 
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
@@ -116,7 +116,7 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 
-### https://raw.github.com/github/gitignore//TeX.gitignore
+### https://raw.github.com/github/gitignore/218a941be92679ce67d0484547e3e142b2f5f6f0/TeX.gitignore
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
