@@ -1,6 +1,6 @@
 #!/bin/bash
 
-branch=$(git branch-name)
+branch=$(git rev-parse --abbrev-ref HEAD)
 origin=$(git remote get-url origin | sed -e "s/^git@github.com://" -e "s/^https:\/\/github.com\///" -e "s/.git$//")
 dirlen=$(git rev-parse --show-toplevel | wc -c)
 
