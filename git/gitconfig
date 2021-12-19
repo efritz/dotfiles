@@ -5,6 +5,13 @@
 [github]
 	user = efritz
 
+[alias]
+	# See https://stackoverflow.com/a/25915221
+	merge-default = !git-merge-default && :
+	reset-default = !git-reset-default && :
+	squash = !git-squash && :
+	wip = !git-wip && :
+
 [core]
 	excludesfile = ~/.gitignore_global
 	
