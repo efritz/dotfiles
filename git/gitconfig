@@ -7,11 +7,12 @@
 
 [core]
 	excludesfile = ~/.gitignore_global
+	
 	# Treat spaces before tabs and all kinds of trailing whitespace as an error
 	# [default] trailing-space: looks for spaces at the end of a line
 	# [default] space-before-tab: looks for spaces before tabs at the beginning of a line
 	whitespace = space-before-tab,-indent-with-non-tab,trailing-space
-
+	
 	# Enable parallel I/O for operations like "git diff".
 	# See http://stackoverflow.com/q/18257622/276478
 	preloadindex = true
@@ -40,6 +41,7 @@
 	compactionHeuristic = true
 	renames = copies
 	mnemonicprefix = true
+
 [push]
 	# Make "git push" or "git push <remote>" only push the current branch to
 	# the tracked branch (regardless of its remote name) as opposed to pushing
