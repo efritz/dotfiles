@@ -8,6 +8,7 @@
 [alias]
 	# See https://stackoverflow.com/a/25915221
 	merge-default = !git-merge-default && :
+	pr = !git-pr && :
 	reset-default = !git-reset-default && :
 	squash = !git-squash && :
 	wip = !git-wip && :
