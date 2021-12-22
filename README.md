@@ -35,3 +35,9 @@ After installing a Visual Studio Code extension, run the following command to up
 ```bash
 code --list-extensions > vscode/extensions
 ```
+
+After installing a new package via brew, run the following commands to update the Brewfile.
+
+```bash
+brew bundle dump --force
+```
