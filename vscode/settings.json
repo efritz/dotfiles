@@ -1,46 +1,71 @@
 {
-    "editor.cursorStyle": "line-thin",
-    "editor.fontFamily": "Fira Code",
-    // https://github.com/microsoft/vscode/issues/106583
-    "editor.fontLigatures": "'ccmp' off",
-    "editor.minimap.enabled": false,
-    "editor.renderWhitespace": "all",
-    "go.formatTool": "goimports",
-    "go.useLanguageServer": true,
-    "workbench.colorTheme": "Nord Extra Dark",
-    "workbench.iconTheme": "vscode-icons",
-    "extensions.autoUpdate": false,
-    "[typescript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[dockerfile]": {
-        "editor.defaultFormatter": "ms-azuretools.vscode-docker"
-    },
-    "cmake.configureOnOpen": true,
-    "[json]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "cSpell.userWords": [
-        "unmarshals"
-    ],
-    "[typescriptreact]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "workbench.startupEditor": "newUntitledFile",
-    "typescript.updateImportsOnFileMove.enabled": "never",
-    "[javascript]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "editor.fontSize": 11,
-    "[html]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[yaml]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "workbench.editor.untitled.hint": "hidden",
-    "security.workspace.trust.untrustedFiles": "open",
-    "[jsonc]": {
-        "editor.defaultFormatter": "vscode.json-language-features"
-    },
+  "workbench.startupEditor": "newUntitledFile",
+  "editor.cursorStyle": "line-thin",
+  "editor.minimap.enabled": false,
+  "editor.renderWhitespace": "all",
+  "workbench.iconTheme": "vscode-icons",
+  "markdown-preview-enhanced.codeBlockTheme": "github.css",
+  "security.workspace.trust.untrustedFiles": "open",
+  "go.toolsManagement.autoUpdate": true,
+  "workbench.editor.untitled.hint": "hidden",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "wingmate.prefixes": ["Query = "],
+  "gopls": {
+    "ui.semanticTokens": false
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "workbench.colorTheme": "Nord Extra Dark",
+  "editor.semanticTokenColorCustomizations": {
+    "[Nord Extra Dark]": {
+      "enabled": true
+    }
+  },
+  "remote.extensionKind": {
+    "pub.name": ["ui"]
+  }
+
+  // "extensions.autoUpdate": false,
+  // "[typescript]": {
+  //     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  // },
+  // "[dockerfile]": {
+  //     "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+  // },
+  // "cmake.configureOnOpen": true,
+  // "[json]": {
+  //     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  // },
+  // "cSpell.userWords": [
+  //     "unmarshals"
+  // ],
+  // "[typescriptreact]": {
+  //     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  // },
+  // "workbench.startupEditor": "newUntitledFile",
+  // "typescript.updateImportsOnFileMove.enabled": "never",
+  // "[javascript]": {
+  //     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  // },
+  // "editor.fontSize": 11,
+  // "[html]": {
+  //     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  // },
+  // "[yaml]": {
+  //     "editor.defaultFormatter": "esbenp.prettier-vscode"
+  // },
+  // "workbench.editor.untitled.hint": "hidden",
+  // "security.workspace.trust.untrustedFiles": "open",
+  // "[jsonc]": {
+  //     "editor.defaultFormatter": "vscode.json-language-features"
+  // },
 }
