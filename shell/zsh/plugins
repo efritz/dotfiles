@@ -1,10 +1,9 @@
 plugins=(
     brew
     docker
-    extract
     git
     kubectl
-    osx
+    macos
     pass
     vscode
 )
