@@ -33,56 +33,56 @@
 	commitGraph = true
 
 	# New options to try out
-	pager = diff-so-fancy | less --tabs=4 -RFX # less -FRSX # delta
-	compression = 9
+	pager = delta # pager = diff-so-fancy | less --tabs=4 -RFX # less -FRSX # delta
+	# compression = 9
 
 [diff]
 	# Use more time to create better diffs. E.g. matching opening/closing braces
 	# from neighbour functions.
-	algorithm = minimal # patience
+	algorithm = histogram # minimal # patience
 
 	# Tells Git to detect renames. If set to "true", it will enable basic
 	# rename detection. If set to "copies", it will detect copies, as well.
 	renames = copies
 
 	# New options to try out
-	compactionHeuristic = true
-	renames = copies
-	mnemonicprefix = true
+	# compactionHeuristic = true
+	# mnemonicprefix = true
 
 [push]
 	# Make "git push" or "git push <remote>" only push the current branch to
 	# the tracked branch (regardless of its remote name) as opposed to pushing
 	# all branches with a matching name on the remote. See "An asymmetry
 	# between git pull and push": http://longair.net/blog/?p=572
-	default = current # tracking
+	# default = current # tracking
 
 	# New options to try out
-	followTags = true
+	# followTags = true
+	autoSetupRemote = true
 
 [status]
 	showuntrackedfiles = all
 
 [commit]
-	verbose = true
+	# verbose = true
 
 [branch]
-	autosetuprebase = always
+	# autosetuprebase = always
 
 [fetch]
-	prune = true
+	# prune = true
 
 [pull]
 	rebase = true
 
 [merge]
-	conflictStyle = diff3
+	# conflictStyle = diff3
 
 [filter "lfs"]
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
-	clean = git-lfs clean -- %f
+	# smudge = git-lfs smudge -- %f
+	# process = git-lfs filter-process
+	# required = true
+	# clean = git-lfs clean -- %f
 
 [url "git@github.com:"]
 	insteadOf = https://github.com/
