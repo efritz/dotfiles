@@ -33,7 +33,8 @@
   "typescript.updateImportsOnFileMove.enabled": "always",
 
   // Extensions settings
-  "markdown-preview-enhanced.codeBlockTheme": "github.css"
+  "markdown-preview-enhanced.codeBlockTheme": "github.css",
+  "editor.stickyScroll.enabled": true
 
   // Backup
 
