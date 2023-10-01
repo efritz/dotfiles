@@ -1,5 +1,5 @@
 paths=(
-    ~/.asdf/shims
+    # ~/.asdf/shims
     # vscode
     /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
     "${GOPATH}/bin"
@@ -9,7 +9,6 @@ paths=(
     # /usr/local/sbin
     # replace the system git
     # "/usr/local/Cellar/git/$(ls /usr/local/Cellar/git/)/bin"
-    ~/.sg
 )
 
 for dir in "${paths[@]}"; do
@@ -22,6 +21,6 @@ unset paths;
 
 export PATH;
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+# [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
