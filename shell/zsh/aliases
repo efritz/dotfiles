@@ -9,9 +9,6 @@ alias cp='cp -i'
 # make parent dirs
 alias mkdir='mkdir -p'
 
-# better colors (requires coreutils)
-# alias ls='ls -hF --color=always --group-directories-first'
-
 # map function (e.g. `find . -name .gitattributes | map dirname`)
 alias map='xargs -n1'
 
