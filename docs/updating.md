@@ -4,7 +4,7 @@ Be sure to update dotfiles whenever an operating system package, application ext
 
 ## Brew packages
 
-After installing a new package via brew, run the following commands to update the Brewfile.
+After installing a new package via brew or a new VSCode extension, run the following commands to update the Brewfile.
 
 ```bash
 brew bundle dump --force
@@ -16,12 +16,4 @@ The global gitignore file is generted via `gibo`. To add additional files from G
 
 ```bash
 gibo dump macOS VisualStudioCode JetBrains TeX > git/gitignore_global
-```
-
-## VSCode extensions
-
-After installing a Visual Studio Code extension, run the following command to update the extensions list.
-
-```bash
-code --list-extensions > vscode/extensions
 ```
