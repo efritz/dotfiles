@@ -12,7 +12,7 @@ brew bundle dump --force
 
 ## Gitignore
 
-The global gitignore file is generted via `gibo`. To add additional files from GitHub's [gitignore repo](https://github.com/github/gitignore), modify the following command.
+The global gitignore file is generated via `gibo`. To add additional files from GitHub's [gitignore repo](https://github.com/github/gitignore), modify the following command.
 
 ```bash
 gibo dump macOS VisualStudioCode JetBrains TeX > git/gitignore_global
