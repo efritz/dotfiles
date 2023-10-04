@@ -35,10 +35,4 @@
   // Extensions settings
   "markdown-preview-enhanced.codeBlockTheme": "github.css",
   "editor.stickyScroll.enabled": true
-
-  // Backup
-
-  // "remote.extensionKind": {
-  //   "pub.name": ["ui"]
-  // },
 }
