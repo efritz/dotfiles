@@ -23,7 +23,3 @@ This repo must be located in a stable location, otherwise symlinks will break. T
 # Setup pass store
 
 See [efritz/pass-store](https://github.com/efritz/pass-store) on GitHub.
-
-# Install Google Cloud SDK
-
-TODO
