@@ -7,7 +7,7 @@ These steps should be done once on a new machine. Be sure to update these instru
 1. Install [homebrew](https://brew.sh/):
 
 ```bash
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
 2. Install [oh-my-zsh](https://ohmyz.sh/):
