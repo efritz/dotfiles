@@ -5,18 +5,15 @@
 [github]
 	user = efritz
 
-[alias]
-	# See https://stackoverflow.com/a/25915221
-	merge-default = !git-merge-default && :
-	pr = !git-pr && :
-	reset-default = !git-reset-default && :
-	squash = !git-squash && :
-	wip = !git-wip && :
+[url "git@github.com:"]
+	insteadOf = https://github.com/
 
 [core]
+	# Common settings
+	pager = delta
 	excludesfile = ~/.gitignore_global
 	
-	# Treat spaces before tabs and all kinds of trailing whitespace as an error
+	# Treat spaces before tabs and all kinds of trailing whitespace as an error.
 	# [default] trailing-space: looks for spaces at the end of a line
 	# [default] space-before-tab: looks for spaces before tabs at the beginning of a line
 	whitespace = space-before-tab,-indent-with-non-tab,trailing-space
@@ -25,67 +22,37 @@
 	# See http://stackoverflow.com/q/18257622/276478
 	preloadindex = true
 
-	# Use 12 characters for the abbreviated commit hash. I can currently make
-	# do with 10, but this should provide a certain level of safety for the
-	# near-ish future. See the interesting and well-researched article at
-	# http://blog.cuviper.com/2013/11/10/how-short-can-git-abbreviate/
+	# Use 12 characters for the abbreviated commit hash.
+	# See http://blog.cuviper.com/2013/11/10/how-short-can-git-abbreviate/
 	abbrev = 12
+
+	# Use commit graph index to speed up some traversal operations.
 	commitGraph = true
 
-	# New options to try out
-	pager = delta # pager = diff-so-fancy | less --tabs=4 -RFX # less -FRSX # delta
-	# compression = 9
-
-[diff]
-	# Use more time to create better diffs. E.g. matching opening/closing braces
-	# from neighbour functions.
-	algorithm = histogram # minimal # patience
-
-	# Tells Git to detect renames. If set to "true", it will enable basic
-	# rename detection. If set to "copies", it will detect copies, as well.
-	renames = copies
-
-	# New options to try out
-	# compactionHeuristic = true
-	# mnemonicprefix = true
-
-[push]
-	# Make "git push" or "git push <remote>" only push the current branch to
-	# the tracked branch (regardless of its remote name) as opposed to pushing
-	# all branches with a matching name on the remote. See "An asymmetry
-	# between git pull and push": http://longair.net/blog/?p=572
-	# default = current # tracking
-
-	# New options to try out
-	# followTags = true
-	autoSetupRemote = true
+[alias]
+	# Custom workflow aliases
+	# See https://stackoverflow.com/a/25915221
+	wip = !git-wip && :
+	squash = !git-squash && :
+	pr = !git-pr && :
+	# (used transitively by thte above aliases)
+	merge-default = !git-merge-default && :
+	reset-default = !git-reset-default && :
 
 [status]
 	showuntrackedfiles = all
 
-[commit]
-	# verbose = true
-
-[branch]
-	# autosetuprebase = always
-
-[fetch]
-	# prune = true
+[push]
+	autoSetupRemote = true
 
 [pull]
 	rebase = true
 
-[merge]
-	# conflictStyle = diff3
+[diff]
+	# Use more time to create better diffs. E.g. matching opening/closing braces
+	# from neighbour functions.
+	algorithm = histogram
 
-[filter "lfs"]
-	# smudge = git-lfs smudge -- %f
-	# process = git-lfs filter-process
-	# required = true
-	# clean = git-lfs clean -- %f
-
-[url "git@github.com:"]
-	insteadOf = https://github.com/
-
-[include]
-	path = ~/.gitconfig_local
+	# Tells Git to detect renames. If set to "true", it will enable basic
+	# rename detection. If set to "copies", it will detect copies, as well.
+	renames = copies
