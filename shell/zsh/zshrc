@@ -3,6 +3,7 @@ includes=(
     ~/.zsh/autocorrect
     ~/.zsh/exports
     ~/.zsh/history
+    ~/.zsh/homebrew
     ~/.zsh/hooks
     ~/.zsh/oh-my-zsh
     ~/.zsh/paths
