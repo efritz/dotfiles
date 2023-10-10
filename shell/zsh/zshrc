@@ -1,6 +1,8 @@
 includes=(
     ~/.zsh/aliases
+    ~/.zsh/asdf
     ~/.zsh/autocorrect
+    ~/.zsh/completions
     ~/.zsh/exports
     ~/.zsh/history
     ~/.zsh/homebrew
@@ -9,8 +11,6 @@ includes=(
     ~/.zsh/paths
     ~/.zsh/plugins
     ~/.fzf.zsh
-    /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-    /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
     ~/.zsh/zshrc-`hostname -s`
 )
 
@@ -20,6 +20,3 @@ for config in $includes; do
     fi
 done
 
-export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR=/opt/homebrew/share/zsh-syntax-highlighting/highlighters
-
-autoload -U +X bashcompinit && bashcompinit
