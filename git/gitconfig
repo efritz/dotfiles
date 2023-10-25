@@ -56,3 +56,6 @@
 	# Tells Git to detect renames. If set to "true", it will enable basic
 	# rename detection. If set to "copies", it will detect copies, as well.
 	renames = copies
+
+[includeIf "gitdir:~/dev/render"]
+	path = ~/.gitconfig-render
