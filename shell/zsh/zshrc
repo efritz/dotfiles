@@ -1,11 +1,14 @@
 includes=(
+    ~/.zsh/homebrew # must come before $(brew --prefix) calls
+
     ~/.zsh/aliases
     ~/.zsh/asdf
     ~/.zsh/autocorrect
+    ~/.zsh/nvm
     ~/.zsh/completions
     ~/.zsh/exports
+    ~/.zsh/gcloud
     ~/.zsh/history
-    ~/.zsh/homebrew
     ~/.zsh/hooks
     ~/.zsh/oh-my-zsh
     ~/.zsh/paths
@@ -19,4 +22,3 @@ for config in $includes; do
         source $config
     fi
 done
-
