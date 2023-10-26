@@ -1,5 +1,6 @@
 paths=(
     /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
+    "$HOME/.nvm/versions/node/$(nvm version)/bin/yarn"
     /opt/homebrew/opt/postgresql@16/bin
     "${GOPATH}/bin"
     ~/.dotfiles/bin
