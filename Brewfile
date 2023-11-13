@@ -12,6 +12,7 @@ brew "pixman"
 brew "cairo"
 brew "cloc"
 brew "direnv"
+brew "dive"
 brew "dnsmasq", restart_service: true
 brew "findutils"
 brew "fzf"
