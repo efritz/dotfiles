@@ -1,7 +1,8 @@
 export RENDER_API_PATH="$HOME/dev/render/api"
-export RENDER_DEV_CTX='gke_render-devs_us-central1_efritz'
-export VAULT_ADDR='https://vault.render.com:8200'
+export RENDER_DEV_REGION="us-central1"
+export RENDER_DEV_CTX="gke_render-devs_${RENDER_DEV_REGION}_efritz"
 
+export VAULT_ADDR='https://vault.render.com:8200'
 function vault-login() {
     vault login -method=github token="$(pass vault)"
 }
