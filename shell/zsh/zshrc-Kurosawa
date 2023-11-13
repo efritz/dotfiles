@@ -6,3 +6,12 @@ export VAULT_ADDR='https://vault.render.com:8200'
 function vault-login() {
     vault login -method=github token="$(pass vault)"
 }
+
+alias tctl="tctl --tls_server_name=temporal-frontend.temporal.render.com --tls_ca_path=$RENDER_API_PATH/secrets/temporal-api-server-tls-client-certs/ca.crt --tls_cert_path=$RENDER_API_PATH/secrets/temporal-api-server-tls-client-certs/api.crt --tls_key_path=$RENDER_API_PATH/secrets/temporal-api-server-tls-client-certs/api.key"
+
+if [[ -e ${RENDER_API_PATH}/jobrunner/jobrunner ]]; then
+   export PATH="${RENDER_API_PATH}/jobrunner:$PATH"
+fi
+if [[ -e ${RENDER_API_PATH}/jobrunner/completion.zsh ]]; then
+  . "${RENDER_API_PATH}/jobrunner/completion.zsh"
+fi
