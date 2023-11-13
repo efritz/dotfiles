@@ -2,7 +2,6 @@
   // Workbench
   "workbench.startupEditor": "newUntitledFile",
   "workbench.editor.empty.hint": "hidden",
-  "workbench.editor.untitled.hint": "hidden",
   "workbench.colorTheme": "Nord Extra Dark",
   "workbench.iconTheme": "vscode-icons",
   "workbench.tree.indent": 15,
