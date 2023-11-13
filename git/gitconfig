@@ -57,5 +57,5 @@
 	# rename detection. If set to "copies", it will detect copies, as well.
 	renames = copies
 
-[includeIf "gitdir:~/dev/render"]
+[includeIf "gitdir:~/dev/render/"]
 	path = ~/.gitconfig-render
