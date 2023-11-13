@@ -1,7 +1,7 @@
 export ZSH=~/.oh-my-zsh
 export CASE_SENSITIVE="false"
 export COMPLETION_WAITING_DOTS="true"
-export ENABLE_CORRECTION="true"
+export ENABLE_CORRECTION="false"
 export HYPHEN_INSENSITIVE="true"
 export ZSH_THEME="robbyrussell"
 
