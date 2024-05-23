@@ -4,7 +4,7 @@ export RENDER_DEV_CTX="gke_render-devs_${RENDER_DEV_REGION}_efritz"
 
 export VAULT_ADDR='https://vault.render.com:8200'
 function vault-login() {
-    vault login -method=github token="$(pass vault)"
+    vault login -method=oidc
 }
 
 alias tctl="tctl --tls_server_name=temporal-frontend.temporal.render.com --tls_ca_path=$RENDER_API_PATH/secrets/temporal-api-server-tls-client-certs/ca.crt --tls_cert_path=$RENDER_API_PATH/secrets/temporal-api-server-tls-client-certs/api.crt --tls_key_path=$RENDER_API_PATH/secrets/temporal-api-server-tls-client-certs/api.key"
