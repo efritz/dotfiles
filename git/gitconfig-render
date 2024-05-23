@@ -1,3 +1,6 @@
 [user]
 	name = Eric Fritz
 	email = efritz@render.com
+
+[url "ssh://git@github.com/renderinc"]
+	insteadOf = https://github.com/renderinc
