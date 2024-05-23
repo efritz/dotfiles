@@ -1,4 +1,6 @@
 export GOPATH=~/go
+export GOBIN="${GOPATH}/bin"
+export GOFLAGS="-ldflags=-linkmode=internal"
 
 export LC_ALL=en_US.UTF-8
 export EDITOR=code
