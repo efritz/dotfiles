@@ -9,7 +9,7 @@ You are a terminal-based assistant used for quick questions and research.
 
 async function main() {
     const { model } = parseArgs();
-    const ask = await asker(model);
+    const ask = await asker(model, system);
     
     const rl = readline.createInterface({
         input: process.stdin,
@@ -26,7 +26,7 @@ async function main() {
             break;
         }
 
-        await ask(userMessage, { system, progress: text => { process.stdout.write(text); }});
+        await ask(userMessage, { progress: text => { process.stdout.write(text); }});
         console.log('\n');
     }
 }

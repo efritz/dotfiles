@@ -6,7 +6,7 @@ export async function asker(name, system) {
         case 'gpt-4o':
             return askOpenAI('gpt-4o', system);
         case 'gpt-4':
-            return askOpenAI('gpt-4-32k-0314', system);
+            return askOpenAI('gpt-4', system);
         case 'haiku':
             return askClaude('claude-3-haiku-20240307', system);
         case 'sonnet':

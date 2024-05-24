@@ -54,9 +54,9 @@ development ensure it remains a reliable and powerful choice for enterprise-grad
 
 async function main() {
     const { file, model } = parseArgs();
-    const ask = await asker(model);
+    const ask = await asker(model, system);
     const contents = await fs.readFile(file, 'utf-8');
-    const response = await ask(`<DRAFT>${contents}</DRAFT>`, { system });
+    const response = await ask(`<DRAFT>${contents}</DRAFT>`);
 
     const draftChunks = splitBlocks(contents, todoPattern);
     const completions = splitBlocks(response, completionPattern);
