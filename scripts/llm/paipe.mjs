@@ -24,7 +24,7 @@ function parseArgs() {
         )
         .option(
             '-m, --model <string>',
-            `Model to use for chatbot. Defaults to gpt-4o. Valid options are ${Object.keys(models).sort().join(', ')}.`,
+            `Model to use. Defaults to gpt-4o. Valid options are ${Object.keys(models).sort().join(', ')}.`,
             'gpt-4o',
         );
 
