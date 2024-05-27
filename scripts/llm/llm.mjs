@@ -8,7 +8,7 @@ import { asker, models } from './common.mjs';
 
 const execAsync = promisify(exec);
 
-const system = `
+const chatSystem = `
 You are an AI assistant that specializes in helping users with tasks via the terminal.
 
 When the user asks you to perform a task:
@@ -27,7 +27,36 @@ Guidelines:
 `
 
 async function main() {
-    const { model } = parseArgs();
+    const { pipeMode, model, system: pipeSystem } = parseArgs();
+    
+    if (pipeMode) {
+        await pipe(model, pipeSystem);
+    } else {
+        await chat(model, chatSystem);
+    }
+}
+
+async function pipe(model, system) {
+    const ask = await asker(model, system);
+
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+        terminal: false
+    });
+
+    let message = '';
+    await new Promise((resolve) => {
+        rl.on('line', (line) => { message += line; });
+        rl.once('close', resolve);
+    });
+
+    rl.close();
+    await ask(message, { progress: text => { process.stdout.write(text); }});
+    console.log('\n');
+}
+
+async function chat(model, system) {
     let ask = await asker(model, system);
 
     console.log(`Chatting with ${model}...\n`);
@@ -90,7 +119,7 @@ async function main() {
 
             case 'clear':
                 lastOutput = '';
-                ask = await asker(model, system);
+                ask = await asker(model, chatSystem);
                 console.log('Chat history cleared.');
                 console.log();
                 break;
@@ -114,20 +143,28 @@ async function main() {
 
 function parseArgs() {
     program
-        .name('chat')
-        .description('LLM chat on the command line.')
+        .name('llm')
+        .description('LLM interface on the command line.')
         .allowExcessArguments(false)
         .option(
             '-m, --model <string>',
             `Model to use. Defaults to gpt-4o. Valid options are ${Object.keys(models).sort().join(', ')}.`,
             'gpt-4o',
         );
+    
+    const pipeMode = !process.stdin.setRawMode;
+    if (pipeMode) {
+        program.requiredOption(
+            '-s, --system <string>',
+            'The system prompt to use.',
+        );
+    }
 
     // argv = node zx ./chat.mjs [...]
     program.parse(process.argv.slice(1));
     const options = program.opts();
 
-    return { ...options };
+    return { pipeMode, ...options };
 }
 
 await main();
