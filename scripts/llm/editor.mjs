@@ -1,6 +1,7 @@
 #!/usr/bin/env zx
 
-import { asker } from './ask.mjs';
+import { program } from 'commander';
+import { asker, models } from './ask.mjs';
 
 const todoPattern = /<TODO>([\s\S]*?)<\/TODO>/g;
 const completionPattern = /<COMPLETION>([\s\S]*?)<\/COMPLETION>/g;
@@ -80,31 +81,35 @@ async function main() {
 }
 
 function parseArgs() {
+    program
+        .name('editor')
+        .description('Replaces <TODO /> blocks with LLM completions in the specified file in-place.')
+        .argument('<file>', 'The file to edit.')
+        .allowExcessArguments(false)
+        .option(
+            '-m, --model <string>',
+            `Model to use for chatbot. Defaults to gpt-4o. Valid options are ${Object.keys(models).sort().join(', ')}.`,
+            'gpt-4o',
+        );
+
     // argv = node zx ./editor.mjs [...]
-    const file = process.argv[3];
-    const model = process.argv[4] || 'gpt-4o'
+    program.parse(process.argv.slice(1));
+    const options = program.opts();
 
-    if (!file) {
-        console.log('Usage: editor <file> [<model_name>]');
-        console.log('');
-        console.log('Replaces <TODO /> blocks with LLM completions in the specified file in-place.');
-        process.exit();
-    }
-
-    return { file, model }
+    return { file: program.args[0], ...options };
 }
 
 function splitBlocks(content, pattern) {
     let match;
     let lastIndex = 0;
-    
+
     const result = [];
     while ((match = pattern.exec(content)) !== null) {
         result.push(content.slice(lastIndex, match.index));
         result.push(match[1]);
         lastIndex = pattern.lastIndex;
     }
-    
+
     result.push(content.slice(lastIndex));
     return result;
 }
