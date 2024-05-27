@@ -4,7 +4,7 @@ import { program } from 'commander';
 import { exec } from 'child_process';
 import readline from 'readline';
 import { promisify } from 'util';
-import { asker, models } from './ask.mjs';
+import { asker, models } from './common.mjs';
 
 const execAsync = promisify(exec);
 

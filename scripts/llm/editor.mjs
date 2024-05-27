@@ -1,7 +1,7 @@
 #!/usr/bin/env zx
 
 import { program } from 'commander';
-import { asker, models } from './ask.mjs';
+import { asker, models } from './common.mjs';
 
 const todoPattern = /<TODO>([\s\S]*?)<\/TODO>/g;
 const completionPattern = /<COMPLETION>([\s\S]*?)<\/COMPLETION>/g;
