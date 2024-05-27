@@ -1,20 +1,27 @@
 import { OpenAI } from "openai";
 import { Anthropic } from '@anthropic-ai/sdk';
 
+export const models = {
+    'gpt-4o': { provider: 'OpenAI',    model: 'gpt-4o' },
+    'gpt-4':  { provider: 'OpenAI',    model: 'gpt-4'  },
+    'haiku':  { provider: 'Anthropic', model: 'claude-3-haiku-20240307'  },
+    'sonnet': { provider: 'Anthropic', model: 'claude-3-sonnet-20240229' },
+    'opus':   { provider: 'Anthropic', model: 'claude-3-opus-20240229'   },
+}
+
 export async function asker(name, system) {
-    switch (name) {
-        case 'gpt-4o':
-            return askOpenAI('gpt-4o', system);
-        case 'gpt-4':
-            return askOpenAI('gpt-4', system);
-        case 'haiku':
-            return askClaude('claude-3-haiku-20240307', system);
-        case 'sonnet':
-            return askClaude('claude-3-sonnet-20240229', system);
-        case 'opus':
-            return askClaude('claude-3-opus-20240229', system);
+    const model = models[name]
+    if (!model) {
+        throw new Error(`Unknown model: ${name}`);
+    }
+
+    switch (model.provider) {
+        case 'OpenAI':
+            return askOpenAI(model.model, system);
+        case 'Anthropic':
+            return askClaude(model.model, system);
         default:
-            throw new Error(`Unknown model: ${name}`);
+            throw new Error(`Unknown provider: ${model.provider}`);
     }
 }
 
