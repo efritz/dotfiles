@@ -1,9 +1,9 @@
 import { spawn } from 'child_process';
 import { readdirSync } from 'fs';
-import { readFile } from 'fs/promises';
+import { readFile, writeFile } from 'fs/promises';
 import readline from 'readline';
 import ora from 'ora';
-import { asker } from '../common/ask.mjs';
+import { createAsker, loadAskerFromHistoryFile } from '../common/ask.mjs';
 
 const system = `
 You are an AI assistant that specializes in helping users with tasks via the terminal.
@@ -23,7 +23,7 @@ Guidelines:
 - Always assume common commands/tools are available. Don't write install commands unless explicitly requested.
 `
 
-export async function chat(model) {
+export async function chat(model, historyFilename) {
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -31,14 +31,13 @@ export async function chat(model) {
         completer,
     });
 
-    const context = {
-        ask: await asker(model, system),
-        prompter: prompter(rl),
-        lastOutput: '',
-    };
+    const { ask, pushMessage, clearMessages, serialize } = historyFilename
+        ? await loadAskerFromHistoryFile(historyFilename)
+        : await createAsker(model, system);
+    const prompter = createPrompter(rl);
 
     console.log(`Chatting with ${model}...\n`);
-    await handler(context);
+    await handler({ ask, pushMessage, clearMessages, serialize, prompter });
     rl.close();
 }
 
@@ -46,49 +45,93 @@ async function handler(context) {
     loop: while (true) {
         const userMessage = (await context.prompter.question('$ ')).trim();
 
-        switch (userMessage) {
-            case '':
+        for (const [pattern, handler] of dispatch) {
+            const match = userMessage.match(pattern);
+            if (!match) {
+                continue;
+            }
+
+            try {
+                await handler(context, userMessage, match);
                 continue loop;
+            } catch (error) {
+                if (error instanceof ExitError) {
+                    return;
+                }
 
-            case 'exit':
-                break loop;
-
-            case 'clear':
-                context.lastOutput = '';
-                ask = await asker(model, system);
-                console.log('Chat history cleared.');
-                console.log();
-                break;
-
-            case 'help':
-                console.log('Commands:');
-                console.log('  exit - Exit the chat.');
-                console.log('  clear - Clear the chat history.');
-                console.log('  load <file> - load file contents into the chat context');
-                console.log('  help - Show this message.');
-                console.log();
-                break;
-
-            default:
-                await handleMessage(context, userMessage)
-                break;
+                throw error;
+            }
         }
+
+        throw new Error(`No pattern matched message: ${userMessage}.`);
     }
+}
+
+const dispatch = [
+    [/^help$/, handleHelp],
+    [/^exit$/, handleExit],
+    [/^clear$/, handleClear],
+    [/^save$/, handleSave],
+    [/^load (.+)$/, handleLoad],
+    [/^(.*)$/, handleMessage],
+];
+
+async function handleHelp() {
+    console.log('Commands:');
+    console.log('  help - Show this message.');
+    console.log('  exit - Exit the chat.');
+    console.log('  clear - Clear the chat history.');
+    console.log('  save - Save this chat history.');
+    console.log('  load <file> - load file contents into the chat context');
+    console.log();
+}
+
+class ExitError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'ExitError';
+    }
+}
+
+async function handleExit() {
+    console.log('Goodbye!');
+    console.log();
+
+    throw new ExitError('User exited.');
+}
+
+async function handleClear(context) {
+    context.clearMessages();
+    console.log('Chat history cleared.');
+    console.log();
+}
+
+async function handleSave(context) {
+    const filename = `chat-${Math.floor(Date.now() / 1000)}.json`;
+    await writeFile(filename, JSON.stringify(context.serialize(), null, '\t'));
+    console.log(`Chat history saved to ${filename}.`);
+    console.log();
+}
+
+async function handleLoad(context, userMessage, match) {
+    const path = match[1];
+
+    await withProgress(async () => {
+        const contents = await readFile(path);
+        context.pushMessage(`<path>${path}</path><contents>${contents}</contents>\n`);
+    }, {
+        progress: `Loading ${path} into context...`,
+        success: `Loaded ${path} into context.`,
+        failure: `Failed to load ${path}.`,
+    });
 }
 
 async function handleMessage(context, userMessage) {
-    const match = userMessage.match(/^load (.+)$/);
-    if (match) {
-        return handleLoad(context, match[1]);
+    if (userMessage === '') {
+        return;
     }
 
-    const message = context.lastOutput + userMessage;
-    context.lastOutput = '';
-    return handleQuestion(context, message);
-}
-
-async function handleQuestion(context, message) {
-    const { ok, response } = await withProgress(progress => context.ask(message, { progress }), {
+    const { ok, response } = await withProgress(progress => context.ask(userMessage, { progress }), {
         progress: 'Generating response...',
         success: 'Generated response.',
         failure: 'Failed to generate response.',
@@ -97,20 +140,6 @@ async function handleQuestion(context, message) {
     if (ok) {
         await handleCode(context, response);
     }
-}
-
-async function handleLoad(context, path) {
-    const spinner = ora({ text: `Loading ${path} into context...`, discardStdin: false });
-
-    try {
-        const contents = await readFile(path);
-        context.lastOutput = `<path>${path}</path><contents>${contents}</contents>\n`;
-        spinner.succeed(`Loaded ${path} into context.`);
-    } catch (error) {
-        spinner.fail(`Failed to load ${path} into context: ${error.message}.`);
-    }
-
-    console.log();
 }
 
 async function handleCode(context, response) {
@@ -122,8 +151,7 @@ async function handleCode(context, response) {
 
     if (!(await context.prompter.yesOrNo('Would you like to run this command?', false))) {
         console.log('No code was executed.');
-        console.log('');
-        context.lastOutput = '';
+        console.log();
         return;
     }
 
@@ -147,20 +175,20 @@ async function handleCode(context, response) {
         failure: 'Command failed.',
     });
 
-    if (ok) {
-        context.lastOutput = `Command succeeded.\nOutput:\n${output}\n`;
-    } else {
-        context.lastOutput = `Command failed.\nOutput:\n${output}\n`;
+    context.pushMessage(`Command ${ok ? 'succeeded' : 'failed'}.\nOutput:\n${output}\n`);
 
+    if (!ok) {
         if (await context.prompter.yesOrNo('Would you like to debug this command?', true)) {
-            return handleMessage('Diagnose the error.');
+            return handleMessage(context, 'Diagnose the error.');
+        } else {
+            console.log();
         }
     }
 }
 
 async function withProgress(f, options) {
     let buffer = '';
-    const formatBuffer = (prefix) => prefix + '\n\n> ' + buffer.trim().replace(/\n/g, '\n> ');
+    const formatBuffer = (prefix) => prefix + (buffer.trim() === '' ? '' : '\n\n> ' + buffer.trim().replace(/\n/g, '\n> '));
 
     const spinner = ora({ text: options.progress, discardStdin: false });
     spinner.start();
@@ -183,7 +211,7 @@ async function withProgress(f, options) {
     }
 }
 
-function prompter(rl) {
+function createPrompter(rl) {
     const question = async (prompt) => await new Promise((resolve) => {
         rl.question(prompt, resolve);
     });

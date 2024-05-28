@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import { asker } from '../common/ask.mjs';
+import { createAsker } from '../common/ask.mjs';
 
 const todoPattern = /<TODO>([\s\S]*?)<\/TODO>/g;
 const completionPattern = /<COMPLETION>([\s\S]*?)<\/COMPLETION>/g;
@@ -52,7 +52,7 @@ development ensure it remains a reliable and powerful choice for enterprise-grad
 `
 
 export async function edit(file, model) {
-    const ask = await asker(model, system);
+    const { ask } = await createAsker(model, system);
     const contents = await readFile(file, 'utf-8');
 
     const response = await ask(`<DRAFT>${contents}</DRAFT>`);

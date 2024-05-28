@@ -37,7 +37,8 @@ function setupCommands(program) {
         .command('chat', { isDefault: true })
         .description('Execution-enabled chat interface with the specified model.')
         .option(modelFlags, modelDescription, modelDefault)
-        .action((_, options) => chat(options.model));
+        .option('--history <string>', 'File to load chat history from.')
+        .action((_, options) => chat(options.model, options.history));
 
     program
         .command('edit')

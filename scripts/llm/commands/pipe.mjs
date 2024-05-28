@@ -1,8 +1,8 @@
 import readline from 'readline';
-import { asker } from '../common/ask.mjs';
+import { createAsker } from '../common/ask.mjs';
 
 export async function pipe(model, system) {
-    const ask = await asker(model, system);
+    const { ask } = await createAsker(model, system);
     const message = await readInput();
 
     await ask(message, { progress: text => process.stdout.write(text) });
