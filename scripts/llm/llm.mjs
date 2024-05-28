@@ -2,9 +2,11 @@
 
 import { program } from 'commander';
 import { spawn } from 'child_process';
+import { readdirSync } from 'fs';
 import readline from 'readline';
-import { asker, models, streamOutput } from './common.mjs';
 import ora from 'ora';
+import { asker, models, streamOutput } from './common.mjs';
+import { readFile } from 'fs/promises';
 
 const chatSystem = `
 You are an AI assistant that specializes in helping users with tasks via the terminal.
@@ -61,6 +63,22 @@ async function chat(model, system) {
         input: process.stdin,
         output: process.stdout,
         terminal: true,
+        completer: (line) => {
+            if (!line.startsWith('load ')) {
+                return [[], line];
+            }
+
+            const prefix = line.slice(5);
+            const index = prefix.lastIndexOf('/');
+            const dir = index < 0 ? '.' : prefix.substring(0, index + 1);
+
+            return [
+                readdirSync(dir)
+                    .filter(name => name.startsWith(path.basename(prefix)))
+                    .map(name => 'load ' + (dir == '.' ? '' : dir) + name),
+                line,
+            ];
+        },
     });
     const promptUser = (prompt) => new Promise((resolve) => rl.question(prompt, resolve));
     const parseYesNo = (input) => input.trim().toLowerCase()[0] === 'y';
@@ -82,16 +100,37 @@ async function chat(model, system) {
     const formatResponse = (prefix, response) => {
         return prefix + '\n\n> ' + response.trim().replace(/\n/g, '\n> ');
     };
-    
+
     let lastOutput = '';
 
+    const loadFile = async (path) => {
+        const spinner = ora({ text: `Loading ${path} into context...`, discardStdin: false });
+
+        try {
+            const contents = await readFile(path);
+            lastOutput = `<path>${path}</path><contents>${contents}</contents>\n`;
+            spinner.succeed(`Loaded ${path} into context.`);
+        } catch (error) {
+            spinner.fail(`Failed to load ${path} into context: ${error.message}.`);
+        }
+
+        console.log();
+    };
+
     const handleMessage = async (userMessage) => {
+        const match = userMessage.match(/^load (.+)$/);
+        if (match) {
+            const path = match[1];
+            await loadFile(path);
+            return;
+        }
+
         const message = lastOutput + userMessage;
         lastOutput = '';
 
         const progressPrefix = 'Generating response...';
         const finishedPrefix = 'Generated response.';
-        
+
         const spinner = ora({ text: progressPrefix, discardStdin: false });
         const [progress, _] = progressForSpinner(spinner, progressPrefix);
 
@@ -179,6 +218,7 @@ async function chat(model, system) {
                 console.log('Commands:');
                 console.log('  exit - Exit the chat.');
                 console.log('  clear - Clear the chat history.');
+                console.log('  load <file> - load file contents into the chat context');
                 console.log('  help - Show this message.');
                 console.log();
                 break;
