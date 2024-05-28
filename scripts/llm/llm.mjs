@@ -1,13 +1,10 @@
 #!/usr/bin/env zx
 
 import { program } from 'commander';
-import { exec } from 'child_process';
+import { spawn } from 'child_process';
 import readline from 'readline';
-import { promisify } from 'util';
 import { asker, models, streamOutput } from './common.mjs';
 import ora from 'ora';
-
-const execAsync = promisify(exec);
 
 const chatSystem = `
 You are an AI assistant that specializes in helping users with tasks via the terminal.
@@ -72,6 +69,16 @@ async function chat(model, system) {
         (defaultValue ? 'y' : 'n')
     );
 
+    const progressForSpinner = (spinner, prefix) => {
+        let buffer = '';
+        const progress = chunk => {
+            buffer += chunk;
+            spinner.text = formatResponse(prefix, buffer);
+        };
+
+        return [progress, () => buffer];
+    };
+
     const formatResponse = (prefix, response) => {
         return prefix + '\n\n> ' + response.trim().replace(/\n/g, '\n> ');
     };
@@ -84,13 +91,9 @@ async function chat(model, system) {
 
         const progressPrefix = 'Generating response...';
         const finishedPrefix = 'Generated response.';
-        const spinner = ora({ text: progressPrefix, discardStdin: false });
         
-        let responseText = '';
-        const progress = text => {
-            responseText += text;
-            spinner.text = formatResponse('Generating response...', responseText);
-        };
+        const spinner = ora({ text: progressPrefix, discardStdin: false });
+        const [progress, _] = progressForSpinner(spinner, progressPrefix);
 
         spinner.start();
         const response = await ask(message, { progress });
@@ -105,6 +108,7 @@ async function chat(model, system) {
         if (!codeMatch) {
             return;
         }
+        const code = codeMatch[1].trim();
 
         if (!(await promptYesNo('Would you like to run this command?', false))) {
             console.log('No code was executed.');
@@ -116,18 +120,36 @@ async function chat(model, system) {
         const progressPrefix = 'Executing command...';
         const successPrefix = 'Command succeeded.';
         const failurePrefix = 'Command failed.';
-        const spinner = ora({ tetxt: progressPrefix, discardStdin: false });
+
+        const spinner = ora({ text: progressPrefix, discardStdin: false });
+        const [progress, getBuffer] = progressForSpinner(spinner, progressPrefix);
+        spinner.start();
+
+        const runCode = new Promise((resolve, reject) => {
+            const cmd = spawn('zsh', ['-c', code]);
+            cmd.stdout.on('data', data => progress(data.toString()));
+            cmd.stderr.on('data', data => progress(data.toString()));
+
+            cmd.on('exit', code => {
+                if (code === 0) {
+                    resolve();
+                } else {
+                    reject();
+                }
+            });
+        });
 
         try {
-            const code = codeMatch[1].trim();
-            const { stdout, stderr } = await execAsync(code);
+            await runCode;
 
-            spinner.succeed(formatResponse(successPrefix, stdout + stderr));
-            lastOutput = `Command executed.\nOutput:\n${stdout}${stderr}\n`;
+            const buffer = getBuffer();
+            spinner.succeed(formatResponse(successPrefix, buffer));
+            lastOutput = `Command succeeded.\nOutput:\n${buffer}\n`;
             console.log();
         } catch (error) {
-            spinner.fail(formatResponse(failurePrefix, error.message));
-            lastOutput = `Command failed.\nError:\n${error.message}\n`;
+            const buffer = getBuffer();
+            spinner.fail(formatResponse(failurePrefix, buffer));
+            lastOutput = `Command failed.\nOutput:\n${buffer}\n`;
             console.log();
 
             if (await promptYesNo('Would you like to debug this command?', true)) {
