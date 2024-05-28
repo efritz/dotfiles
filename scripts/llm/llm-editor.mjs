@@ -92,7 +92,7 @@ function parseArgs() {
             'gpt-4o',
         );
 
-    // argv = node zx ./editor.mjs [...]
+    // argv = node zx ./llm-editor.mjs [...]
     program.parse(process.argv.slice(1));
     const options = program.opts();
 
