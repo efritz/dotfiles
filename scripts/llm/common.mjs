@@ -86,3 +86,7 @@ async function askClaude(model, system) {
         return result;
     };
 }
+
+export function streamOutput(text) {
+    process.stdout.write(text);
+}

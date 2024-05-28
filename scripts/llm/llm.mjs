@@ -4,7 +4,8 @@ import { program } from 'commander';
 import { exec } from 'child_process';
 import readline from 'readline';
 import { promisify } from 'util';
-import { asker, models } from './common.mjs';
+import { asker, models, streamOutput } from './common.mjs';
+import ora from 'ora';
 
 const execAsync = promisify(exec);
 
@@ -28,7 +29,7 @@ Guidelines:
 
 async function main() {
     const { pipeMode, model, system: pipeSystem } = parseArgs();
-    
+
     if (pipeMode) {
         await pipe(model, pipeSystem);
     } else {
@@ -38,22 +39,20 @@ async function main() {
 
 async function pipe(model, system) {
     const ask = await asker(model, system);
-
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        terminal: false
-    });
-
-    let message = '';
-    await new Promise((resolve) => {
-        rl.on('line', (line) => { message += line; });
-        rl.once('close', resolve);
-    });
-
-    rl.close();
-    await ask(message, { progress: text => { process.stdout.write(text); }});
+    const message = await readInput();
+    await ask(message, { progress: streamOutput });
     console.log('\n');
+}
+
+async function readInput() {
+    let message = '';
+    const progress = text => { message += text };
+
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: false });
+    await new Promise((resolve) => { rl.on('line', progress); rl.once('close', resolve); });
+    rl.close();
+
+    return message;
 }
 
 async function chat(model, system) {
@@ -66,16 +65,37 @@ async function chat(model, system) {
         output: process.stdout,
         terminal: true,
     });
-    const prompt = (query) => new Promise((resolve) => rl.question(query, resolve));
+    const promptUser = (prompt) => new Promise((resolve) => rl.question(prompt, resolve));
+    const parseYesNo = (input) => input.trim().toLowerCase()[0] === 'y';
+    const promptYesNo = async (prompt, defaultValue) =>  parseYesNo(
+        (await promptUser(`${prompt} [${defaultValue ? 'Y/n' : 'y/N'}]: `)) ||
+        (defaultValue ? 'y' : 'n')
+    );
 
+    const formatResponse = (prefix, response) => {
+        return prefix + '\n\n> ' + response.trim().replace(/\n/g, '\n> ');
+    };
+    
     let lastOutput = '';
 
     const handleMessage = async (userMessage) => {
         const message = lastOutput + userMessage;
         lastOutput = '';
 
-        const response = await ask(message, { progress: text => { process.stdout.write(text); }});
-        console.log('\n');
+        const progressPrefix = 'Generating response...';
+        const finishedPrefix = 'Generated response.';
+        const spinner = ora({ text: progressPrefix, discardStdin: false });
+        
+        let responseText = '';
+        const progress = text => {
+            responseText += text;
+            spinner.text = formatResponse('Generating response...', responseText);
+        };
+
+        spinner.start();
+        const response = await ask(message, { progress });
+        spinner.succeed(formatResponse(finishedPrefix, response));
+        console.log();
 
         await handleCode(response);
     };
@@ -86,29 +106,38 @@ async function chat(model, system) {
             return;
         }
 
-        if (((await prompt('Would you like to run this command? (y/N) ')).trim().toLowerCase() || 'n')[0] !== 'y') {
+        if (!(await promptYesNo('Would you like to run this command?', false))) {
             console.log('No code was executed.');
             console.log('');
             lastOutput = '';
             return;
         }
 
+        const progressPrefix = 'Executing command...';
+        const successPrefix = 'Command succeeded.';
+        const failurePrefix = 'Command failed.';
+        const spinner = ora({ tetxt: progressPrefix, discardStdin: false });
+
         try {
             const code = codeMatch[1].trim();
             const { stdout, stderr } = await execAsync(code);
 
-            const output = `Command executed.\nOutput:\n${stdout}${stderr}\n`;
-            console.log(output);
-            lastOutput = output;
+            spinner.succeed(formatResponse(successPrefix, stdout + stderr));
+            lastOutput = `Command executed.\nOutput:\n${stdout}${stderr}\n`;
+            console.log();
         } catch (error) {
-            const output = `Command failed.\nError:\n${error.message}\n`;
-            console.error(output);
-            lastOutput = output;
+            spinner.fail(formatResponse(failurePrefix, error.message));
+            lastOutput = `Command failed.\nError:\n${error.message}\n`;
+            console.log();
+
+            if (await promptYesNo('Would you like to debug this command?', true)) {
+                return handleMessage('Diagnose the error.');
+            }
         }
     };
 
     loop: while (true) {
-        const userMessage = (await prompt('> ')).trim();
+        const userMessage = (await promptUser('$ ')).trim();
 
         switch (userMessage) {
             case '':
@@ -151,7 +180,7 @@ function parseArgs() {
             `Model to use. Defaults to gpt-4o. Valid options are ${Object.keys(models).sort().join(', ')}.`,
             'gpt-4o',
         );
-    
+
     const pipeMode = !process.stdin.setRawMode;
     if (pipeMode) {
         program.requiredOption(
