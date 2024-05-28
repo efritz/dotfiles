@@ -4,21 +4,24 @@ import { asker } from '../common/ask.mjs';
 export async function pipe(model, system) {
     const ask = await asker(model, system);
     const message = await readInput();
-    await ask(message, { progress: streamOutput });
+
+    await ask(message, { progress: text => process.stdout.write(text) });
     console.log('\n');
 }
 
 async function readInput() {
     let message = '';
-    const progress = text => { message += text };
-
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: false });
-    await new Promise((resolve) => { rl.on('line', progress); rl.once('close', resolve); });
-    rl.close();
-
+    await streamInput(text => { message += text });
     return message;
 }
 
-function streamOutput(text) {
-    process.stdout.write(text);
+async function streamInput(progress) {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+        terminal: false,
+    });
+
+    await new Promise((resolve) => { rl.on('line', progress); rl.once('close', resolve); });
+    rl.close();
 }

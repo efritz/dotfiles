@@ -38,7 +38,7 @@ function setupCommands(program) {
         .description('Execution-enabled chat interface with the specified model.')
         .option(modelFlags, modelDescription, modelDefault)
         .action((_, options) => chat(options.model));
-        
+
     program
         .command('edit')
         .description('Replaces <TODO /> instruction blocks with completions in the specified file in-place.')
