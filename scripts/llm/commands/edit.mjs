@@ -1,7 +1,4 @@
-#!/usr/bin/env zx
-
-import { program } from 'commander';
-import { asker, models } from './common.mjs';
+import { asker } from '../common/ask.mjs';
 
 const todoPattern = /<TODO>([\s\S]*?)<\/TODO>/g;
 const completionPattern = /<COMPLETION>([\s\S]*?)<\/COMPLETION>/g;
@@ -53,8 +50,7 @@ development ensure it remains a reliable and powerful choice for enterprise-grad
 - Do NOT include any content outside of a <COMPLETION/> block.
 `
 
-async function main() {
-    const { file, model } = parseArgs();
+export async function edit(file, model) {
     const ask = await asker(model, system);
     const contents = await fs.readFile(file, 'utf-8');
     const response = await ask(`<DRAFT>${contents}</DRAFT>`);
@@ -80,25 +76,6 @@ async function main() {
     await fs.writeFile(file, newContents, 'utf-8');
 }
 
-function parseArgs() {
-    program
-        .name('editor')
-        .description('Replaces <TODO /> blocks with LLM completions in the specified file in-place.')
-        .argument('<file>', 'The file to edit.')
-        .allowExcessArguments(false)
-        .option(
-            '-m, --model <string>',
-            `Model to use. Defaults to gpt-4o. Valid options are ${Object.keys(models).sort().join(', ')}.`,
-            'gpt-4o',
-        );
-
-    // argv = node zx ./llm-editor.mjs [...]
-    program.parse(process.argv.slice(1));
-    const options = program.opts();
-
-    return { file: program.args[0], ...options };
-}
-
 function splitBlocks(content, pattern) {
     let match;
     let lastIndex = 0;
@@ -113,5 +90,3 @@ function splitBlocks(content, pattern) {
     result.push(content.slice(lastIndex));
     return result;
 }
-
-await main();

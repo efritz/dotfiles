@@ -1,3 +1,3 @@
 #!/bin/bash
 
-~/.dotfiles/scripts/llm/llm.mjs "$@"
+~/.dotfiles/scripts/llm/main.mjs "$@"

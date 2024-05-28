@@ -1,14 +1,11 @@
-#!/usr/bin/env zx
-
-import { program } from 'commander';
 import { spawn } from 'child_process';
 import { readdirSync } from 'fs';
+import { readFile } from 'fs/promises';
 import readline from 'readline';
 import ora from 'ora';
-import { asker, models, streamOutput } from './common.mjs';
-import { readFile } from 'fs/promises';
+import { asker } from '../common/ask.mjs';
 
-const chatSystem = `
+const system = `
 You are an AI assistant that specializes in helping users with tasks via the terminal.
 
 When the user asks you to perform a task:
@@ -26,35 +23,7 @@ Guidelines:
 - Always assume common commands/tools are available. Don't write install commands unless explicitly requested.
 `
 
-async function main() {
-    const { pipeMode, model, system: pipeSystem } = parseArgs();
-
-    if (pipeMode) {
-        await pipe(model, pipeSystem);
-    } else {
-        await chat(model, chatSystem);
-    }
-}
-
-async function pipe(model, system) {
-    const ask = await asker(model, system);
-    const message = await readInput();
-    await ask(message, { progress: streamOutput });
-    console.log('\n');
-}
-
-async function readInput() {
-    let message = '';
-    const progress = text => { message += text };
-
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: false });
-    await new Promise((resolve) => { rl.on('line', progress); rl.once('close', resolve); });
-    rl.close();
-
-    return message;
-}
-
-async function chat(model, system) {
+export async function chat(model) {
     let ask = await asker(model, system);
 
     console.log(`Chatting with ${model}...\n`);
@@ -209,7 +178,7 @@ async function chat(model, system) {
 
             case 'clear':
                 lastOutput = '';
-                ask = await asker(model, chatSystem);
+                ask = await asker(model, system);
                 console.log('Chat history cleared.');
                 console.log();
                 break;
@@ -231,31 +200,3 @@ async function chat(model, system) {
 
     rl.close();
 }
-
-function parseArgs() {
-    program
-        .name('llm')
-        .description('LLM interface on the command line.')
-        .allowExcessArguments(false)
-        .option(
-            '-m, --model <string>',
-            `Model to use. Defaults to gpt-4o. Valid options are ${Object.keys(models).sort().join(', ')}.`,
-            'gpt-4o',
-        );
-
-    const pipeMode = !process.stdin.setRawMode;
-    if (pipeMode) {
-        program.requiredOption(
-            '-s, --system <string>',
-            'The system prompt to use.',
-        );
-    }
-
-    // argv = node zx ./chat.mjs [...]
-    program.parse(process.argv.slice(1));
-    const options = program.opts();
-
-    return { pipeMode, ...options };
-}
-
-await main();

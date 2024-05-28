@@ -1,13 +1,6 @@
-import { OpenAI } from "openai";
 import { Anthropic } from '@anthropic-ai/sdk';
-
-export const models = {
-    'gpt-4o': { provider: 'OpenAI',    model: 'gpt-4o' },
-    'gpt-4':  { provider: 'OpenAI',    model: 'gpt-4'  },
-    'haiku':  { provider: 'Anthropic', model: 'claude-3-haiku-20240307'  },
-    'sonnet': { provider: 'Anthropic', model: 'claude-3-sonnet-20240229' },
-    'opus':   { provider: 'Anthropic', model: 'claude-3-opus-20240229'   },
-}
+import { OpenAI } from "openai";
+import { models } from './models.mjs';
 
 export async function asker(name, system) {
     const model = models[name]
@@ -23,16 +16,6 @@ export async function asker(name, system) {
         default:
             throw new Error(`Unknown provider: ${model.provider}`);
     }
-}
-
-async function getKey(name) {
-    const keyPath = path.join(
-        os.homedir(),
-        ".dotfiles", "scripts", "llm", "keys",
-        `${name}.key`,
-    );
-
-    return (await fs.readFile(keyPath, "utf8")).trim();
 }
 
 async function askOpenAI(model, system) {
@@ -87,6 +70,12 @@ async function askClaude(model, system) {
     };
 }
 
-export function streamOutput(text) {
-    process.stdout.write(text);
+async function getKey(name) {
+    const keyPath = path.join(
+        os.homedir(),
+        ".dotfiles", "scripts", "llm", "keys",
+        `${name}.key`,
+    );
+
+    return (await fs.readFile(keyPath, "utf8")).trim();
 }
