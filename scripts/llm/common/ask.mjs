@@ -23,7 +23,7 @@ async function askOpenAI(model, system) {
     const messages = [];
     messages.push({ role: 'system', content: system })
 
-    return async (userMessage, { temperature = 0.0, max_tokens = 4096, progress = () => {} }) => {
+    return async (userMessage, { temperature = 0.0, max_tokens = 4096, progress = () => {} } = {}) => {
         messages.push({ role: 'user', content: userMessage });
 
         const params = {
@@ -49,7 +49,7 @@ async function askClaude(model, system) {
     const client = new Anthropic({ apiKey: await getKey('anthropic') });
     const messages = [];
 
-    return async (userMessage, { temperature = 0.0, max_tokens = 4096, progress = () => {} }) => {
+    return async (userMessage, { temperature = 0.0, max_tokens = 4096, progress = () => {} } = {}) => {
         messages.push({ role: 'user', content: userMessage });
 
         const params = {
