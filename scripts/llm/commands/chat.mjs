@@ -155,8 +155,7 @@ async function handleCode(context, response) {
     const code = codeMatch[1].trim();
 
     if (!(await context.prompter.yesOrNo('Would you like to run this command?', false))) {
-        console.log();
-        console.log(chalk.italic('No code was executed.'));
+        console.log(chalk.dim('ℹ') + ' No code was executed.');
         console.log();
         return;
     }
@@ -211,7 +210,15 @@ async function withProgress(f, options) {
         if (error && error.message) {
             context = chalk.bold.red(`error: ${error.message}`);
         }
-        context = (context + '\n\n' + chalk.red(buffer)).trim();
+
+        const trimmedBuffer = buffer.trim();
+        if (trimmedBuffer !== '') {
+            if (context !== '') {
+                context += '\n\n';
+            }
+
+            context += chalk.red(trimmedBuffer);
+        }
 
         if (context === '') {
             return prefix;
