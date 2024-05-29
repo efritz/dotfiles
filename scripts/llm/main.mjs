@@ -10,6 +10,7 @@ async function main() {
     program
         .name('llm')
         .description('Personalized LLM utilities.')
+        .showHelpAfterError(true)
         .allowExcessArguments(false)
         .storeOptionsAsProperties();
     
