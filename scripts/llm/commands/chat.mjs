@@ -24,6 +24,10 @@ Guidelines:
 `
 
 export async function chat(model, historyFilename) {
+    if (!process.stdin.setRawMode) {
+        throw new Error('chat command is not supported in this environment.');
+    }
+    
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,

@@ -52,6 +52,10 @@ development ensure it remains a reliable and powerful choice for enterprise-grad
 `
 
 export async function edit(file, model) {
+    if (!process.stdin.setRawMode) {
+        throw new Error('edit command is not supported in this environment.');
+    }
+
     const { ask } = await createAsker(model, system);
     const contents = await readFile(file, 'utf-8');
 
