@@ -1,8 +1,9 @@
+import chalk from 'chalk';
+import readline from 'readline';
+import ora from 'ora';
 import { spawn } from 'child_process';
 import { readdirSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
-import readline from 'readline';
-import ora from 'ora';
 import { createAsker, loadAskerFromHistoryFile } from '../common/ask.mjs';
 
 const system = `
@@ -113,7 +114,7 @@ async function handleClear(context) {
 async function handleSave(context) {
     const filename = `chat-${Math.floor(Date.now() / 1000)}.json`;
     await writeFile(filename, JSON.stringify(context.serialize(), null, '\t'));
-    console.log(`Chat history saved to ${filename}.`);
+    console.log(`Chat history saved to ${filename}`);
     console.log();
 }
 
@@ -154,7 +155,8 @@ async function handleCode(context, response) {
     const code = codeMatch[1].trim();
 
     if (!(await context.prompter.yesOrNo('Would you like to run this command?', false))) {
-        console.log('No code was executed.');
+        console.log();
+        console.log(chalk.italic('No code was executed.'));
         console.log();
         return;
     }
@@ -169,7 +171,7 @@ async function handleCode(context, response) {
                 if (code === 0) {
                     resolve();
                 } else {
-                    reject();
+                    reject(new Error(`exit code ${code}`));
                 }
             });
         });
@@ -192,7 +194,31 @@ async function handleCode(context, response) {
 
 async function withProgress(f, options) {
     let buffer = '';
-    const formatBuffer = (prefix) => prefix + (buffer.trim() === '' ? '' : '\n\n> ' + buffer.trim().replace(/\n/g, '\n> '));
+    const formatBuffer = prefix => {
+        const context = chalk.cyan(buffer.trim().replace(/(```shell)([\s\S]*?)(```|$)/g, (_, left, code, right) => {
+            return left + chalk.bold.magenta(code) + right;
+        }));
+
+        if (context === '') {
+            return prefix;
+        }
+
+        return prefix + '\n\n' + context;
+    }
+
+    const formatBufferError = (prefix, error) => {
+        let context = '';
+        if (error && error.message) {
+            context = chalk.bold.red(`error: ${error.message}`);
+        }
+        context = (context + '\n\n' + chalk.red(buffer)).trim();
+
+        if (context === '') {
+            return prefix;
+        }
+
+        return prefix + '\n\n' + context;
+    }
 
     const spinner = ora({ text: options.progress, discardStdin: false });
     spinner.start();
@@ -200,15 +226,15 @@ async function withProgress(f, options) {
     try {
         await f(chunk => {
             buffer += chunk;
-            spinner.text = formatBuffer(options.progress, buffer);
+            spinner.text = formatBuffer(options.progress);
         });
 
-        spinner.succeed(formatBuffer(options.success, buffer));
+        spinner.succeed(formatBuffer(options.success));
         console.log();
 
         return { ok: true, response: buffer };
     } catch (error) {
-        spinner.fail(formatBuffer(options.failure, buffer));
+        spinner.fail(formatBufferError(options.failure, error));
         console.log();
 
         return { ok: false, response: buffer };
