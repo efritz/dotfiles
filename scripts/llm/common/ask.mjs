@@ -73,6 +73,7 @@ async function askClaude(model, system, messages) {
 
     return async (userMessage, { temperature = 0.0, max_tokens = 4096, progress = () => {} } = {}) => {
         messages.push({ role: 'user', content: userMessage });
+        collapseMessagesFromSameSpeaker(messages);
 
         const params = {
             system,
@@ -90,6 +91,24 @@ async function askClaude(model, system, messages) {
         messages.push({ role: 'assistant', content: result });
         return result;
     };
+}
+
+function collapseMessagesFromSameSpeaker(messages) {
+    let previous = null;
+    for (let i = 0; i < messages.length; i++) {
+        const message = messages[i];
+
+        if (previous !== null && message.role == previous.role) {
+            previous.content += '\n' + message.content;
+
+            // Remove the current message from the list and reprocess the
+            // current index, which now contains the subsequent message.
+            messages.splice(i--, 1);
+            continue;
+        }
+
+        previous = message;
+    }
 }
 
 async function getKey(name) {
