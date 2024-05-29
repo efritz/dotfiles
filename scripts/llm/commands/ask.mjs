@@ -1,18 +1,23 @@
 import readline from 'readline';
 import { createAsker } from '../common/ask.mjs';
 
-export async function ask(system, model) {
-    const { ask } = await createAsker(model, system);
-    const message = await readInput();
-    await ask(message, { progress: streamOutput });
+const system = `
+You are an AI assistant.
+`;
+
+export async function ask(prompt, model) {
+    const { ask, pushMessage } = await createAsker(model, system);
+
+    if (!process.stdin.setRawMode) {
+        const message = await readInput();
+        pushMessage(`<context>${message}</context>`);
+    }
+
+    await ask(prompt, { progress: streamOutput });
     console.log('\n');
 }
 
 async function readInput() {
-    if (process.stdin.setRawMode) {
-        return '';
-    }
-
     let message = '';
     await streamInput(text => { message += text });
     return message;

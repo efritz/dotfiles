@@ -21,8 +21,8 @@ async function main() {
         .command('ask', { isDefault: true })
         .description('Ask a one-shot question of the specified model. Accepts piped input.')
         .option(modelFlags, modelDescription, modelDefault)
-        .argument('<query>', 'The user query.')
-        .action((query, options) => ask(query, options.model));
+        .argument('<prompt>', 'The user prompt.')
+        .action((prompt, options) => ask(prompt, options.model));
 
     program
         .command('chat')
