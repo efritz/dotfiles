@@ -35,5 +35,6 @@
 
   // Extensions settings
   "markdown-preview-enhanced.codeBlockTheme": "github.css",
-  "github.copilot.editor.enableAutoCompletions": true
+  "github.copilot.editor.enableAutoCompletions": true,
+  "gitlens.mode.active": "review"
 }

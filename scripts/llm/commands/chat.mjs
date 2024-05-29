@@ -1,9 +1,10 @@
 import chalk from 'chalk';
+import chokidar from 'chokidar';
 import readline from 'readline';
 import ora from 'ora';
 import { spawn } from 'child_process';
-import { readdirSync } from 'fs';
-import { readFile, writeFile } from 'fs/promises';
+import { randomBytes } from 'crypto';
+import { readdirSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
 import { createAsker, loadAskerFromHistoryFile } from '../common/ask.mjs';
 
 const system = `
@@ -113,7 +114,7 @@ async function handleClear(context) {
 
 async function handleSave(context) {
     const filename = `chat-${Math.floor(Date.now() / 1000)}.json`;
-    await writeFile(filename, JSON.stringify(context.serialize(), null, '\t'));
+    writeFileSync(filename, JSON.stringify(context.serialize(), null, '\t'));
     console.log(`Chat history saved to ${filename}`);
     console.log();
 }
@@ -122,12 +123,12 @@ async function handleLoad(context, userMessage, match) {
     const path = match[1];
 
     await withProgress(async () => {
-        const contents = await readFile(path);
+        const contents = readFileSync(path);
         context.pushMessage(`<path>${path}</path><contents>${contents}</contents>\n`);
     }, {
-        progress: `Loading ${path} into context...`,
-        success: `Loaded ${path} into context.`,
-        failure: `Failed to load ${path}.`,
+        progress: formatBufferWithPrefix(`Loading ${path} into context...`),
+        success: formatBufferWithPrefix(`Loaded ${path} into context.`),
+        failure: formatBufferErrorWithPrefix(`Failed to load ${path}.`),
     });
 }
 
@@ -137,9 +138,9 @@ async function handleMessage(context, userMessage) {
     }
 
     const { ok, response } = await withProgress(progress => context.ask(userMessage, { progress }), {
-        progress: 'Generating response...',
-        success: 'Generated response.',
-        failure: 'Failed to generate response.',
+        progress: formatBufferWithPrefix('Generating response...'),
+        success: formatBufferWithPrefix('Generated response.'),
+        failure: formatBufferErrorWithPrefix('Failed to generate response.'),
     });
 
     if (ok) {
@@ -154,36 +155,69 @@ async function handleCode(context, response) {
     }
     const code = codeMatch[1].trim();
 
-    if (!(await context.prompter.yesOrNo('Would you like to run this command?', false))) {
-        console.log(chalk.dim('ℹ') + ' No code was executed.');
-        console.log();
-        return;
+    if ((await context.prompter.options('Would you like to ' + chalk.bold('run') + ' this command?', [
+        { name: 'y' },
+        { name: 'n', isDefault: true },
+    ])) === 'y') {
+        return runCode(context, code)
     }
 
-    const { ok, response: output } = await withProgress(async (progress) => {
+    if ((await context.prompter.options('Would you like to ' + chalk.bold('edit') + ' this command?', [
+        { name: 'y' },
+        { name: 'n', isDefault: true },
+    ])) === 'y') {
+        const { ok, response: editedCodeWithFence } = await withProgress(async (progress) => {
+            const editedCode = await edit(code);
+            const codeWithFence = "```shell\n" + editedCode.trim() + "\n```\n"
+            progress(codeWithFence);
+            return codeWithFence;
+        }, {
+            progress: formatBufferWithPrefix('Editing code...'),
+            success: formatBufferWithPrefix('Code edited.'),
+            failure: (buffer, error) => error instanceof CancelError 
+                ? 'Edit canceled.' 
+                : formatBufferError('Failed to edit code.', buffer, error),
+        });
+
+        if (ok) {
+            context.pushMessage(`Edited code to:\n${editedCodeWithFence}`);
+            return handleCode(context, editedCodeWithFence);
+        }
+    }
+
+    console.log(chalk.dim('ℹ') + ' No code was executed.');
+    console.log();
+    return;
+}
+
+async function runCode(context, code) {
+    const { ok, response } = await withProgress(async (progress) => {
         await new Promise((resolve, reject) => {
             const cmd = spawn('zsh', ['-c', code]);
             cmd.stdout.on('data', data => progress(data.toString()));
             cmd.stderr.on('data', data => progress(data.toString()));
 
-            cmd.on('exit', code => {
-                if (code === 0) {
+            cmd.on('exit', exitCode => {
+                if (exitCode === 0) {
                     resolve();
                 } else {
-                    reject(new Error(`exit code ${code}`));
+                    reject(new Error(`exit code ${exitCode}`));
                 }
             });
         });
     }, {
-        progress: 'Executing command...',
-        success: 'Command succeeded.',
-        failure: 'Command failed.',
+        progress: formatBufferWithPrefix('Executing command...'),
+        success: formatBufferWithPrefix('Command succeeded.'),
+        failure: formatBufferErrorWithPrefix('Command failed.'),
     });
 
-    context.pushMessage(`Command ${ok ? 'succeeded' : 'failed'}.\nOutput:\n${output}\n`);
+    context.pushMessage(`Command ${ok ? 'succeeded' : 'failed'}.\nOutput:\n${response}\n`);
 
     if (!ok) {
-        if (await context.prompter.yesOrNo('Would you like to debug this command?', true)) {
+        if ((await context.prompter.options('Would you like to diagnose the error?', [
+            { name: 'y', isDefault: true },
+            { name: 'n'},
+        ])) === 'y') {
             return handleMessage(context, 'Diagnose the error.');
         } else {
             console.log();
@@ -193,75 +227,103 @@ async function handleCode(context, response) {
 
 async function withProgress(f, options) {
     let buffer = '';
-    const formatBuffer = prefix => {
-        const context = chalk.cyan(buffer.trim().replace(/(```shell)([\s\S]*?)(```|$)/g, (_, left, code, right) => {
-            return left + chalk.bold.magenta(code) + right;
-        }));
-
-        if (context === '') {
-            return prefix;
-        }
-
-        return prefix + '\n\n' + context;
-    }
-
-    const formatBufferError = (prefix, error) => {
-        let context = '';
-        if (error && error.message) {
-            context = chalk.bold.red(`error: ${error.message}`);
-        }
-
-        const trimmedBuffer = buffer.trim();
-        if (trimmedBuffer !== '') {
-            if (context !== '') {
-                context += '\n\n';
-            }
-
-            context += chalk.red(trimmedBuffer);
-        }
-
-        if (context === '') {
-            return prefix;
-        }
-
-        return prefix + '\n\n' + context;
-    }
-
-    const spinner = ora({ text: options.progress, discardStdin: false });
+    const spinner = ora({ text: options.progress(''), discardStdin: false });
     spinner.start();
 
     try {
         await f(chunk => {
             buffer += chunk;
-            spinner.text = formatBuffer(options.progress);
+            spinner.text = options.progress(buffer);
         });
 
-        spinner.succeed(formatBuffer(options.success));
+        spinner.succeed(options.success(buffer));
         console.log();
 
         return { ok: true, response: buffer };
     } catch (error) {
-        spinner.fail(formatBufferError(options.failure, error));
+        spinner.fail(options.failure(buffer, error));
         console.log();
 
         return { ok: false, response: buffer };
     }
 }
 
-function createPrompter(rl) {
-    const question = async (prompt) => await new Promise((resolve) => {
-        rl.question(prompt, resolve);
-    });
+function formatBufferWithPrefix(prefix) {
+    return buffer => formatBuffer(prefix, buffer);
+}
 
-    const yesOrNo = async (prompt, defaultValue) => {
-        const options = defaultValue ? 'Y/n' : 'y/N';
-        const value = (await question(`${prompt} [${options}]: `)) || (defaultValue ? 'y' : 'n');
-        return value.trim().toLowerCase()[0] === 'y'
-    };
+function formatBufferErrorWithPrefix(prefix) {
+    return (buffer, error) => formatBufferError(prefix, buffer, error);
+}
+
+function formatBuffer(prefix, buffer) {
+    const context = chalk.cyan(buffer.trim().replace(/(```shell)([\s\S]*?)(```|$)/g, (_, left, code, right) => {
+        return left + chalk.bold.magenta(code) + right;
+    }));
+
+    if (context === '') {
+        return prefix;
+    }
+
+    return prefix + '\n\n' + context;
+}
+
+function formatBufferError(prefix, buffer, error) {
+    let context = '';
+    if (error && error.message) {
+        context = chalk.bold.red(`error: ${error.message}`);
+    }
+
+    const trimmedBuffer = buffer.trim();
+    if (trimmedBuffer !== '') {
+        if (context !== '') {
+            context += '\n\n';
+        }
+
+        context += chalk.red(trimmedBuffer);
+    }
+
+    if (context === '') {
+        return prefix;
+    }
+
+    return prefix + '\n\n' + context;
+}
+
+function createPrompter(rl) {
+    const question = (prompt, initialValue) => {
+        const p = new Promise((resolve) => rl.question(prompt, resolve));
+
+        if (initialValue !== '') {
+            rl.write(initialValue);
+        }
+
+        return p;
+    }
+
+    const options = async (prompt, options) => {
+        const optionNames = options.map(o => o.isDefault
+            ? o.name.toUpperCase()
+            : o.name.toLowerCase()
+        ).join('/');
+
+        while (true) {
+            const value = await question(`${prompt} [${optionNames}]: `);
+
+            const option = options.find(o =>
+                (value === '' && o.isDefault) ||
+                (value !== '' && o.name.toLowerCase() === value[0].toLowerCase())
+            );
+
+            if (option) {
+                return option.name;
+            }
+        }
+    }
 
     return {
         question,
-        yesOrNo,
+        options,
     };
 }
 
@@ -280,4 +342,38 @@ function completer(line) {
             .map(name => 'load ' + (dir == '.' ? '' : dir) + name),
         line,
     ];
+}
+
+class CancelError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'CancelError';
+    }
+}
+
+function edit(content) {
+    const suffix = randomBytes(16).toString('hex');
+    const tempPath = `/tmp/llm-chat-code-${suffix}`;
+    writeFileSync(tempPath, content);
+
+    const watcher = chokidar.watch(tempPath, {
+        persistent: true,
+        ignoreInitial: true,
+    });
+
+    return new Promise((resolve, reject) => {
+        process.on('SIGINT', () => reject(new CancelError('User canceled edit')));
+        watcher.on('change', () => {
+            const newContent = readFileSync(tempPath, 'utf-8');
+            if (newContent !== content) {
+                resolve(newContent);
+            }
+        });
+
+        const editor = $`e ${tempPath}`;
+        editor.catch((error) => reject(new Error(`Failed to open editor: ${error.message}`)));
+    }).finally(() => {
+        watcher.close();
+        unlinkSync(tempPath);
+    });
 }
