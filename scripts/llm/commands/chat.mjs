@@ -25,6 +25,8 @@ Guidelines:
 - Always assume common commands/tools are available. Don't write install commands unless explicitly requested.
 `
 
+let sigintHandler;
+
 export async function chat(model, historyFilename) {
     if (!process.stdin.setRawMode) {
         throw new Error('chat command is not supported in this environment.');
@@ -37,9 +39,18 @@ export async function chat(model, historyFilename) {
         completer,
     });
 
+    rl.on('SIGINT', () => {
+        if (sigintHandler) {
+            sigintHandler();
+        } else {
+            rl.pause();
+        }
+    });
+
     const { ask, pushMessage, clearMessages, serialize } = historyFilename
         ? await loadAskerFromHistoryFile(historyFilename)
         : await createAsker(model, system);
+
     const prompter = createPrompter(rl);
 
     console.log(`Chatting with ${model}...\n`);
@@ -174,8 +185,8 @@ async function handleCode(context, response) {
         }, {
             progress: formatBufferWithPrefix('Editing code...'),
             success: formatBufferWithPrefix('Code edited.'),
-            failure: (buffer, error) => error instanceof CancelError 
-                ? 'Edit canceled.' 
+            failure: (buffer, error) => error instanceof CancelError
+                ? 'Edit canceled.'
                 : formatBufferError('Failed to edit code.', buffer, error),
         });
 
@@ -291,15 +302,9 @@ function formatBufferError(prefix, buffer, error) {
 }
 
 function createPrompter(rl) {
-    const question = (prompt, initialValue) => {
-        const p = new Promise((resolve) => rl.question(prompt, resolve));
-
-        if (initialValue !== '') {
-            rl.write(initialValue);
-        }
-
-        return p;
-    }
+    const question = async (prompt) => {
+        return new Promise((resolve) => rl.question(prompt, resolve));
+    };
 
     const options = async (prompt, options) => {
         const optionNames = options.map(o => o.isDefault
@@ -362,7 +367,10 @@ function edit(content) {
     });
 
     return new Promise((resolve, reject) => {
-        process.on('SIGINT', () => reject(new CancelError('User canceled edit')));
+        sigintHandler = () => {
+            reject(new CancelError('User canceled edit'))
+        };
+
         watcher.on('change', () => {
             const newContent = readFileSync(tempPath, 'utf-8');
             if (newContent !== content) {
@@ -375,5 +383,6 @@ function edit(content) {
     }).finally(() => {
         watcher.close();
         unlinkSync(tempPath);
+        sigintHandler = null;
     });
 }
