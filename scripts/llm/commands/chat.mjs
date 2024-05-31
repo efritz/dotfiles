@@ -166,17 +166,15 @@ async function handleCode(context, response) {
     }
     const code = codeMatch[1].trim();
 
-    if ((await context.prompter.options('Would you like to ' + chalk.bold('run') + ' this command?', [
-        { name: 'y' },
-        { name: 'n', isDefault: true },
-    ])) === 'y') {
+    const resp = await context.prompter.options('Execute this command', [
+        { name: 'y', description: 'execute the command as-is' },
+        { name: 'n', description: 'skip execution and continue conversation', isDefault: true },
+        { name: 'e', description: 'edit this command in vscode' },
+    ]);
+    if (resp === 'y') {
         return runCode(context, code)
     }
-
-    if ((await context.prompter.options('Would you like to ' + chalk.bold('edit') + ' this command?', [
-        { name: 'y' },
-        { name: 'n', isDefault: true },
-    ])) === 'y') {
+    if (resp === 'e') {
         const { ok, response: editedCodeWithFence } = await withProgress(async (progress) => {
             const editedCode = await edit(code);
             const codeWithFence = "```shell\n" + editedCode.trim() + "\n```\n"
@@ -225,9 +223,9 @@ async function runCode(context, code) {
     context.pushMessage(`Command ${ok ? 'succeeded' : 'failed'}.\nOutput:\n${response}\n`);
 
     if (!ok) {
-        if ((await context.prompter.options('Would you like to diagnose the error?', [
-            { name: 'y', isDefault: true },
-            { name: 'n'},
+        if ((await context.prompter.options('Diagnose error', [
+            { name: 'y', description: 'diagnose this error', isDefault: true },
+            { name: 'n', description: 'skip diagnosis and continue conversation'},
         ])) === 'y') {
             return handleMessage(context, 'Diagnose the error.');
         } else {
@@ -307,22 +305,23 @@ function createPrompter(rl) {
     };
 
     const options = async (prompt, options) => {
-        const optionNames = options.map(o => o.isDefault
-            ? o.name.toUpperCase()
-            : o.name.toLowerCase()
-        ).join('/');
+        const help = { name: '?', description: 'print help' };
+        const name = o => o.isDefault ? o.name.toUpperCase() : o.name.toLowerCase();
+        const optionNames = [...options, help].map(o => name(o)).join('/');
+        const helpText = [...options, help].map(o => `${name(o)} - ${o.description}`).join('\n');
 
         while (true) {
-            const value = await question(`${prompt} [${optionNames}]: `);
+            const value = await question(chalk.cyanBright(`${prompt} [${optionNames}]? `));
 
             const option = options.find(o =>
                 (value === '' && o.isDefault) ||
                 (value !== '' && o.name.toLowerCase() === value[0].toLowerCase())
             );
-
             if (option) {
                 return option.name;
             }
+
+            console.log(chalk.bold.red(helpText));
         }
     }
 
