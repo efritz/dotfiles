@@ -15,8 +15,8 @@ async function main() {
         .storeOptionsAsProperties();
     
     const modelFlags = '-m, --model <string>';
-    const modelDescription = `Model to use. Defaults to gpt-4o. Valid options are ${modelNames.join(', ')}.`;
-    const modelDefault = 'gpt-4o';
+    const modelDescription = `Model to use. Defaults to sonnet. Valid options are ${modelNames.join(', ')}.`;
+    const modelDefault = 'sonnet';
 
     program
         .command('ask', { isDefault: true })
