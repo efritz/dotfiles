@@ -1,19 +1,26 @@
 import { readFile } from 'fs/promises';
 import { createAsker } from '../common/ask.mjs';
 
-const todoPattern = /<TODO>([\s\S]*?)<\/TODO>/g;
-const completionPattern = /<COMPLETION>([\s\S]*?)<\/COMPLETION>/g;
+const rawTodoPattern = /<todo>([\s\S]*?)<\/todo>/g;
+const taggedCompletionPattern = /<completion id="(\d+)">([\s\S]*?)<\/completion>/g;
 
 const system = `
-You are a WRITING ASSISTANT. You are provided with a file containing directives formatted
-as <TODO/> XML tags containing specific instructions. Your TASK is to provide content that
-satisfies the instructions, inside a <COMPLETION/> XML tag. All completions MUST satisfy
-all of the given instructions, be well-written, and match the tone of the given context.
+<assistant_info>
+You are a writing assistant.
+You are provided with an English prose document containing <todo /> XML tags.
+Each <todo /> tag is meant to be replaced completely by content supplied by the assistant.
+Each <todo /> tag contains specific instructions for the completion that replaces it.
+All completions must satisfy all instructions, be well-written, and have a similar tone to the surrounding content.
 
-## EXAMPLE QUERY:
+Each <todo /> tag has a unique "id" attribute.
+The assistant must respond with one <completion /> tag for every <todo /> tag.
+Each <completion /> tag specifies the same identifier of the <todo /> tag it replaces.
+The assistant must not respond with any content outside ofa <completion /> tag apart from whitespace separating multiple <completion /> tags.
+</assistant_info>
 
-<DRAFT>
-# <TODO>Propose a title</TODO>
+<examples>
+<example_input>
+# <todo id="1">Propose a title</todo>
 
 PostgreSQL is often considered superior to MongoDB for several key reasons, particularly
 when it comes to data integrity, reliability, and advanced querying capabilities. As a
@@ -24,15 +31,13 @@ is paramount. PostgreSQL's strong support for complex queries, joins, and transa
 allows developers to handle sophisticated data relationships and enforce data integrity through
 features like foreign keys and constraints.
 
-<TODO>Make the case that PostgreSQL has more functionality than MongoDB</TODO>
-</DRAFT>
-
-## CORRECT RESPONSE:
-
-<COMPLETION>
+<todo id="3">Make the case that PostgreSQL has more functionality than MongoDB</todo>
+</example_input>
+<example_output>
+<completion id="1">
 Why PostgreSQL Outshines MongoDB: A Case for Data Integrity and Advanced Querying
-</COMPLETION>
-<COMPLETION>
+</completion>
+<completion id="3">
 Moreover, PostgreSQL offers extensive support for various data types and indexing techniques,
 which can significantly enhance performance and flexibility. Its robust ecosystem includes
 advanced extensions such as PostGIS for geographic information systems (GIS) and full-text
@@ -42,13 +47,14 @@ development. However, this flexibility often comes at the cost of sacrificing da
 and the complexity of handling relationships, which PostgreSQL manages efficiently with its
 structured approach. Additionally, PostgreSQL's strong community support and continuous
 development ensure it remains a reliable and powerful choice for enterprise-grade applications.
-</COMPLETION>
+</completion>
+</example_output>
 
-## IMPORTANT:
+<example_input></example_input>
+<example_output></example_output>
+</examples>
 
-- There should be one <COMPLETION/> response for every <TODO/> block.
-- Answer ONLY with the <COMPLETION/> blocks, separated by a single newline.
-- Do NOT include any content outside of a <COMPLETION/> block.
+Input requiring completion will now follow.
 `
 
 export async function edit(file, model) {
@@ -57,41 +63,44 @@ export async function edit(file, model) {
     }
 
     const { ask } = await createAsker(model, system);
-    const contents = await readFile(file, 'utf-8');
+    const rawContents = await readFile(file, 'utf-8');
+    const { contents, placeholders } = prepareInput(rawContents);
+    const response = await ask(contents);
 
-    const response = await ask(`<DRAFT>${contents}</DRAFT>`);
-    const draftChunks = splitBlocks(contents, todoPattern);
-    const completions = splitBlocks(response, completionPattern);
-
-    if (draftChunks.length !== completions.length) {
-        console.error('Mismatch between draft and completion blocks:');
-        console.log(response);
-        process.exit(1);
-    }
-
-    let newContents = '';
-    for (let i = 0; i < draftChunks.length; i++) {
-        if (i % 2 === 0) {
-            newContents += draftChunks[i];
-        } else {
-            newContents += completions[i].trim();
-        }
-    }
+    let newContents = contents;
+    forEachMatch(response, taggedCompletionPattern, match => {
+        const id = parseInt(match[1]);
+        const replacementText = match[2].trim();
+        newContents = newContents.replace(placeholders[id], replacementText);
+    });
 
     await fs.writeFile(file, newContents, 'utf-8');
 }
 
-function splitBlocks(content, pattern) {
-    let match;
+function prepareInput(contents) {
+    let i = 0;
     let lastIndex = 0;
+    let buffer = '';
+    const placeholders = {};
 
-    const result = [];
-    while ((match = pattern.exec(content)) !== null) {
-        result.push(content.slice(lastIndex, match.index));
-        result.push(match[1]);
-        lastIndex = pattern.lastIndex;
+    forEachMatch(contents, rawTodoPattern, match => {
+        i++;
+        const todo = `<todo id="${i}">${match[1]}</todo>`;
+        placeholders[i] = todo;
+
+        buffer += contents.slice(lastIndex, match.index);
+        buffer += todo;
+        lastIndex = rawTodoPattern.lastIndex;
+    });
+
+    buffer += contents.slice(lastIndex);
+    return { contents: buffer, placeholders };
+}
+
+function forEachMatch(text, pattern, f) {
+    let match;
+
+    while ((match = pattern.exec(text)) !== null) {
+        f(match)
     }
-
-    result.push(content.slice(lastIndex));
-    return result;
 }
