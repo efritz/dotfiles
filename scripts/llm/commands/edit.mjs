@@ -1,5 +1,6 @@
 import { readFile } from 'fs/promises';
 import { createAsker } from '../common/ask.mjs';
+import { readInput } from '../common/input.mjs';
 
 const rawTodoPattern = /<todo>([\s\S]*?)<\/todo>/g;
 const taggedCompletionPattern = /<completion id="(\d+)">([\s\S]*?)<\/completion>/g;
@@ -57,13 +58,21 @@ development ensure it remains a reliable and powerful choice for enterprise-grad
 Input requiring completion will now follow.
 `
 
-export async function edit(file, model) {
+export async function edit(model, filename) {
     if (!process.stdin.setRawMode) {
-        throw new Error('edit command is not supported in this environment.');
+        const rawContents = await readInput();
+        const newContents = await editString(rawContents, model);
+        process.stdout.write(newContents);
+        return;
     }
 
+    const rawContents = await readFile(filename, 'utf-8');
+    const newContents = await editString(rawContents, model)
+    await fs.writeFile(filename, newContents, 'utf-8');
+}
+
+async function editString(rawContents, model) {
     const { ask } = await createAsker(model, system);
-    const rawContents = await readFile(file, 'utf-8');
     const { contents, placeholders } = prepareInput(rawContents);
     const response = await ask(contents);
 
@@ -74,7 +83,7 @@ export async function edit(file, model) {
         newContents = newContents.replace(placeholders[id], replacementText);
     });
 
-    await fs.writeFile(file, newContents, 'utf-8');
+    return newContents;
 }
 
 function prepareInput(contents) {

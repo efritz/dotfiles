@@ -36,8 +36,8 @@ async function main() {
         .command('edit')
         .description('Replaces <TODO /> instruction blocks with completions in the specified file in-place.')
         .option(modelFlags, modelDescription, modelDefault)
-        .argument('<file>', 'The file to rewrite.')
-        .action((filename, options) => edit(filename, options.model));
+        .argument('[<file>]', 'The file to rewrite.')
+        .action((filename, options) => edit(options.model, filename));
 
     // argv = node zx ./main.mjs [...]
     program.parse(process.argv.slice(1));
