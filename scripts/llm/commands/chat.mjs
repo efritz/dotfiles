@@ -374,7 +374,7 @@ function completer(line) {
     }
 
     const prefix = line.slice(5);
-    const pathPrefix = prefix.startsWith('~') ? homedir() + prefix.slice(1) : prefix;
+    const pathPrefix = prefix.startsWith('~') ? homedir() + prefix.slice(1) : prefix.startsWith('./') ? prefix.slice(2) : prefix;
     const index = pathPrefix.lastIndexOf('/');
     const dirname = index < 0 ? '.' : pathPrefix.substring(0, index);
     const dirs = [...new Set(['.', dirname, pathPrefix].map(trimSlash))];
