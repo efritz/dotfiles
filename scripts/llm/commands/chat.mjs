@@ -151,16 +151,23 @@ async function handleSave(context) {
 
 async function handleLoad(context, userMessage, match) {
     const paths = match[1].split(' ').filter(p => p.trim() !== '');
+    const noun = paths.length === 1 ? paths[0] : `${paths.length} files`;
 
-    for (const path of paths) {
-        await withProgress(async () => {
-            const contents = readFileSync(path, 'utf8');
+    const pathContents = [];
+    const { ok } = await withProgress(async () => {
+        for (const path of paths) {
+            pathContents.push({path, contents: readFileSync(path, 'utf8')});
+        }
+    }, {
+        progress: formatBufferWithPrefix(`Loading ${noun} into context...`),
+        success: () => formatBuffer(`Loaded ${noun} into context${paths.length > 1 ? `: ${paths.join(', ')}` : '.'}`, ''),
+        failure: formatBufferErrorWithPrefix(`Failed to load files into context.`),
+    });
+
+    if (ok) {
+        for (const { path, contents } of pathContents) {
             context.pushMessage(`<path>${path}</path><contents>${contents}</contents>\n`);
-        }, {
-            progress: formatBufferWithPrefix(`Loading ${path} into context...`),
-            success: formatBufferWithPrefix(`Loaded ${path} into context.`),
-            failure: formatBufferErrorWithPrefix(`Failed to load ${path}.`),
-        });
+        }
     }
 }
 
