@@ -4,7 +4,7 @@ import readline from 'readline';
 import ora from 'ora';
 import { spawn } from 'child_process';
 import { randomBytes } from 'crypto';
-import { lstat, lstatSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
+import { lstatSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { homedir } from 'os';
 import { createAsker, loadAskerFromHistoryFile } from '../common/ask.mjs';
 
@@ -150,16 +150,18 @@ async function handleSave(context) {
 }
 
 async function handleLoad(context, userMessage, match) {
-    const path = match[1];
+    const paths = match[1].split(' ').filter(p => p.trim() !== '');
 
-    await withProgress(async () => {
-        const contents = readFileSync(path);
-        context.pushMessage(`<path>${path}</path><contents>${contents}</contents>\n`);
-    }, {
-        progress: formatBufferWithPrefix(`Loading ${path} into context...`),
-        success: formatBufferWithPrefix(`Loaded ${path} into context.`),
-        failure: formatBufferErrorWithPrefix(`Failed to load ${path}.`),
-    });
+    for (const path of paths) {
+        await withProgress(async () => {
+            const contents = readFileSync(path, 'utf8');
+            context.pushMessage(`<path>${path}</path><contents>${contents}</contents>\n`);
+        }, {
+            progress: formatBufferWithPrefix(`Loading ${path} into context...`),
+            success: formatBufferWithPrefix(`Loaded ${path} into context.`),
+            failure: formatBufferErrorWithPrefix(`Failed to load ${path}.`),
+        });
+    }
 }
 
 async function handleMessage(context, userMessage) {
@@ -265,14 +267,12 @@ async function withProgress(f, options) {
         });
 
         spinner.succeed(options.success(buffer));
-        console.log();
-
         return { ok: true, response: buffer };
     } catch (error) {
         spinner.fail(options.failure(buffer, error));
-        console.log();
-
         return { ok: false, response: buffer };
+    } finally {
+        console.log();
     }
 }
 
@@ -357,7 +357,7 @@ function isDir(path) {
 function readDir(dirname) {
     try {
         return readdirSync(dirname)
-            .map(path => dirname === '.' ? path : `${dirname}/${path}`)
+            .map(path => `${dirname}/${path}`)
             .map(path => `${path}${isDir(path) ? '/' : ''}`);
     } catch (e) {
         return [];
@@ -368,19 +368,34 @@ function trimSlash(path) {
     return path.endsWith('/') ? path.slice(0, -1) : path;
 }
 
+function completePath(path) {
+    let pathPrefix = path;
+    if (pathPrefix.startsWith('~')) {
+        pathPrefix = homedir() + path.slice(1);
+    }
+    if (!pathPrefix.startsWith('/') && !pathPrefix.startsWith('./') && !pathPrefix.startsWith('../')) {
+        pathPrefix = `./${pathPrefix}`;
+    }
+
+    const index = pathPrefix.lastIndexOf('/');
+    const dirname = index < 0 ? '.' : pathPrefix.substring(0, index);
+    const dirs = [...new Set([dirname, pathPrefix].map(trimSlash))];
+    const entries = dirs.flatMap(readDir);
+    return entries.filter(path =>
+        path.startsWith(pathPrefix) &&
+        // Do not complete directories to themselves
+        !(path.endsWith('/') && path === pathPrefix)
+    );
+}
+
 function completer(line) {
-    if (!line.startsWith('load ')) {
+    const parts = line.split(' ');
+    if (parts[0] !== 'load') {
         return [[], line];
     }
 
-    const prefix = line.slice(5);
-    const pathPrefix = prefix.startsWith('~') ? homedir() + prefix.slice(1) : prefix.startsWith('./') ? prefix.slice(2) : prefix;
-    const index = pathPrefix.lastIndexOf('/');
-    const dirname = index < 0 ? '.' : pathPrefix.substring(0, index);
-    const dirs = [...new Set(['.', dirname, pathPrefix].map(trimSlash))];
-    const entries = dirs.flatMap(readDir);
-    const matchingEntries = entries.filter(path => path.startsWith(pathPrefix) && !(path.endsWith('/') && path === pathPrefix));
-    return [matchingEntries.map(path => path), prefix];
+    const prefix = parts[parts.length - 1];
+    return [completePath(prefix), prefix];
 }
 
 class CancelError extends Error {
