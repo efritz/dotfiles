@@ -4,7 +4,8 @@ import readline from 'readline';
 import ora from 'ora';
 import { spawn } from 'child_process';
 import { randomBytes } from 'crypto';
-import { readdirSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
+import { lstat, lstatSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
+import { homedir } from 'os';
 import { createAsker, loadAskerFromHistoryFile } from '../common/ask.mjs';
 
 const system = `
@@ -349,21 +350,37 @@ function createPrompter(rl) {
     };
 }
 
+function isDir(path) {
+    return lstatSync(path).isDirectory();
+}
+
+function readDir(dirname) {
+    try {
+        return readdirSync(dirname)
+            .map(path => dirname === '.' ? path : `${dirname}/${path}`)
+            .map(path => `${path}${isDir(path) ? '/' : ''}`);
+    } catch (e) {
+        return [];
+    }
+}
+
+function trimSlash(path) {
+    return path.endsWith('/') ? path.slice(0, -1) : path;
+}
+
 function completer(line) {
     if (!line.startsWith('load ')) {
         return [[], line];
     }
 
     const prefix = line.slice(5);
-    const index = prefix.lastIndexOf('/');
-    const dir = index < 0 ? '.' : prefix.substring(0, index + 1);
-
-    return [
-        readdirSync(dir)
-            .filter(name => name.startsWith(path.basename(prefix)))
-            .map(name => 'load ' + (dir == '.' ? '' : dir) + name),
-        line,
-    ];
+    const pathPrefix = prefix.startsWith('~') ? homedir() + prefix.slice(1) : prefix;
+    const index = pathPrefix.lastIndexOf('/');
+    const dirname = index < 0 ? '.' : pathPrefix.substring(0, index);
+    const dirs = [...new Set(['.', dirname, pathPrefix].map(trimSlash))];
+    const entries = dirs.flatMap(readDir);
+    const matchingEntries = entries.filter(path => path.startsWith(pathPrefix) && !(path.endsWith('/') && path === pathPrefix));
+    return [matchingEntries.map(path => path), prefix];
 }
 
 class CancelError extends Error {
