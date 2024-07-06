@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { readInput } from '../internal/input.mjs';
 import { createAsker } from '../internal/models.mjs';
 
-const system = readFileSync('system_prompts/ask.txt', 'utf-8');
+const system = readFileSync('/Users/efritz/.dotfiles/scripts/llm/system_prompts/ask.txt', 'utf-8');
 
 export async function ask(prompt, model) {
     const { ask, pushMessage } = await createAsker(model, system);
