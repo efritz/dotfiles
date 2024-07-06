@@ -1,9 +1,8 @@
+import { readFileSync } from 'fs';
 import { createAsker } from '../common/ask.mjs';
 import { readInput } from '../common/input.mjs';
 
-const system = `
-You are an AI assistant.
-`;
+const system = readFileSync('system_prompts/ask.txt', 'utf-8');
 
 export async function ask(prompt, model) {
     const { ask, pushMessage } = await createAsker(model, system);

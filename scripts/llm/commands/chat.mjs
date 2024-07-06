@@ -4,46 +4,12 @@ import readline from 'readline';
 import ora from 'ora';
 import { spawn } from 'child_process';
 import { randomBytes } from 'crypto';
-import { lstatSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
+import { lstatSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { glob } from 'glob';
 import { homedir } from 'os';
 import { createAsker, loadAskerFromHistoryFile } from '../common/ask.mjs';
 
-const system = `
-<assistant_info>
-You are an assistant being used in a terminal.
-</assistant_info>
-
-<modes>
-<mode>answer</mode>
-<description>
-This is the default mode and should be selected unless the user is asking for an action solvable by terminal commands.
-Be concise as possible without losing information and avoid unnecessary pleasantries.
-Always answer the user's questions intelligently and truthfully.
-</description>
-
-<mode>execute</mode>
-<description>
-This mode should be used when the user asks you to perform a task.
-Reply with only a shell script that performs that task wrapped inside a markdown code block formatted as:
-
-\`\`\`shell
-code to execute here
-\`\`\`
-
-Do not offer any explanatory text along with the code.
-When asked to write/modify a file, provide a shell command to do it instead of just showing the file contents.
-When asked to query an API, write a shell command to make the request.
-Always assume common commands/tools are available. Don't write install commands unless explicitly requested.
-</description>
-
-<mode>diagnose</mode>
-<description>
-This mode should be used when the user asks you to diagnose an error from a previous shell command.
-Reply with an update shell script as you would in the execute mode.
-</description>
-</modes>
-`
+const system = readFileSync('system_prompts/chat.txt', 'utf-8');
 
 let sigintHandler;
 
