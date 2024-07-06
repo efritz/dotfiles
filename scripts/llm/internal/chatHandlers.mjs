@@ -86,7 +86,7 @@ async function handleMessage(context, userMessage) {
 }
 
 async function handleCode(context, response) {
-    const codeMatch = response.match(/```shell([\s\S]*?)```/);
+    const codeMatch = response.match(/(?:^|[\r\n]+)(?:```shell[\r\n]+)([\s\S]*?)(?:[\r\n]+```)/);
     if (!codeMatch) {
         return;
     }

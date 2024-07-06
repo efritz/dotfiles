@@ -9,7 +9,7 @@ export function formatBufferErrorWithPrefix(prefix) {
 }
 
 export function formatBuffer(prefix, buffer) {
-    const context = chalk.cyan(buffer.trim().replace(/(```shell)([\s\S]*?)(```|$)/g, (_, left, code, right) => {
+    const context = chalk.cyan(buffer.trim().replace(/((?:^|[\r\n]+)(?:```shell[\r\n]+))([\s\S]*?)([\r\n]+```|$)/g, (_, left, code, right) => {
         return left + chalk.bold.magenta(code) + right;
     }));
 
