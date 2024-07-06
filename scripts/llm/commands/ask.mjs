@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
-import { createAsker } from '../common/ask.mjs';
-import { readInput } from '../common/input.mjs';
+import { readInput } from '../internal/input.mjs';
+import { createAsker } from '../internal/models.mjs';
 
 const system = readFileSync('system_prompts/ask.txt', 'utf-8');
 

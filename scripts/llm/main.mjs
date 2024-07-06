@@ -4,7 +4,7 @@ import { program } from 'commander';
 import { ask } from './commands/ask.mjs';
 import { chat } from './commands/chat.mjs';
 import { edit } from './commands/edit.mjs';
-import { modelNames } from './common/models.mjs';
+import { modelNames } from './internal/models.mjs';
 
 async function main() {
     program
