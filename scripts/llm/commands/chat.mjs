@@ -5,6 +5,7 @@ import ora from 'ora';
 import { spawn } from 'child_process';
 import { randomBytes } from 'crypto';
 import { lstatSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
+import { glob } from 'glob';
 import { homedir } from 'os';
 import { createAsker, loadAskerFromHistoryFile } from '../common/ask.mjs';
 
@@ -118,7 +119,7 @@ async function handleHelp() {
     console.log('  exit - Exit the chat.');
     console.log('  clear - Clear the chat history.');
     console.log('  save - Save this chat history.');
-    console.log('  load <file> - load file contents into the chat context');
+    console.log('  load [<file>, ...] - load file contents into the chat context (supports wildcards)');
     console.log();
 }
 
@@ -150,7 +151,8 @@ async function handleSave(context) {
 }
 
 async function handleLoad(context, userMessage, match) {
-    const paths = match[1].split(' ').filter(p => p.trim() !== '');
+    const patterns = match[1].split(' ').filter(p => p.trim() !== '');
+    const paths = patterns.flatMap(pattern => glob.sync(pattern));
     const noun = paths.length === 1 ? paths[0] : `${paths.length} files`;
 
     const pathContents = [];
@@ -358,41 +360,11 @@ function createPrompter(rl) {
 }
 
 function isDir(path) {
-    return lstatSync(path).isDirectory();
-}
-
-function readDir(dirname) {
     try {
-        return readdirSync(dirname)
-            .map(path => `${dirname}/${path}`)
-            .map(path => `${path}${isDir(path) ? '/' : ''}`);
+        return lstatSync(path).isDirectory();
     } catch (e) {
-        return [];
+        return false;
     }
-}
-
-function trimSlash(path) {
-    return path.endsWith('/') ? path.slice(0, -1) : path;
-}
-
-function completePath(path) {
-    let pathPrefix = path;
-    if (pathPrefix.startsWith('~')) {
-        pathPrefix = homedir() + path.slice(1);
-    }
-    if (!pathPrefix.startsWith('/') && !pathPrefix.startsWith('./') && !pathPrefix.startsWith('../')) {
-        pathPrefix = `./${pathPrefix}`;
-    }
-
-    const index = pathPrefix.lastIndexOf('/');
-    const dirname = index < 0 ? '.' : pathPrefix.substring(0, index);
-    const dirs = [...new Set([dirname, pathPrefix].map(trimSlash))];
-    const entries = dirs.flatMap(readDir);
-    return entries.filter(path =>
-        path.startsWith(pathPrefix) &&
-        // Do not complete directories to themselves
-        !(path.endsWith('/') && path === pathPrefix)
-    );
 }
 
 function completer(line) {
@@ -401,8 +373,43 @@ function completer(line) {
         return [[], line];
     }
 
-    const prefix = parts[parts.length - 1];
-    return [completePath(prefix), prefix];
+    // Only complete the last part of the line
+    const lastEntry = parts[parts.length - 1];
+
+    let pathPrefix = lastEntry;
+    if (pathPrefix.startsWith('~')) {
+        pathPrefix = homedir() + lastEntry.slice(1);
+    }
+    if (!pathPrefix.startsWith('/') && !pathPrefix.startsWith('./') && !pathPrefix.startsWith('../')) {
+        pathPrefix = `./${pathPrefix}`;
+    }
+
+    // Explicit glob - expand directly
+    if (pathPrefix.includes('*')) {
+        const entries = glob.sync(pathPrefix).filter(path => !isDir(path));
+        if (entries.length === 0) {
+            return [[], lastEntry];
+        }
+
+        // Return as a single completion to expand the user input into actual file paths.
+        // Since this is a single element array, we'll end up adding it directly to the
+        // user's input line.
+        return [[entries.join(' ') + ' '], lastEntry];
+    }
+
+    if (isDir(pathPrefix)) {
+        // Ensure directories end in a slash before globbing below
+        pathPrefix = pathPrefix.endsWith('/') ? pathPrefix : pathPrefix + '/';
+    }
+
+    // Use glob to expand paths by prefix in a single layer in the directory tree
+    const completions = glob.sync(pathPrefix + '*')
+        // Add a trailing slash to directories
+        .map(path => `${path}${isDir(path) ? '/' : ''}`)
+        // Do not complete directories to themselves
+        .filter(path => !(path.endsWith('/') && path === pathPrefix));
+
+    return [completions, lastEntry];
 }
 
 class CancelError extends Error {
