@@ -3,7 +3,7 @@ import { readInput } from '../internal/input.mjs';
 import { createAsker } from '../internal/models.mjs';
 import { editString } from '../internal/todoEditor.mjs';
 
-const system = readFileSync('/Users/efritz/.dotfiles/scripts/llm/system_prompts/edit.txt', 'utf-8');
+const system = readFileSync('/Users/efritz/.dotfiles/ai/scripts/system_prompts/edit.txt', 'utf-8');
 
 export async function edit(model, filename) {
     const { ask } = await createAsker(model, system);

@@ -123,7 +123,7 @@ function collapseMessagesFromSameSpeaker(messages) {
 async function getKey(name) {
     const keyPath = path.join(
         os.homedir(),
-        ".dotfiles", "scripts", "llm", "keys",
+        ".dotfiles", "ai", "scripts", "keys",
         `${name}.key`,
     );
 
