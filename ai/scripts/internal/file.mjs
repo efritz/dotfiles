@@ -1,4 +1,4 @@
-import { lstatSync } from 'fs';
+import { lstatSync, readFileSync } from 'fs';
 import { glob } from 'glob';
 import { homedir } from 'os';
 
@@ -53,4 +53,8 @@ function isDir(path) {
     } catch (e) {
         return false;
     }
+}
+
+export async function readLocalFile(segments) {
+    return readFileSync(path.join(...[os.homedir(), ".dotfiles", "ai", "scripts", ...segments]), "utf8").trim();
 }

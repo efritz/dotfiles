@@ -1,6 +1,7 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import { readFile } from 'fs/promises';
 import { OpenAI } from "openai";
+import { readLocalFile } from "./file.mjs";
 
 export const models = {
     'gpt-4o': { provider: 'OpenAI',    model: 'gpt-4o' },
@@ -49,7 +50,7 @@ const providerFactories = {
 };
 
 async function askOpenAI(model, system, messages) {
-    const client = new OpenAI({ apiKey: await getKey('openai') });
+    const client = new OpenAI({ apiKey: getKey('openai') });
 
     return async (userMessage, { temperature = 0.0, max_tokens = 4096, progress = () => {} } = {}) => {
         if (messages.length === 0) {
@@ -78,7 +79,7 @@ async function askOpenAI(model, system, messages) {
 }
 
 async function askClaude(model, system, messages) {
-    const client = new Anthropic({ apiKey: await getKey('anthropic') });
+    const client = new Anthropic({ apiKey: getKey('anthropic') });
 
     return async (userMessage, { temperature = 0.0, max_tokens = 4096, progress = () => {} } = {}) => {
         messages.push({ role: 'user', content: userMessage });
@@ -121,11 +122,5 @@ function collapseMessagesFromSameSpeaker(messages) {
 }
 
 async function getKey(name) {
-    const keyPath = path.join(
-        os.homedir(),
-        ".dotfiles", "ai", "scripts", "keys",
-        `${name}.key`,
-    );
-
-    return (await fs.readFile(keyPath, "utf8")).trim();
+    return readLocalFile(["keys", `${name}.key`]);
 }

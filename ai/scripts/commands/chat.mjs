@@ -4,10 +4,11 @@ import { dispatch } from '../internal/chatHandlers.mjs';
 import { ExitError } from '../internal/errors.mjs';
 import { completeFilePaths } from '../internal/file.mjs';
 import { createAsker, loadAskerFromHistoryFile } from '../internal/models.mjs';
+import { getPrompt } from '../internal/system.mjs';
 import { createPrompter } from '../internal/prompt.mjs';
 import { handleSigint } from '../internal/sigint.mjs';
 
-const system = readFileSync('/Users/efritz/.dotfiles/ai/scripts/system_prompts/chat.txt', 'utf-8');
+const system = getPrompt('chat');
 
 export async function chat(model, historyFilename) {
     if (!process.stdin.setRawMode) {
