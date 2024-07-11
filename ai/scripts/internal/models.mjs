@@ -121,6 +121,6 @@ function collapseMessagesFromSameSpeaker(messages) {
     }
 }
 
-async function getKey(name) {
+function getKey(name) {
     return readLocalFile(["keys", `${name}.key`]);
 }

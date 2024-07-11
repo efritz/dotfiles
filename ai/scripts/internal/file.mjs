@@ -55,6 +55,6 @@ function isDir(path) {
     }
 }
 
-export async function readLocalFile(segments) {
+export function readLocalFile(segments) {
     return readFileSync(path.join(...[os.homedir(), ".dotfiles", "ai", "scripts", ...segments]), "utf8").trim();
 }
