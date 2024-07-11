@@ -1,7 +1,6 @@
 #!/usr/bin/env zx
 
 import { program } from 'commander';
-import { ask } from './commands/ask.mjs';
 import { chat } from './commands/chat.mjs';
 import { edit } from './commands/edit.mjs';
 import { modelNames } from './internal/models.mjs';
@@ -17,13 +16,6 @@ async function main() {
     const modelFlags = '-m, --model <string>';
     const modelDescription = `Model to use. Defaults to sonnet. Valid options are ${modelNames.join(', ')}.`;
     const modelDefault = 'sonnet';
-
-    program
-        .command('ask', { isDefault: true })
-        .description('Ask a one-shot question of the specified model. Accepts piped input.')
-        .option(modelFlags, modelDescription, modelDefault)
-        .argument('<prompt>', 'The user prompt.')
-        .action((prompt, options) => ask(prompt, options.model));
 
     program
         .command('chat')
