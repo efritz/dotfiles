@@ -2,15 +2,19 @@ import { lstatSync, readFileSync } from 'fs';
 import { glob } from 'glob';
 import { homedir } from 'os';
 
-export function completeFilePaths(line) {
-    const parts = line.split(' ');
-    if (parts[0] !== 'load') {
-        return [[], line];
+export function isDir(path) {
+    try {
+        return lstatSync(path).isDirectory();
+    } catch (e) {
+        return false;
     }
+}
 
-    // Only complete the last part of the line
-    const lastEntry = parts[parts.length - 1];
+export function readLocalFile(segments) {
+    return readFileSync(path.join(...[homedir(), ".dotfiles", "ai", "scripts", ...segments]), "utf8").trim();
+}
 
+export function expandFilePath(lastEntry) {
     let pathPrefix = lastEntry;
     if (pathPrefix.startsWith('~')) {
         pathPrefix = homedir() + lastEntry.slice(1);
@@ -23,7 +27,7 @@ export function completeFilePaths(line) {
     if (pathPrefix.includes('*')) {
         const entries = glob.sync(pathPrefix).filter(path => !isDir(path));
         if (entries.length === 0) {
-            return [[], lastEntry];
+            return [];
         }
 
         // Return as a single completion to expand the user input into actual file paths.
@@ -38,23 +42,9 @@ export function completeFilePaths(line) {
     }
 
     // Use glob to expand paths by prefix in a single layer in the directory tree
-    const completions = glob.sync(pathPrefix + '*')
+    return glob.sync(pathPrefix + '*')
         // Add a trailing slash to directories
         .map(path => `${path}${isDir(path) ? '/' : ''}`)
         // Do not complete directories to themselves
         .filter(path => !(path.endsWith('/') && path === pathPrefix));
-
-    return [completions, lastEntry];
-}
-
-function isDir(path) {
-    try {
-        return lstatSync(path).isDirectory();
-    } catch (e) {
-        return false;
-    }
-}
-
-export function readLocalFile(segments) {
-    return readFileSync(path.join(...[os.homedir(), ".dotfiles", "ai", "scripts", ...segments]), "utf8").trim();
 }

@@ -2,27 +2,27 @@ import chalk from 'chalk';
 import { spawn } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
 import { glob } from 'glob';
-import { edit } from './codeEditor.mjs';
+import { edit } from './code.mjs';
 import { CancelError, ExitError } from './errors.mjs';
 import { formatBuffer, formatBufferErrorWithPrefix, formatBufferWithPrefix } from './format.mjs';
 import { withProgress } from './progress.mjs';
 
 export const dispatch = [
-    [/^help$/, handleHelp],
-    [/^exit$/, handleExit],
-    [/^clear$/, handleClear],
-    [/^save$/, handleSave],
-    [/^load (.+)$/, handleLoad],
+    [/^:help$/, handleHelp],
+    [/^:exit$/, handleExit],
+    [/^:clear$/, handleClear],
+    [/^:save$/, handleSave],
+    [/^:load (.+)$/, handleLoad],
     [/^(.*)$/, handleMessage],
 ];
 
 async function handleHelp() {
     console.log('Commands:');
-    console.log('  help - Show this message.');
-    console.log('  exit - Exit the chat.');
-    console.log('  clear - Clear the chat history.');
-    console.log('  save - Save this chat history.');
-    console.log('  load [<file>, ...] - load file contents into the chat context (supports wildcards)');
+    console.log('  :help - Show this message.');
+    console.log('  :exit - Exit the chat.');
+    console.log('  :clear - Clear the chat history.');
+    console.log('  :save - Save this chat history.');
+    console.log('  :load [<file>, ...] - load file contents into the chat context (supports wildcards)');
     console.log();
 }
 

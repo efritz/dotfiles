@@ -1,8 +1,7 @@
 import readline from 'readline';
-import { readFileSync } from 'fs';
-import { dispatch } from '../internal/chatHandlers.mjs';
+import { dispatch } from '../internal/chat.mjs';
 import { ExitError } from '../internal/errors.mjs';
-import { completeFilePaths } from '../internal/file.mjs';
+import { completer } from '../internal/completions.mjs';
 import { createAsker, loadAskerFromHistoryFile } from '../internal/models.mjs';
 import { getPrompt } from '../internal/system.mjs';
 import { createPrompter } from '../internal/prompt.mjs';
@@ -19,7 +18,7 @@ export async function chat(model, historyFilename) {
         input: process.stdin,
         output: process.stdout,
         terminal: true,
-        completer: completeFilePaths,
+        completer,
     });
 
     rl.on('SIGINT', () => {

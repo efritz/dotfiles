@@ -1,7 +1,7 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import { readFile } from 'fs/promises';
 import { OpenAI } from "openai";
-import { readLocalFile } from "./file.mjs";
+import { readLocalFile } from "./files.mjs";
 
 export const models = {
     'gpt-4o': { provider: 'OpenAI',    model: 'gpt-4o' },
