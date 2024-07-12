@@ -2,9 +2,9 @@ import chalk from 'chalk';
 import { spawn } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
 import { glob } from 'glob';
-import { edit } from './code.mjs';
+import { edit } from './editor.mjs';
 import { CancelError, ExitError } from './errors.mjs';
-import { formatBuffer, formatBufferErrorWithPrefix, formatBufferWithPrefix } from './format.mjs';
+import { formatBuffer, formatBufferErrorWithPrefix, formatBufferWithPrefix } from './output.mjs';
 import { withProgress } from './progress.mjs';
 
 export const dispatch = [
@@ -27,23 +27,19 @@ async function handleHelp() {
 }
 
 async function handleExit(context) {
-    console.log('Goodbye!');
-    console.log();
-
+    context.log('Goodbye!\n');
     throw new ExitError('User exited.');
 }
 
 async function handleClear(context) {
     context.clearMessages();
-    console.log('Chat history cleared.');
-    console.log();
+    context.log('Chat history cleared.\n');
 }
 
 async function handleSave(context) {
     const filename = `chat-${Math.floor(Date.now() / 1000)}.json`;
     writeFileSync(filename, JSON.stringify(context.serialize(), null, '\t'));
-    console.log(`Chat history saved to ${filename}`);
-    console.log();
+    context.log(`Chat history saved to ${filename}\n`);
 }
 
 async function handleLoad(context, userMessage, match) {
@@ -57,6 +53,7 @@ async function handleLoad(context, userMessage, match) {
             pathContents.push({path, contents: readFileSync(path, 'utf8')});
         }
     }, {
+        log: context.log,
         progress: formatBufferWithPrefix(`Loading ${noun} into context...`),
         success: () => formatBuffer(`Loaded ${noun} into context${paths.length > 1 ? `: ${paths.join(', ')}` : '.'}`, ''),
         failure: formatBufferErrorWithPrefix(`Failed to load files into context.`),
@@ -75,6 +72,7 @@ async function handleMessage(context, userMessage) {
     }
 
     const { ok, response } = await withProgress(progress => context.ask(userMessage, { progress }), {
+        log: context.log,
         progress: formatBufferWithPrefix('Generating response...'),
         success: formatBufferWithPrefix('Generated response.'),
         failure: formatBufferErrorWithPrefix('Failed to generate response.'),
@@ -98,6 +96,7 @@ async function handleCode(context, result) {
         { name: 'e', description: 'edit this command in vscode' },
     ]);
     if (resp === 'y') {
+        context.log('Executing command...', { silent: true });
         return runCode(context, code)
     }
     if (resp === 'e') {
@@ -107,6 +106,7 @@ async function handleCode(context, result) {
             progress(codeWithFence);
             return codeWithFence;
         }, {
+            log: context.log,
             progress: formatBufferWithPrefix('Editing code...'),
             success: formatBufferWithPrefix('Code edited.'),
             failure: (buffer, error) => error instanceof CancelError
@@ -120,8 +120,7 @@ async function handleCode(context, result) {
         }
     }
 
-    console.log(chalk.dim('ℹ') + ' No code was executed.');
-    console.log();
+    context.log(chalk.dim('ℹ') + ' No code was executed.\n');
     return;
 }
 
@@ -141,6 +140,7 @@ async function runCode(context, code) {
             });
         });
     }, {
+        log: context.log,
         progress: formatBufferWithPrefix('Executing command...'),
         success: formatBufferWithPrefix('Command succeeded.'),
         failure: formatBufferErrorWithPrefix('Command failed.'),

@@ -5,6 +5,17 @@ export async function withProgress(f, options) {
     const spinner = ora({ text: options.progress(''), discardStdin: false });
     spinner.start();
 
+    if (options.log) {
+        const wrap = (f, prefix) => (...args) => {
+            const formatted = f(...args);
+            options.log(prefix + ' ' + formatted + '\n', { silent: true });
+            return formatted;
+        };
+
+        options.success = wrap(options.success, chalk.green('✔'));
+        options.failure = wrap(options.failure, chalk.red('✖'));
+    }
+
     try {
         await f(chunk => {
             buffer += chunk;

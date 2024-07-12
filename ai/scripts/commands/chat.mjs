@@ -33,7 +33,7 @@ export async function chat(model, historyFilename) {
 
     const prompter = createPrompter(rl);
 
-    console.log(`Beginning session with ${model}...\n`);
+    askerContext.log(`Beginning session with ${model}...\n`);
     await handler({ ...askerContext, prompter });
     rl.close();
 }
