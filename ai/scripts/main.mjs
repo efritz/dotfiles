@@ -3,7 +3,7 @@
 import { program } from 'commander';
 import { chat } from './commands/chat.mjs';
 import { edit } from './commands/edit.mjs';
-import { modelNames } from './internal/models.mjs';
+import { modelNames } from './internal/asker.mjs';
 
 async function main() {
     program

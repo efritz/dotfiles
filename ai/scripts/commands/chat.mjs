@@ -1,8 +1,8 @@
 import readline from 'readline';
 import { dispatch } from '../internal/chat.mjs';
-import { ExitError } from '../internal/errors.mjs';
 import { completer } from '../internal/completions.mjs';
-import { createAsker, loadAskerFromHistoryFile } from '../internal/models.mjs';
+import { ExitError } from '../internal/errors.mjs';
+import { createHistoryFromFile, createHistoryFromModel } from '../internal/history.mjs';
 import { getPrompt } from '../internal/system.mjs';
 import { createPrompter } from '../internal/prompt.mjs';
 import { handleSigint } from '../internal/sigint.mjs';
@@ -27,14 +27,14 @@ export async function chat(model, historyFilename) {
         }
     });
 
-    const { ask, pushMessage, clearMessages, serialize } = historyFilename
-        ? await loadAskerFromHistoryFile(historyFilename)
-        : await createAsker(model, system);
+    const askerContext = historyFilename
+        ? await createHistoryFromFile(historyFilename)
+        : await createHistoryFromModel(model, system);
 
     const prompter = createPrompter(rl);
 
-    console.log(`Chatting with ${model}...\n`);
-    await handler({ ask, pushMessage, clearMessages, serialize, prompter });
+    console.log(`Beginning session with ${model}...\n`);
+    await handler({ ...askerContext, prompter });
     rl.close();
 }
 

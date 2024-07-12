@@ -1,13 +1,13 @@
 import { readFileSync } from 'fs';
+import { createAskerByName } from '../internal/asker.mjs';
 import { readInput } from '../internal/input.mjs';
-import { createAsker } from '../internal/models.mjs';
 import { getPrompt } from '../internal/system.mjs';
 import { editString } from '../internal/todoEditor.mjs';
 
 const system = getPrompt('edit');
 
 export async function edit(model, filename) {
-    const { ask } = await createAsker(model, system);
+    const { ask } = await createAskerByName(model, system);
 
     if (!process.stdin.setRawMode) {
         const rawContents = await readInput();

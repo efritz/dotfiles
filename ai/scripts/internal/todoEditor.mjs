@@ -3,10 +3,10 @@ const taggedCompletionPattern = /<completion id="(\d+)">([\s\S]*?)<\/completion>
 
 export async function editString(rawContents, ask) {
     const { contents, placeholders } = prepareInput(rawContents);
-    const response = await ask(contents);
+    const { result } = await ask(contents);
 
     let newContents = contents;
-    forEachMatch(response, taggedCompletionPattern, match => {
+    forEachMatch(result, taggedCompletionPattern, match => {
         const id = parseInt(match[1]);
         const replacementText = match[2].trim();
         newContents = newContents.replace(placeholders[id], replacementText);

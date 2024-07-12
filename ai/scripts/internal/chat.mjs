@@ -26,7 +26,7 @@ async function handleHelp() {
     console.log();
 }
 
-async function handleExit() {
+async function handleExit(context) {
     console.log('Goodbye!');
     console.log();
 
@@ -64,7 +64,7 @@ async function handleLoad(context, userMessage, match) {
 
     if (ok) {
         for (const { path, contents } of pathContents) {
-            context.pushMessage(`<path>${path}</path><contents>${contents}</contents>\n`);
+            context.pushUserMessage(`<path>${path}</path><contents>${contents}</contents>\n`);
         }
     }
 }
@@ -85,8 +85,8 @@ async function handleMessage(context, userMessage) {
     }
 }
 
-async function handleCode(context, response) {
-    const codeMatch = response.match(/(?:^|[\r\n]+)(?:```shell[\r\n]+)([\s\S]*?)(?:[\r\n]+```)/);
+async function handleCode(context, result) {
+    const codeMatch = result.match(/(?:^|[\r\n]+)(?:```shell[\r\n]+)([\s\S]*?)(?:[\r\n]+```)/);
     if (!codeMatch) {
         return;
     }
@@ -115,7 +115,7 @@ async function handleCode(context, response) {
         });
 
         if (ok) {
-            context.pushMessage(`Edited code to:\n${editedCodeWithFence}`);
+            context.pushUserMessage(`Edited code to:\n${editedCodeWithFence}`);
             return handleCode(context, editedCodeWithFence);
         }
     }
@@ -146,7 +146,7 @@ async function runCode(context, code) {
         failure: formatBufferErrorWithPrefix('Command failed.'),
     });
 
-    context.pushMessage(`Command ${ok ? 'succeeded' : 'failed'}.\nOutput:\n${response}\n`);
+    context.pushUserMessage(`Command ${ok ? 'succeeded' : 'failed'}.\nOutput:\n${response}\n`);
 
     if (!ok) {
         if ((await context.prompter.options('Diagnose error', [

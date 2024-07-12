@@ -1,5 +1,4 @@
 import { Anthropic } from '@anthropic-ai/sdk';
-import { readFile } from 'fs/promises';
 import { OpenAI } from "openai";
 import { readLocalFile } from "./files.mjs";
 
@@ -13,25 +12,16 @@ export const models = {
 
 export const modelNames = Object.keys(models).sort();
 
-export async function createAsker(name, system) {
+export async function createAskerByName(name, system, messages = []) {
     const model = models[name]
     if (!model) {
-        throw new Error(`Unknown model: ${name}`);
+        throw new Error(`Unknown model: ${name} `);
     }
 
-    return asker(model, system, []);
+    return createAskerByModel(model, system, messages);
 }
 
-export async function loadAskerFromHistory(serialized) {
-    const { model, system, messages } = serialized;
-    return asker(model, system, messages);
-}
-
-export async function loadAskerFromHistoryFile(filename) {
-    return loadAskerFromHistory(JSON.parse(await readFile(filename, 'utf8')));
-}
-
-async function asker(model, system, messages) {
+export async function createAskerByModel(model, system, messages = []) {
     const factory = providerFactories[model.provider];
     if (!factory) {
         throw new Error(`Unknown provider: ${model.provider}`);
@@ -40,8 +30,7 @@ async function asker(model, system, messages) {
     const ask = await factory(model.model, system, messages);
     const pushMessage = userMessage => messages.push({ role: 'user', content: userMessage });
     const clearMessages = () => messages.splice(0, messages.length);
-    const serialize = () => ({ model, system, messages });
-    return { ask, pushMessage, clearMessages, serialize };
+    return { model, system, ask, pushMessage, clearMessages };
 }
 
 const providerFactories = {
@@ -53,28 +42,22 @@ async function askOpenAI(model, system, messages) {
     const client = new OpenAI({ apiKey: getKey('openai') });
 
     return async (userMessage, { temperature = 0.0, max_tokens = 4096, progress = () => {} } = {}) => {
+        const { newContext, push } = teeArray(messages);
+
         if (messages.length === 0) {
-            messages.push({ role: 'system', content: system });
+            push({ role: 'system', content: system });
         }
-
-        messages.push({ role: 'user', content: userMessage });
-
-        const params = {
-            model,
-            temperature,
-            max_tokens,
-            stream: true,
-            messages,
-        };
+        push({ role: 'user', content: userMessage });
 
         let result = '';
         const onChunk = text => { progress(text); result += text; }
+        const params = { model, temperature, max_tokens, stream: true, messages };
         for await (const chunk of await client.chat.completions.create(params)) {
             onChunk(chunk.choices[0]?.delta?.content ?? '');
         }
+        push({ role: 'assistant', content: result });
 
-        messages.push({ role: 'assistant', content: result });
-        return result;
+        return { result, newContext };
     };
 }
 
@@ -82,25 +65,31 @@ async function askClaude(model, system, messages) {
     const client = new Anthropic({ apiKey: getKey('anthropic') });
 
     return async (userMessage, { temperature = 0.0, max_tokens = 4096, progress = () => {} } = {}) => {
-        messages.push({ role: 'user', content: userMessage });
-        collapseMessagesFromSameSpeaker(messages);
+        const { newContext, push } = teeArray(messages);
 
-        const params = {
-            system,
-            model,
-            temperature,
-            max_tokens,
-            stream: true,
-            messages,
-        };
+        push({ role: 'user', content: userMessage });
+        collapseMessagesFromSameSpeaker(messages);
 
         let result = '';
         const onChunk = text => { progress(text); result += text; }
+        const params = { system, model, temperature, max_tokens, stream: true, messages };
         await client.messages.stream(params).on('text', onChunk).finalMessage();
+        push({ role: 'assistant', content: result });
 
-        messages.push({ role: 'assistant', content: result });
-        return result;
+        return { result, newContext };
     };
+}
+
+function getKey(name) {
+    return readLocalFile(["keys", `${name}.key`]);
+}
+
+function teeArray(context) {
+    const newContext = [];
+    return { newContext, push: entry => {
+        context.push(entry);
+        newContext.push(entry);
+    }};
 }
 
 function collapseMessagesFromSameSpeaker(messages) {
@@ -119,8 +108,4 @@ function collapseMessagesFromSameSpeaker(messages) {
 
         previous = message;
     }
-}
-
-function getKey(name) {
-    return readLocalFile(["keys", `${name}.key`]);
 }
