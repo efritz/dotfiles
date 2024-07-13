@@ -6,6 +6,7 @@ import { edit } from './editor.mjs';
 import { CancelError, ExitError } from './errors.mjs';
 import { formatBuffer, formatBufferErrorWithPrefix, formatBufferWithPrefix } from './output.mjs';
 import { withProgress } from './progress.mjs';
+import { createXmlPattern } from './xml.mjs';
 
 export const commandDescriptions = [
     {
@@ -171,7 +172,7 @@ async function handleMessage(context, message) {
 }
 
 async function handleCode(context, result) {
-    const pattern = /(?:^|[\r\n]+)(?:```shell[\r\n]+)([\s\S]*?)(?:[\r\n]+```)/;
+    const pattern = createXmlPattern('AI:CODEBLOCK', true);
     const codeMatch = pattern.exec(result);
     if (!codeMatch) {
         return;
@@ -181,7 +182,7 @@ async function handleCode(context, result) {
         return;
     }
 
-    const code = codeMatch[1].trim();
+    const code = codeMatch[2].trim();
 
     const resp = await context.prompter.options('Execute this command', [
         { name: 'y', description: 'execute the command as-is' },
