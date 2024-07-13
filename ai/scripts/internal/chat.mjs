@@ -138,7 +138,7 @@ async function handleLoad(context, message) {
 
     if (ok) {
         for (const { path, contents } of pathContents) {
-            context.pushUserMessage(`<path>${path}</path><contents>${contents}</contents>\n`);
+            context.pushUserMessage(`<AI:FILE path="${path}">${contents}</AI:FILE>\n`);
         }
     }
 }
