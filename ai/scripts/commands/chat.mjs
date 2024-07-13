@@ -1,5 +1,5 @@
 import readline from 'readline';
-import { dispatch } from '../internal/chat.mjs';
+import { handle } from '../internal/chat.mjs';
 import { completer } from '../internal/completions.mjs';
 import { ExitError } from '../internal/errors.mjs';
 import { createHistoryFromFile, createHistoryFromModel } from '../internal/history.mjs';
@@ -39,27 +39,17 @@ export async function chat(model, historyFilename) {
 }
 
 async function handler(context) {
-    loop: while (true) {
-        const userMessage = (await context.prompter.question('$ ')).trim();
+    while (true) {
+        const message = (await context.prompter.question('$ ')).trim();
 
-        for (const [pattern, handler] of dispatch) {
-            const match = userMessage.match(pattern);
-            if (!match) {
-                continue;
+        try {
+            await handle(context, message);
+        } catch (error) {
+            if (error instanceof ExitError) {
+                return;
             }
 
-            try {
-                await handler(context, userMessage, match);
-                continue loop;
-            } catch (error) {
-                if (error instanceof ExitError) {
-                    return;
-                }
-
-                throw error;
-            }
+            throw error;
         }
-
-        throw new Error(`No pattern matched message: ${userMessage}.`);
     }
 }

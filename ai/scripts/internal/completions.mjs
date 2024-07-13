@@ -1,12 +1,7 @@
+import { commandDescriptions } from './chat.mjs';
 import { expandFilePath } from './files.mjs';
 
-const commands = [
-    ':help',
-    ':exit',
-    ':clear',
-    ':save',
-    ':load ',
-];
+const commands = commandDescriptions.map(({ prefix, args }) => prefix + (args ? ' ' : ''));
 
 export function completer(line) {
     if (line.startsWith(':load')) {

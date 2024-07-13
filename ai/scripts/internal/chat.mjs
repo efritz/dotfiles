@@ -7,43 +7,119 @@ import { CancelError, ExitError } from './errors.mjs';
 import { formatBuffer, formatBufferErrorWithPrefix, formatBufferWithPrefix } from './output.mjs';
 import { withProgress } from './progress.mjs';
 
-export const dispatch = [
-    [/^:help$/, handleHelp],
-    [/^:exit$/, handleExit],
-    [/^:clear$/, handleClear],
-    [/^:save$/, handleSave],
-    [/^:load (.+)$/, handleLoad],
-    [/^(.*)$/, handleMessage],
+export const commandDescriptions = [
+    {
+        prefix: ':help',
+        handler: handleHelp,
+        description: 'Show this message',
+    },
+    {
+        prefix: ':exit',
+        handler: handleExit,
+        description: 'Exit the chat',
+    },
+    {
+        prefix: ':clear',
+        handler: handleClear,
+        description: 'Clear the chat history',
+    },
+    {
+        prefix: ':save',
+        handler: handleSave,
+        description: 'Save this chat history',
+    },
+    {
+        prefix: ':load',
+        args: true,
+        handler: handleLoad,
+        description: 'Load file contents into the chat context (supports wildcards)',
+    },
+    {
+        prefix: ':run',
+        args: true,
+        handler: handleRun,
+        description: 'Run a command in the shell',
+    },
 ];
 
-async function handleHelp() {
-    console.log('Commands:');
-    console.log('  :help - Show this message.');
-    console.log('  :exit - Exit the chat.');
-    console.log('  :clear - Clear the chat history.');
-    console.log('  :save - Save this chat history.');
-    console.log('  :load [<file>, ...] - load file contents into the chat context (supports wildcards)');
+export async function handle(context, message) {
+    if (message.startsWith(':')) {
+        const parts = message.split(' ');
+        const command = parts[0];
+        const args = parts.slice(1).join(' ').trim();
+
+        for (const { prefix, handler } of commandDescriptions) {
+            if (command === prefix) {
+                return handler(context, args);
+            }
+        }
+
+        console.log(chalk.bold.red(`Unknown command prefix: ${command}.`));
+        console.log();
+        return;
+    }
+
+    return handleMessage(context, message);
+}
+
+async function handleHelp(context, message) {
+    if (message !== '') {
+        console.log(chalk.bold.red(`Unexpected arguments supplied to :help.`));
+        console.log();
+        return;
+    }
+
+    console.log();
+    const maxWidth = commandDescriptions.reduce((max, { prefix }) => Math.max(max, prefix.length), 0);
+    
+    for (const { prefix, description } of commandDescriptions) {
+        console.log(`${prefix.padEnd(maxWidth)} - ${description}`);
+    }
     console.log();
 }
 
-async function handleExit(context) {
+async function handleExit(context, message) {
+    if (message !== '') {
+        console.log(chalk.bold.red(`Unexpected arguments supplied to :exit.`));
+        console.log();
+        return;
+    }
+
     context.log('Goodbye!\n');
     throw new ExitError('User exited.');
 }
 
 async function handleClear(context) {
+    if (message !== '') {
+        console.log(chalk.bold.red(`Unexpected arguments supplied to :clear.`));
+        console.log();
+        return;
+    }
+
     context.clearMessages();
     context.log('Chat history cleared.\n');
 }
 
-async function handleSave(context) {
+async function handleSave(context, message) {
+    if (message !== '') {
+        console.log(chalk.bold.red(`Unexpected arguments supplied to :save.`));
+        console.log();
+        return;
+    }
+
     const filename = `chat-${Math.floor(Date.now() / 1000)}.json`;
     writeFileSync(filename, JSON.stringify(context.serialize(), null, '\t'));
     context.log(`Chat history saved to ${filename}\n`);
 }
 
-async function handleLoad(context, userMessage, match) {
-    const patterns = match[1].split(' ').filter(p => p.trim() !== '');
+async function handleLoad(context, message) {
+    if (message === '') {
+        console.log(chalk.bold.red(`No paths supplied to :load.`));
+        console.log();
+        return;
+    }
+
+    const patterns = message.split(' ').filter(p => p.trim() !== '');
     const paths = patterns.flatMap(pattern => glob.sync(pattern));
     const noun = paths.length === 1 ? paths[0] : `${paths.length} files`;
 
@@ -66,12 +142,23 @@ async function handleLoad(context, userMessage, match) {
     }
 }
 
-async function handleMessage(context, userMessage) {
-    if (userMessage === '') {
+async function handleRun(context, message) {
+    if (message === '') {
+        console.log(chalk.bold.red(`No command supplied to :run.`));
+        console.log();
         return;
     }
 
-    const { ok, response } = await withProgress(progress => context.ask(userMessage, { progress }), {
+    context.log(`Executing command "${message}"...`, { silent: true });
+    return runCode(context, message);
+}
+
+async function handleMessage(context, message) {
+    if (message === '') {
+        return;
+    }
+
+    const { ok, response } = await withProgress(progress => context.ask(message, { progress }), {
         log: context.log,
         progress: formatBufferWithPrefix('Generating response...'),
         success: formatBufferWithPrefix('Generated response.'),
