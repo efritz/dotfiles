@@ -19,6 +19,7 @@ Reply with only a shell script that performs that task wrapped inside a markdown
 code to execute here
 ```
 
+Respond with AT MOST ONE code block.
 Do not offer any explanatory text along with the code.
 When asked to write/modify a file, provide a shell command to do it instead of just showing the file contents.
 When asked to query an API, write a shell command to make the request.

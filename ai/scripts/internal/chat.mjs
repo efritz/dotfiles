@@ -171,10 +171,16 @@ async function handleMessage(context, message) {
 }
 
 async function handleCode(context, result) {
-    const codeMatch = result.match(/(?:^|[\r\n]+)(?:```shell[\r\n]+)([\s\S]*?)(?:[\r\n]+```)/);
+    const pattern = /(?:^|[\r\n]+)(?:```shell[\r\n]+)([\s\S]*?)(?:[\r\n]+```)/;
+    const codeMatch = pattern.exec(result);
     if (!codeMatch) {
         return;
     }
+    if (pattern.exec(result) !== null) {
+        context.log(chalk.dim('ℹ') + ' Multiple code blocks supplied, executing none of them.\n');
+        return;
+    }
+
     const code = codeMatch[1].trim();
 
     const resp = await context.prompter.options('Execute this command', [
