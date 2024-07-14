@@ -8,6 +8,12 @@ import { createPrompter } from '../internal/prompt.mjs';
 import { handleSigint } from '../internal/sigint.mjs';
 
 const system = getPrompt('chat');
+const metadata = async () => `
+<system>
+    <os>${(await $`uname`).stdout.trim()}</os>
+    <shell>${(await $`$SHELL --version`).stdout.trim()}</shell>
+</system>
+`;
 
 export async function chat(model, historyFilename) {
     if (!process.stdin.setRawMode) {
@@ -29,7 +35,7 @@ export async function chat(model, historyFilename) {
 
     const askerContext = historyFilename
         ? await createHistoryFromFile(historyFilename)
-        : await createHistoryFromModel(model, system);
+        : await createHistoryFromModel(model, system + '\n' + await metadata());
 
     const prompter = createPrompter(rl);
 
