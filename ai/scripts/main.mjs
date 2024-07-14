@@ -1,4 +1,4 @@
-#!/usr/bin/env zx
+#!/usr/bin/env -S NODE_OPTIONS="--no-warnings" zx
 
 import { program } from 'commander';
 import { chat } from './commands/chat.mjs';
