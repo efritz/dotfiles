@@ -44,6 +44,10 @@ export const commandDescriptions = [
 ];
 
 export async function handle(context, message) {
+    if (message === '') {
+        return;
+    }
+
     if (message.startsWith(':')) {
         const parts = message.split(' ');
         const command = parts[0];
@@ -72,7 +76,7 @@ async function handleHelp(context, message) {
 
     console.log();
     const maxWidth = commandDescriptions.reduce((max, { prefix }) => Math.max(max, prefix.length), 0);
-    
+
     for (const { prefix, description } of commandDescriptions) {
         console.log(`${prefix.padEnd(maxWidth)} - ${description}`);
     }
@@ -120,7 +124,10 @@ async function handleLoad(context, message) {
         return;
     }
 
-    const patterns = message.split(' ').filter(p => p.trim() !== '');
+    await loadFiles(context, message.split(' ').filter(p => p.trim() !== ''));
+}
+
+async function loadFiles(context, patterns) {
     const paths = patterns.flatMap(pattern => glob.sync(pattern));
     const noun = paths.length === 1 ? paths[0] : `${paths.length} files`;
 
@@ -155,10 +162,6 @@ async function handleRun(context, message) {
 }
 
 async function handleMessage(context, message) {
-    if (message === '') {
-        return;
-    }
-
     const { ok, response } = await withProgress(progress => context.ask(message, { progress }), {
         log: context.log,
         progress: formatBufferWithPrefix('Generating response...'),
@@ -167,8 +170,35 @@ async function handleMessage(context, message) {
     });
 
     if (ok) {
+        if (await handleContextRequest(context, response)) {
+            context.log('$ ' + chalk.grey('<continuing conversation>'));
+            return handleMessage(context, '');
+        }
+
         await handleCode(context, response);
     }
+}
+
+async function handleContextRequest(context, result) {
+    const paths = [];
+    const requestPattern = createXmlPattern('AI:FILE_REQUEST', true);
+
+    let requestMatch;
+    while (requestMatch = requestPattern.exec(result)) {
+        const pathPattern = createXmlPattern('AI:PATH', true);
+
+        let pathMatch;
+        while (pathMatch = pathPattern.exec(requestMatch[2])) {
+            paths.push(pathMatch[2]);
+        }
+    }
+
+    if (paths.length === 0) {
+        return false;
+    }
+
+    await loadFiles(context, paths);
+    return true;
 }
 
 async function handleCode(context, result) {

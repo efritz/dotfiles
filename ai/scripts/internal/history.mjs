@@ -20,6 +20,10 @@ function replayMessages(messages) {
 
         let content = message.content;
         if (message.role === 'user') {
+            if (content === '')  {
+                continue;
+            }
+
             content = '$ ' + content;
         }
         console.log(content);

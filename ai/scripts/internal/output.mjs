@@ -11,13 +11,26 @@ export function formatBufferErrorWithPrefix(prefix) {
 
 const partialTagPatterns = [
     'AI:CODEBLOCK',
+    'AI:FILE_REQUEST',
+    'AI:PATH',
 ].flatMap(name => [
     createXmlPartialOpeningTagPattern(name),
     createXmlPartialClosingTagPattern(name),
 ]);
 
-const colorizedPatterns = [
-    { pattern: createXmlPattern('AI:CODEBLOCK'), colorizer: chalk.bold.magenta },
+const formattedPatterns = [
+    {
+        pattern: createXmlPattern('AI:CODEBLOCK'),
+        formatter: (openingTag, content, closingTag) => {
+            return chalk.bold.magenta(content.trim());
+        },
+    },
+    {
+        pattern: createXmlPattern('AI:FILE_REQUEST'),
+        formatter: (openingTag, content, closingTag) => {
+            return chalk.bold.blue('AI is requesting the following files: ' + content.trim().replace(createXmlPattern('AI:PATH'), (_, openingTag, content, closingTag) => `\n  - ${content}`));
+        },
+    },
 ];
 
 export function formatBuffer(prefix, buffer) {
@@ -35,10 +48,8 @@ export function formatBuffer(prefix, buffer) {
     });
 
     // Colorize finished or partially opened blocks
-    colorizedPatterns.forEach(({ pattern, colorizer }) => {
-        formatted = formatted.replace(pattern, (_, openTag, content, closingTag) => {
-            return colorizer(content.trim());
-        });
+    formattedPatterns.forEach(({ pattern, formatter }) => {
+        formatted = formatted.replace(pattern, (_, openTag, content, closingTag) => formatter(openTag, content, closingTag));
     });
 
     // Colorize all other output as cyan
