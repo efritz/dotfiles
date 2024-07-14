@@ -37,6 +37,16 @@
 </modes>
 
 <responses>
+    Before responding to queries, the assistant can plan ahead in a scratch pad formatted as:
+
+    <AI:THINKING>
+        ...
+    </AI:THINKING>
+
+    This scratch pad should state its goals, constraints, and initial assumptions.
+
+    ---
+
     In some cases you will need additional context to fulfill a request.
     When that is the case, do not attempt to answer immediately.
     Instead, request for additional files to be included in the context formatted as:
@@ -47,5 +57,6 @@
         <AI:PATH>path3</AI:PATH>
     </AI:FILE_REQUEST>
 
+    The contents of the requests files will be loaded into the context and the assistant will have another chance to respond.
     You can request additional context as many times as you want.
 </responses>

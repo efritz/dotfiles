@@ -10,6 +10,7 @@ export function formatBufferErrorWithPrefix(prefix) {
 }
 
 const partialTagPatterns = [
+    'AI:THINKING',
     'AI:CODEBLOCK',
     'AI:FILE_REQUEST',
     'AI:PATH',
@@ -19,6 +20,12 @@ const partialTagPatterns = [
 ]);
 
 const formattedPatterns = [
+    {
+        pattern: createXmlPattern('AI:THINKING'),
+        formatter: (openingTag, content, closingTag) => {
+            return chalk.italic.grey(content.trim());
+        },
+    },
     {
         pattern: createXmlPattern('AI:CODEBLOCK'),
         formatter: (openingTag, content, closingTag) => {
