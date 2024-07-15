@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { glob } from 'glob';
 import { edit } from './editor.mjs';
 import { CancelError, ExitError } from './errors.mjs';
-import { formatBuffer, formatBufferErrorWithPrefix, formatBufferWithPrefix } from './output.mjs';
+import { formatBuffer, formatBufferError, formatBufferErrorWithPrefix, formatBufferWithPrefix } from './output.mjs';
 import { withProgress } from './progress.mjs';
 import { createXmlPattern } from './xml.mjs';
 

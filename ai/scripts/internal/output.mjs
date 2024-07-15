@@ -63,7 +63,7 @@ export function formatBuffer(prefix, buffer) {
     return prefix + '\n\n' + chalk.cyan(formatted);
 }
 
-function formatBufferError(prefix, buffer, error) {
+export function formatBufferError(prefix, buffer, error) {
     let context = '';
     if (error && error.message) {
         context = chalk.bold.red(`error: ${error.message}`);
