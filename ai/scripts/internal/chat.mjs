@@ -217,11 +217,8 @@ async function handleCode(context, code) {
         return runCode(context, code)
     }
     if (resp === 'e') {
-        const { ok, response: editedCodeWithFence } = await withProgress(async (progress) => {
-            const editedCode = await edit(code);
-            const codeWithFence = "```shell\n" + editedCode.trim() + "\n```\n"
-            progress(codeWithFence);
-            return codeWithFence;
+        const { ok, response } = await withProgress(async (progress) => {
+            progress(`<AI:CODEBLOCK>${(await edit(code)).trim()}</AI:CODEBLOCK>`);
         }, {
             log: context.log,
             progress: formatBufferWithPrefix('Editing code...'),
@@ -232,8 +229,9 @@ async function handleCode(context, code) {
         });
 
         if (ok) {
-            context.pushUserMessage(`Edited code to:\n${editedCodeWithFence}`);
-            return handleCode(context, editedCodeWithFence);
+            context.pushUserMessage(`Edited code to:\n${response}`);
+            await handleCode(context, unwrapCode(response));
+            return;
         }
     }
 
