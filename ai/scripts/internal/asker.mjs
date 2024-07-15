@@ -2,12 +2,17 @@ import { Anthropic } from '@anthropic-ai/sdk';
 import { OpenAI } from "openai";
 import { readLocalFile } from "./files.mjs";
 
+const sonnetOptions = {
+    maxTokens: 8192,
+    extraHeaders: { 'anthropic-beta': 'max-tokens-3-5-sonnet-2024-07-15' },
+};
+
 export const models = {
     'gpt-4o': { provider: 'OpenAI',    model: 'gpt-4o' },
-    'gpt-4':  { provider: 'OpenAI',    model: 'gpt-4'  },
-    'haiku':  { provider: 'Anthropic', model: 'claude-3-haiku-20240307'  },
-    'sonnet': { provider: 'Anthropic', model: 'claude-3-5-sonnet-20240620' },
-    'opus':   { provider: 'Anthropic', model: 'claude-3-opus-20240229'   },
+    'gpt-4':  { provider: 'OpenAI',    model: 'gpt-4' },
+    'haiku':  { provider: 'Anthropic', model: 'claude-3-haiku-20240307' },
+    'sonnet': { provider: 'Anthropic', model: 'claude-3-5-sonnet-20240620', options: sonnetOptions },
+    'opus':   { provider: 'Anthropic', model: 'claude-3-opus-20240229' },
 }
 
 export const modelNames = Object.keys(models).sort();
@@ -27,7 +32,7 @@ export async function createAskerByModel(model, system, messages = []) {
         throw new Error(`Unknown provider: ${model.provider}`);
     }
 
-    const ask = await factory(model.model, system, messages);
+    const ask = await factory(model.model, system, messages, model.options);
     const pushMessage = userMessage => messages.push({ role: 'user', content: userMessage });
     const clearMessages = () => messages.splice(0, messages.length);
     return { model, system, ask, pushMessage, clearMessages };
@@ -38,10 +43,10 @@ const providerFactories = {
     'Anthropic': askClaude,
 };
 
-async function askOpenAI(model, system, messages) {
+async function askOpenAI(model, system, messages, { temperature = 0.0, max_tokens: maxTokens = 4096 }) {
     const client = new OpenAI({ apiKey: getKey('openai') });
 
-    return async (userMessage, { temperature = 0.0, max_tokens = 4096, progress = () => {} } = {}) => {
+    return async (userMessage, { progress = () => {} } = {}) => {
         const { newContext, push } = teeArray(messages);
 
         if (messages.length === 0) {
@@ -51,7 +56,7 @@ async function askOpenAI(model, system, messages) {
 
         let result = '';
         const onChunk = text => { progress(text); result += text; }
-        const params = { model, temperature, max_tokens, stream: true, messages };
+        const params = { model, temperature, max_tokens: maxTokens, stream: true, messages };
         for await (const chunk of await client.chat.completions.create(params)) {
             onChunk(chunk.choices[0]?.delta?.content ?? '');
         }
@@ -61,10 +66,10 @@ async function askOpenAI(model, system, messages) {
     };
 }
 
-async function askClaude(model, system, messages) {
-    const client = new Anthropic({ apiKey: getKey('anthropic') });
+async function askClaude(model, system, messages, { temperature = 0.0, max_tokens: maxTokens = 4096, extraHeaders = {} }) {
+    const client = new Anthropic({ apiKey: getKey('anthropic'), defaultHeaders: extraHeaders });
 
-    return async (userMessage, { temperature = 0.0, max_tokens = 4096, progress = () => {} } = {}) => {
+    return async (userMessage, { progress = () => {} } = {}) => {
         const { newContext, push } = teeArray(messages);
 
         push({ role: 'user', content: userMessage });
@@ -72,7 +77,7 @@ async function askClaude(model, system, messages) {
 
         let result = '';
         const onChunk = text => { progress(text); result += text; }
-        const params = { system, model, temperature, max_tokens, stream: true, messages };
+        const params = { system, model, temperature, max_tokens: maxTokens, stream: true, messages };
         await client.messages.stream(params).on('text', onChunk).finalMessage();
         push({ role: 'assistant', content: result });
 
