@@ -6,6 +6,7 @@ import { edit } from './editor.mjs';
 import { CancelError, ExitError } from './errors.mjs';
 import { formatBuffer, formatBufferError, formatBufferErrorWithPrefix, formatBufferWithPrefix } from './output.mjs';
 import { withProgress } from './progress.mjs';
+import { allMatches } from './regex.mjs';
 import { createXmlPattern } from './xml.mjs';
 
 export const commandDescriptions = [
@@ -175,24 +176,17 @@ async function handleMessage(context, message) {
             return handleMessage(context, '');
         }
 
-        await handleCode(context, response);
+        const codeMatch = unwrapCode(response);
+        if (codeMatch) {
+            await handleCode(context, codeMatch);
+        }
     }
 }
 
 async function handleContextRequest(context, result) {
-    const paths = [];
-    const requestPattern = createXmlPattern('AI:FILE_REQUEST', true);
-
-    let requestMatch;
-    while (requestMatch = requestPattern.exec(result)) {
-        const pathPattern = createXmlPattern('AI:PATH', true);
-
-        let pathMatch;
-        while (pathMatch = pathPattern.exec(requestMatch[2])) {
-            paths.push(pathMatch[2]);
-        }
-    }
-
+    const paths = allMatches(result, createXmlPattern('AI:FILE_REQUEST', true)).flatMap(match => {
+        return allMatches(match[2], createXmlPattern('AI:PATH', true)).map(match => match[2]);
+    });
     if (paths.length === 0) {
         return false;
     }
@@ -201,19 +195,19 @@ async function handleContextRequest(context, result) {
     return true;
 }
 
-async function handleCode(context, result) {
-    const pattern = createXmlPattern('AI:CODEBLOCK', true);
-    const codeMatch = pattern.exec(result);
-    if (!codeMatch) {
+function unwrapCode(response) {
+    const codeMatches = allMatches(response, createXmlPattern('AI:CODEBLOCK', true));
+    if (codeMatches.length === 0) {
         return;
     }
-    if (pattern.exec(result) !== null) {
-        context.log(chalk.dim('ℹ') + ' Multiple code blocks supplied, executing none of them.\n');
-        return;
+    if (codeMatches.length === 1) {
+        return codeMatches[0][2].trim();
     }
 
-    const code = codeMatch[2].trim();
+    console.log(chalk.dim('ℹ') + ' Multiple code blocks supplied, executing none of them.\n');
+}
 
+async function handleCode(context, code) {
     const resp = await context.prompter.options('Execute this command', [
         { name: 'y', description: 'execute the command as-is' },
         { name: 'n', description: 'skip execution and continue conversation', isDefault: true },

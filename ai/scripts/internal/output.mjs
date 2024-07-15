@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { allMatches } from './regex.mjs';
 import { createXmlPartialClosingTagPattern, createXmlPartialOpeningTagPattern, createXmlPattern } from './xml.mjs';
 
 export function formatBufferWithPrefix(prefix) {
@@ -35,7 +36,8 @@ const formattedPatterns = [
     {
         pattern: createXmlPattern('AI:FILE_REQUEST'),
         formatter: (openingTag, content, closingTag) => {
-            return chalk.bold.blue('AI is requesting the following files: ' + content.trim().replace(createXmlPattern('AI:PATH'), (_, openingTag, content, closingTag) => `\n  - ${content}`));
+            const paths = allMatches(content, createXmlPattern('AI:PATH')).map(match => match[2].trim());
+            return chalk.bold.blue('AI is requesting the following files:\n' + paths.map(path => `  - ${path}`).join('\n'));
         },
     },
 ];

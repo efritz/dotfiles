@@ -1,3 +1,5 @@
+import { allMatches } from "./regex.mjs";
+
 const rawTodoPattern = /<todo>([\s\S]*?)<\/todo>/g;
 const taggedCompletionPattern = /<completion id="(\d+)">([\s\S]*?)<\/completion>/g;
 
@@ -21,7 +23,7 @@ function prepareInput(contents) {
     let buffer = '';
     const placeholders = {};
 
-    forEachMatch(contents, rawTodoPattern, match => {
+    for (const match of allMatches(contents, rawTodoPattern)) {
         i++;
         const todo = `<todo id="${i}">${match[1]}</todo>`;
         placeholders[i] = todo;
@@ -29,16 +31,8 @@ function prepareInput(contents) {
         buffer += contents.slice(lastIndex, match.index);
         buffer += todo;
         lastIndex = rawTodoPattern.lastIndex;
-    });
+    }
 
     buffer += contents.slice(lastIndex);
     return { contents: buffer, placeholders };
-}
-
-function forEachMatch(text, pattern, f) {
-    let match;
-
-    while ((match = pattern.exec(text)) !== null) {
-        f(match)
-    }
 }
