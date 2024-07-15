@@ -172,8 +172,7 @@ async function handleMessage(context, message) {
 
     if (ok) {
         if (await handleContextRequest(context, response)) {
-            context.log('$ ' + chalk.grey('<continuing conversation>'));
-            return handleMessage(context, '');
+            return;
         }
 
         const codeMatch = unwrapCode(response);
