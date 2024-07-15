@@ -17,5 +17,5 @@ export function completer(line) {
 
     // Complete any meta command; if the line is empty show all meta commands.
     const hits = commands.filter(completion => completion.startsWith(line));
-    return [hits.length ? hits : commands, line];
+    return [line === '' ? commands : hits, line];
 }
