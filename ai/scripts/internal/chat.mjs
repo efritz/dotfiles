@@ -171,27 +171,40 @@ async function handleMessage(context, message) {
     });
 
     if (ok) {
-        if (await handleContextRequest(context, response)) {
-            return;
-        }
-
+        const paths = unwrapContextRequest(response);
         const codeMatch = unwrapCode(response);
+        const writes = unwrapWrites(response);
+        // TODO - ensure mutual exclusion
+
+        if (paths.length > 0) {
+            await loadFiles(context, paths);
+            context.log('$ ' + chalk.grey('<continuing conversation>'));
+            return handleMessage(context, '');
+        }
         if (codeMatch) {
             await handleCode(context, codeMatch);
+        }
+        if (writes.length > 0) {
+            for (const { path, contents } of writes) {
+                const resp = await context.prompter.options(`Write ${path}`, [
+                    { name: 'y', description: 'write contents to disk' },
+                    { name: 'n', description: 'do not write contents to disk', isDefault: true },
+                ]);
+                if (resp === 'y') {
+                    writeFileSync(path, contents);
+                    context.log(`Wrote contents to ${path}\n`);
+                } else {
+                    console.log();
+                }
+            }
         }
     }
 }
 
-async function handleContextRequest(context, result) {
-    const paths = allMatches(result, createXmlPattern('AI:FILE_REQUEST', true)).flatMap(match => {
+function unwrapContextRequest(response) {
+    return allMatches(response, createXmlPattern('AI:FILE_REQUEST', true)).flatMap(match => {
         return allMatches(match[2], createXmlPattern('AI:PATH', true)).map(match => match[2]);
     });
-    if (paths.length === 0) {
-        return false;
-    }
-
-    await loadFiles(context, paths);
-    return true;
 }
 
 function unwrapCode(response) {
@@ -204,6 +217,14 @@ function unwrapCode(response) {
     }
 
     console.log(chalk.dim('ℹ') + ' Multiple code blocks supplied, executing none of them.\n');
+    return;
+}
+
+function unwrapWrites(response) {
+    return allMatches(response, createXmlPattern('AI:FILE', true)).flatMap(match => ({
+        path: /path="([^"]+)"/.exec(match[1])[1],
+        contents: match[2].trim() + '\n',
+    }));
 }
 
 async function handleCode(context, code) {

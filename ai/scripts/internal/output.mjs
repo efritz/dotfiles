@@ -13,6 +13,7 @@ export function formatBufferErrorWithPrefix(prefix) {
 const partialTagPatterns = [
     'AI:THINKING',
     'AI:CODEBLOCK',
+    'AI:FILE',
     'AI:FILE_REQUEST',
     'AI:PATH',
 ].flatMap(name => [
@@ -31,6 +32,13 @@ const formattedPatterns = [
         pattern: createXmlPattern('AI:CODEBLOCK'),
         formatter: (openingTag, content, closingTag) => {
             return chalk.bold.magenta(content.trim());
+        },
+    },
+    {
+        pattern: createXmlPattern('AI:FILE'),
+        formatter: (openingTag, content, closingTag) => {
+            const path = /path="([^"]+)"/.exec(openingTag)[1];
+            return chalk.red('AI is requesting to edit the following file: ' + chalk.bold(path)) + '\n' + chalk.green(content.trim());
         },
     },
     {
