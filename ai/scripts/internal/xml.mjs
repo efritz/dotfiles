@@ -4,7 +4,7 @@
 // to the end of the text if no paired closing tag can be found.
 export function createXmlPattern(name, requireClosingTag) {
     return new RegExp([
-        `(<${name}>)`,                                 // opening tag
+        `(<${name}(?: [^>]*)?)>`,                      // opening tag
         '([\\s\\S]*?)',                                // content
         `(</${name}>${requireClosingTag ? '' : '|$'})` // closing tag
     ].join(''), 'g');
