@@ -16,6 +16,7 @@ const partialTagPatterns = [
     'AI:FILE',
     'AI:FILE_REQUEST',
     'AI:PATH',
+    'AI:COMPLETION',
 ].flatMap(name => [
     createXmlPartialOpeningTagPattern(name),
     createXmlPartialClosingTagPattern(name),
@@ -38,7 +39,7 @@ const formattedPatterns = [
         pattern: createXmlPattern('AI:FILE'),
         formatter: (openingTag, content, closingTag) => {
             const path = /path="([^"]+)"/.exec(openingTag)[1];
-            return chalk.red('AI is requesting to edit the following file: ' + chalk.bold(path)) + '\n' + chalk.green(content.trim());
+            return chalk.red(`AI is requesting to write to the file "${chalk.bold(path)}":`) + '\n' + chalk.green(content.trim());
         },
     },
     {
@@ -46,6 +47,13 @@ const formattedPatterns = [
         formatter: (openingTag, content, closingTag) => {
             const paths = allMatches(content, createXmlPattern('AI:PATH')).map(match => match[2].trim());
             return chalk.bold.blue('AI is requesting the following files:\n' + paths.map(path => `  - ${path}`).join('\n'));
+        },
+    },
+    {
+        pattern: createXmlPattern('AI:COMPLETION'),
+        formatter: (openingTag, content, closingTag) => {
+            const id = /id="([^"]+)"/.exec(openingTag)[1];
+            return chalk.red(`AI has completed item "${chalk.bold(id)}":`) + '\n' + chalk.green(content.trim());
         },
     },
 ];

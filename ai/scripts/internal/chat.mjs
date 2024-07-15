@@ -7,6 +7,7 @@ import { CancelError, ExitError } from './errors.mjs';
 import { formatBuffer, formatBufferError, formatBufferErrorWithPrefix, formatBufferWithPrefix } from './output.mjs';
 import { withProgress } from './progress.mjs';
 import { allMatches } from './regex.mjs';
+import { prepareTodoPlaceholders, replaceTodoPlaceholders } from './todos.mjs';
 import { createXmlPattern } from './xml.mjs';
 
 export const commandDescriptions = [
@@ -35,6 +36,12 @@ export const commandDescriptions = [
         args: true,
         handler: handleLoad,
         description: 'Load file contents into the chat context (supports wildcards)',
+    },
+    {
+        prefix: ':edit',
+        args: true,
+        handler: handleEdit,
+        description: 'Replace <todo /> placeholders in the file with completions',
     },
     {
         prefix: ':run',
@@ -148,6 +155,31 @@ async function loadFiles(context, patterns) {
         for (const { path, contents } of pathContents) {
             context.pushUserMessage(`<AI:FILE path="${path}">${contents}</AI:FILE>\n`);
         }
+    }
+}
+
+async function handleEdit(context, message) {
+    const paths = message.trim().split(' ');
+    if (paths.length !== 1) {
+        console.log(chalk.bold.red(`Expected exactly one path to :edit, got ${paths.length}.`));
+        console.log();
+        return;
+    }
+
+    const path = paths[0];
+    const rawInput = readFileSync(path);
+    const { contents, placeholders } = prepareTodoPlaceholders(rawInput);
+
+    const { ok, response } = await withProgress(progress => context.ask(contents, { progress }), {
+        log: context.log,
+        progress: formatBufferWithPrefix('Completing <todo /> blocks...'),
+        success: formatBufferWithPrefix('Completed <todo /> blocks.'),
+        failure: formatBufferErrorWithPrefix('Failed to complete <todo /> blocks.'),
+    });
+
+    if (ok) {
+        const replaced = replaceTodoPlaceholders(contents, placeholders, response);
+        await handleWrites(context, [{ path, contents: replaced }]);
     }
 }
 
