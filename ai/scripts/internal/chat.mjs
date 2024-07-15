@@ -185,18 +185,22 @@ async function handleMessage(context, message) {
             await handleCode(context, codeMatch);
         }
         if (writes.length > 0) {
-            for (const { path, contents } of writes) {
-                const resp = await context.prompter.options(`Write ${path}`, [
-                    { name: 'y', description: 'write contents to disk' },
-                    { name: 'n', description: 'do not write contents to disk', isDefault: true },
-                ]);
-                if (resp === 'y') {
-                    writeFileSync(path, contents);
-                    context.log(`Wrote contents to ${path}\n`);
-                } else {
-                    console.log();
-                }
-            }
+            await handleWrites(context, writes);
+        }
+    }
+}
+
+async function handleWrites(context, writes) {
+    for (const { path, contents } of writes) {
+        const resp = await context.prompter.options(`Write ${path}`, [
+            { name: 'y', description: 'write contents to disk' },
+            { name: 'n', description: 'do not write contents to disk', isDefault: true },
+        ]);
+        if (resp === 'y') {
+            writeFileSync(path, contents);
+            context.log(`Wrote contents to ${path}\n`);
+        } else {
+            console.log();
         }
     }
 }
