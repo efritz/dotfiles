@@ -122,7 +122,7 @@ async function handleSave(context, message) {
 
     const filename = `chat-${Math.floor(Date.now() / 1000)}.json`;
     writeFileSync(filename, JSON.stringify(context.serialize(), null, '\t'));
-    context.log(`Chat history saved to ${filename}\n`);
+    context.log(`Chat history saved to ${filename}.\n`);
 }
 
 async function handleLoad(context, message) {
