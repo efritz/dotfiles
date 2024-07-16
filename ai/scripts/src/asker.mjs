@@ -32,7 +32,7 @@ export async function createAskerByModel(model, system, messages = []) {
         throw new Error(`Unknown provider: ${model.provider}`);
     }
 
-    const ask = await factory(model.model, system, messages, model.options);
+    const ask = await factory(model.model, system, messages, model.options || {});
     const pushMessage = userMessage => messages.push({ role: 'user', content: userMessage });
     const clearMessages = () => messages.splice(0, messages.length);
     return { model, system, ask, pushMessage, clearMessages };
@@ -43,7 +43,7 @@ const providerFactories = {
     'Anthropic': askClaude,
 };
 
-async function askOpenAI(model, system, messages, { temperature = 0.0, max_tokens: maxTokens = 4096 }) {
+async function askOpenAI(model, system, messages, { temperature = 0.0, maxTokens = 4096 }) {
     const client = new OpenAI({ apiKey: getKey('openai') });
 
     return async (userMessage, { progress = () => {} } = {}) => {
@@ -66,7 +66,7 @@ async function askOpenAI(model, system, messages, { temperature = 0.0, max_token
     };
 }
 
-async function askClaude(model, system, messages, { temperature = 0.0, max_tokens: maxTokens = 4096, extraHeaders = {} }) {
+async function askClaude(model, system, messages, { temperature = 0.0, maxTokens = 4096, extraHeaders = {} }) {
     const client = new Anthropic({ apiKey: getKey('anthropic'), defaultHeaders: extraHeaders });
 
     return async (userMessage, { progress = () => {} } = {}) => {
