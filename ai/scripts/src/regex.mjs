@@ -1,9 +1,12 @@
 export function allMatches(text, pattern) {
-    let match;
     const matches = [];
-    while (match = pattern.exec(text)) {
-        matches.push(match);
-    }
-
+    forEachMatch(text, pattern, match => matches.push(match));
     return matches;
+}
+
+export function forEachMatch(text, pattern, f) {
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+        f(match)
+    }
 }
