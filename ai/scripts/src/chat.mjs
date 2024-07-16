@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import { spawn } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
 import { glob } from 'glob';
+import { showDiff } from './diff.mjs';
 import { edit } from './editor.mjs';
 import { CancelError, ExitError } from './errors.mjs';
 import { formatBuffer, formatBufferError, formatBufferErrorWithPrefix, formatBufferWithPrefix } from './output.mjs';
@@ -224,15 +225,25 @@ async function handleMessage(context, message) {
 
 async function handleWrites(context, writes) {
     for (const { path, contents } of writes) {
-        const resp = await context.prompter.options(`Write ${path}`, [
-            { name: 'y', description: 'write contents to disk' },
-            { name: 'n', description: 'do not write contents to disk', isDefault: true },
-        ]);
-        if (resp === 'y') {
-            writeFileSync(path, contents);
-            context.log(`Wrote contents to ${path}\n`);
-        } else {
-            console.log();
+        while (true) {
+            const decision = await context.prompter.options(`Write ${path}`, [
+                { name: 'y', description: 'write contents to disk' },
+                { name: 'n', description: 'do not write contents to disk', isDefault: true },
+                { name: 'd', description: 'show diff between existing and proposed contents' },
+            ]);
+
+            if (decision === 'd') {
+                await showDiff(context, path, contents);
+                continue
+            }
+
+            if (decision === 'y') {
+                writeFileSync(path, contents);
+                context.log(`Wrote contents to ${path}.\n`);
+            } else {
+                console.log();
+            }
+            break;
         }
     }
 }
