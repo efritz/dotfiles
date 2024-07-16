@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { spawn } from 'child_process';
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { glob } from 'glob';
 import { showDiff } from './diff.mjs';
 import { edit } from './editor.mjs';
@@ -168,6 +168,13 @@ async function handleEdit(context, message) {
     }
 
     const path = paths[0];
+
+    if (!existsSync(path)) {
+        console.log(chalk.bold.red(`File "${path}" does not exist.`));
+        console.log();
+        return;
+    }
+
     const rawInput = readFileSync(path);
     const { contents, placeholders } = prepareTodoPlaceholders(rawInput);
 
