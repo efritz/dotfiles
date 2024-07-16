@@ -102,7 +102,7 @@ async function handleExit(context, message) {
     throw new ExitError('User exited.');
 }
 
-async function handleClear(context) {
+async function handleClear(context, message) {
     if (message !== '') {
         console.log(chalk.bold.red(`Unexpected arguments supplied to :clear.`));
         console.log();
