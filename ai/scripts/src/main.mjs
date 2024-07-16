@@ -1,13 +1,18 @@
+#!/usr/bin/env -S NODE_OPTIONS="--no-warnings" zx
+
+import { program } from 'commander';
 import readline from 'readline';
-import { handle } from '../internal/chat.mjs';
-import { completer } from '../internal/completions.mjs';
-import { ExitError } from '../internal/errors.mjs';
-import { createHistoryFromFile, createHistoryFromModel } from '../internal/history.mjs';
-import { getPrompt } from '../internal/system.mjs';
-import { createPrompter } from '../internal/prompt.mjs';
-import { handleSigint } from '../internal/sigint.mjs';
+import { handle } from './chat.mjs';
+import { completer } from './completions.mjs';
+import { ExitError } from './errors.mjs';
+import { createHistoryFromFile, createHistoryFromModel } from './history.mjs';
+import { getPrompt } from './system.mjs';
+import { createPrompter } from './prompt.mjs';
+import { handleSigint } from './sigint.mjs';
+import { modelNames } from './asker.mjs';
 
 const system = getPrompt('chat');
+
 const metadata = async () => `
 <system>
     <os>${(await $`uname`).stdout.trim()}</os>
@@ -15,7 +20,28 @@ const metadata = async () => `
 </system>
 `;
 
-export async function chat(model, historyFilename) {
+async function main() {
+    program
+        .name('llm')
+        .description('Personalized LLM utilities.')
+        .showHelpAfterError(true)
+        .allowExcessArguments(false)
+        .storeOptionsAsProperties();
+    
+    const modelFlags = '-m, --model <string>';
+    const modelDescription = `Model to use. Defaults to sonnet. Valid options are ${modelNames.join(', ')}.`;
+    const modelDefault = 'sonnet';
+
+    program
+        .option(modelFlags, modelDescription, modelDefault)
+        .option('--history <string>', 'File to load chat history from.')
+        .action((options) => chat(options.model, options.history));
+
+    // argv = node zx ./main.mjs [...]
+    program.parse(process.argv.slice(1));
+}
+
+async function chat(model, historyFilename) {
     if (!process.stdin.setRawMode) {
         throw new Error('chat command is not supported in this environment.');
     }
@@ -59,3 +85,5 @@ async function handler(context) {
         }
     }
 }
+
+await main();

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+~/.dotfiles/ai/scripts/src/main.mjs "$@"

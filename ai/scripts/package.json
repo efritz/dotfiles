@@ -1,5 +1,5 @@
 {
-    "name": "llm-scripts",
+    "name": "ai",
     "license": "MIT",
     "dependencies": {
         "@anthropic-ai/sdk": "^0.24.3",
