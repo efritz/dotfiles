@@ -214,7 +214,11 @@ async function handleMessage(context, message) {
         const paths = unwrapContextRequest(response);
         const codeMatch = unwrapCode(response);
         const writes = unwrapWrites(response);
-        // TODO - ensure mutual exclusion
+
+        if ((paths.length > 0 ? 1 : 0) + (codeMatch ? 1 : 0) + (writes.length > 0 ? 1 : 0) > 1) {
+            console.log(chalk.bold.red('AI is requesting to perform multiple types of actions.'));
+            return;
+        }
 
         if (paths.length > 0) {
             await loadFiles(context, paths);
