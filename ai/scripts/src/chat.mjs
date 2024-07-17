@@ -348,7 +348,7 @@ async function runCode(context, code) {
             { name: 'y', description: 'diagnose this error', isDefault: true },
             { name: 'n', description: 'skip diagnosis and continue conversation'},
         ])) === 'y') {
-            return handleMessage(context, 'Diagnose the error.');
+            return handleMessage(context, 'Diagnose the error from the previous command.');
         } else {
             console.log();
         }
