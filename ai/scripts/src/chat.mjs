@@ -177,8 +177,9 @@ async function handleEdit(context, message) {
 
     const rawInput = readFileSync(path);
     const { contents, placeholders } = prepareTodoPlaceholders(rawInput);
+    const prompt = 'Edit the <AI:TODO /> blocks in the following text';
 
-    const { ok, response } = await withProgress(progress => context.ask(contents, { progress }), {
+    const { ok, response } = await withProgress(progress => context.ask(`${prompt}:\n\n${contents}`, { progress }), {
         log: context.log,
         progress: formatBufferWithPrefix('Completing <todo /> blocks...'),
         success: formatBufferWithPrefix('Completed <todo /> blocks.'),
