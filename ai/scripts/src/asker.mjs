@@ -1,3 +1,4 @@
+import ollama from "ollama";
 import { Anthropic } from '@anthropic-ai/sdk';
 import { OpenAI } from "openai";
 import { readLocalFile } from "./files.mjs";
@@ -13,6 +14,7 @@ export const models = {
     'haiku':  { provider: 'Anthropic', model: 'claude-3-haiku-20240307' },
     'sonnet': { provider: 'Anthropic', model: 'claude-3-5-sonnet-20240620', options: sonnetOptions },
     'opus':   { provider: 'Anthropic', model: 'claude-3-opus-20240229' },
+    'llama3': { provider: 'Ollama',    model: 'llama3' },
 }
 
 export const modelNames = Object.keys(models).sort();
@@ -41,6 +43,7 @@ export async function createAskerByModel(model, system, messages = []) {
 const providerFactories = {
     'OpenAI': askOpenAI,
     'Anthropic': askClaude,
+    'Ollama': askOllama,
 };
 
 async function askOpenAI(model, system, messages, { temperature = 0.0, maxTokens = 4096 }) {
@@ -56,7 +59,7 @@ async function askOpenAI(model, system, messages, { temperature = 0.0, maxTokens
 
         let result = '';
         const onChunk = text => { progress(text); result += text; }
-        const params = { model, temperature, max_tokens: maxTokens, stream: true, messages };
+        const params = { model, messages, stream: true, temperature, max_tokens: maxTokens };
         for await (const chunk of await client.chat.completions.create(params)) {
             onChunk(chunk.choices[0]?.delta?.content ?? '');
         }
@@ -77,8 +80,29 @@ async function askClaude(model, system, messages, { temperature = 0.0, maxTokens
 
         let result = '';
         const onChunk = text => { progress(text); result += text; }
-        const params = { system, model, temperature, max_tokens: maxTokens, stream: true, messages };
+        const params = { system, model, messages,stream: true, temperature, max_tokens: maxTokens };
         await client.messages.stream(params).on('text', onChunk).finalMessage();
+        push({ role: 'assistant', content: result });
+
+        return { result, newContext };
+    };
+}
+
+async function askOllama(model, system, messages, { temperature = 0.0, maxTokens = 4096 }) {
+    return async (userMessage, { progress = () => {} } = {}) => {
+        const { newContext, push } = teeArray(messages);
+
+        if (messages.length === 0) {
+            push({ role: 'system', content: system });
+        }
+        push({ role: 'user', content: userMessage });
+
+        let result = '';
+        const onChunk = text => { progress(text); result += text; }
+        const params = { model, messages, stream: true, options: { temperature, num_predict: maxTokens }};
+        for await (const chunk of await ollama.chat(params)) {
+            onChunk(chunk.message.content);
+        }
         push({ role: 'assistant', content: result });
 
         return { result, newContext };
