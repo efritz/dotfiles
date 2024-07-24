@@ -52,115 +52,111 @@ const providerFactories = {
 async function askOpenAI(model, system, messages, { temperature = 0.0, maxTokens = 4096 }) {
     const client = new OpenAI({ apiKey: getKey('openai') });
 
-    return async (userMessage, { progress = () => {} } = {}) => {
-        const { newContext, push } = teeArray(messages);
+    return createAskerFunc(messages, system, async (messages, progress) => {
+        const stream = client.chat.completions.create({
+            model,
+            messages,
+            stream: true,
+            temperature,
+            max_tokens: maxTokens,
+        });
 
-        if (messages.length === 0) {
-            push({ role: 'system', content: system });
-        }
-        push({ role: 'user', content: userMessage });
-
-        let result = '';
-        const onChunk = text => { progress(text); result += text; }
-        const params = { model, messages, stream: true, temperature, max_tokens: maxTokens };
-        for await (const chunk of await client.chat.completions.create(params)) {
-            onChunk(chunk.choices[0]?.delta?.content ?? '');
-        }
-        push({ role: 'assistant', content: result });
-
-        return { result, newContext };
-    };
+        return readStream(stream, chunk => chunk.choices[0]?.delta?.content ?? '', progress);
+    });
 }
 
 async function askClaude(model, system, messages, { temperature = 0.0, maxTokens = 4096, extraHeaders = {} }) {
     const client = new Anthropic({ apiKey: getKey('anthropic'), defaultHeaders: extraHeaders });
 
-    return async (userMessage, { progress = () => {} } = {}) => {
-        const { newContext, push } = teeArray(messages);
+    return createAskerFunc(messages, '', async (messages, progress) => {
+        const stream = client.messages.stream({
+            system,
+            model,
+            messages,
+            stream: true,
+            temperature,
+            max_tokens: maxTokens,
+        });
 
-        push({ role: 'user', content: userMessage });
-        collapseMessagesFromSameSpeaker(messages);
-
-        let result = '';
-        const onChunk = text => { progress(text); result += text; }
-        const params = { system, model, messages,stream: true, temperature, max_tokens: maxTokens };
-        await client.messages.stream(params).on('text', onChunk).finalMessage();
-        push({ role: 'assistant', content: result });
-
-        return { result, newContext };
-    };
+        stream.on('text', progress);
+        return (await stream.finalMessage()).content;
+    });
 }
 
 async function askOllama(model, system, messages, { temperature = 0.0, maxTokens = 4096 }) {
-    return async (userMessage, { progress = () => {} } = {}) => {
-        const { newContext, push } = teeArray(messages);
+    return createAskerFunc(messages, system, async (messages, progress) => {
+        const stream = ollama.chat({
+            model,
+            messages,
+            stream: true,
+            options: {
+                temperature,
+                num_predict: maxTokens,
+            },
+        });
 
-        if (messages.length === 0) {
-            push({ role: 'system', content: system });
-        }
-        push({ role: 'user', content: userMessage });
-
-        let result = '';
-        const onChunk = text => { progress(text); result += text; }
-        const params = { model, messages, stream: true, options: { temperature, num_predict: maxTokens }};
-        for await (const chunk of await ollama.chat(params)) {
-            onChunk(chunk.message.content);
-        }
-        push({ role: 'assistant', content: result });
-
-        return { result, newContext };
-    };
+        return await readStream(stream, chunk => chunk.message.content, progress);
+    });
 }
 
 async function askGroq(model, system, messages, { temperature = 0.0, maxTokens = 4096 }) {
     const client = new Groq({ apiKey: getKey('groq') });
 
-    return async (userMessage, { progress = () => {} } = {}) => {
-        const { newContext, push } = teeArray(messages);
+    return createAskerFunc(messages, system, async (messages, progress) => {
+        const stream = client.chat.completions.create({
+            model,
+            messages,
+            stream: true,
+            temperature,
+            max_tokens: maxTokens,
+        });
 
-        if (messages.length === 0) {
-            push({ role: 'system', content: system });
-        }
-        push({ role: 'user', content: userMessage });
-
-        let result = '';
-        const onChunk = text => { progress(text); result += text; }
-        const params = { model, messages, stream: true, temperature, max_tokens: maxTokens };
-        for await (const chunk of await client.chat.completions.create(params)) {
-            onChunk(chunk.choices[0]?.delta?.content ?? '');
-        }
-        push({ role: 'assistant', content: result });
-
-        return { result, newContext };
-    };
+        return await readStream(stream, chunk => chunk.choices[0]?.delta?.content ?? '', progress);
+    });
 }
 
 function getKey(name) {
     return readLocalFile(["keys", `${name}.key`]);
 }
 
-function teeArray(context) {
-    const newContext = [];
-    return { newContext, push: entry => {
-        context.push(entry);
-        newContext.push(entry);
-    }};
-}
-
-function collapseMessagesFromSameSpeaker(messages) {
-    let previous = null;
-    for (let i = 0; i < messages.length; i++) {
-        const message = messages[i];
-
-        if (previous !== null && message.role == previous.role) {
-            previous.content += '\n' + message.content;
-
-            // Remove the current message from the list and reprocess the
-            // current index, which now contains the subsequent message.
-            messages.splice(i--, 1);
-            continue;
+async function createAskerFunc(messages, system, f) {
+    return async (userMessage, { progress = () => {} } = {}) => {
+        const newMessages = [];
+        const push = entry => {
+            messages.push(entry);
+            newMessages.push(entry);
         }
 
-        previous = message;
+        if (messages.length === 0 && system !== '') {
+            push({ role: 'system', content: system });
+        }
+        push({ role: 'user', content: userMessage });
+
+        const collapsedMessages = messages.reduce((acc, message) => {
+            const lastMessage = acc[acc.length - 1];
+
+            if (lastMessage && lastMessage.role === message.role) {
+                lastMessage.content += '\n' + message.content;
+            } else {
+                acc.push({ ...message });
+            }
+
+            return acc;
+        }, []);
+
+        const result = await f(collapsedMessages, progress);
+        push({ role: 'assistant', content: result });
+        return { result, newContext: newMessages };
+    };
+}
+
+async function readStream(stream, mapFn, progress) {
+    let result = '';
+    for await (const chunk of await stream) {
+        const text = mapFn(chunk);
+        progress(text);
+        result += text;
     }
+
+    return result;
 }
