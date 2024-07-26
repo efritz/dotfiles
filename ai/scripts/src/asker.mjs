@@ -76,10 +76,45 @@ async function askClaude(model, system, messages, { temperature = 0.0, maxTokens
             stream: true,
             temperature,
             max_tokens: maxTokens,
+            tools: [
+                {
+                    name: 'shell_execute',
+                    description: 'Execute a shell command.',
+                    input_schema: {
+                        type: 'object',
+                        properties: {
+                            command: { type: 'string' },
+                        },
+                        required: ['command'],
+                    },
+                },
+            ],
         });
 
-        stream.on('text', progress);
-        return (await stream.finalMessage()).content;
+        const format = (message) => {
+            const chunks = message.content;
+
+            console.log({chunks});
+
+            const sss = [];
+            for (const chunk of chunks) {
+                sss.push({ text: chunk.type === 'text' ? chunk.text : chunk.name + '(' + JSON.stringify(chunk.input) + ')' });
+            }
+            return sss.map(s => s.text).join('\n');
+        }
+
+        // stream.on('streamEvent', (_, snapshot) => progress(format(snapshot)));
+        stream.on('streamEvent', (e) => {
+            if (e.type === 'content_block_delta') {
+                console.log({delta:e.delta});
+            }else            if (e.type === 'content_block_start') {
+                console.log({content_block:e.content_block});
+            }else{
+            console.log({unknown:e})}
+        })
+        stream.on('text', t => console.log({raw_text: t}));
+        stream.on('inputJson', t => console.log({raw_json: t}))
+        progress(format(await stream.finalMessage()));
     });
 }
 

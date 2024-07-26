@@ -1,7 +1,7 @@
 import ora from 'ora';
 
 export async function withProgress(f, options) {
-    let buffer = '';
+    let buffer = ''; // TODO
     const spinner = ora({ text: options.progress(''), discardStdin: false });
     spinner.start();
 
@@ -18,7 +18,7 @@ export async function withProgress(f, options) {
 
     try {
         await f(chunk => {
-            buffer += chunk;
+            buffer = chunk;
             spinner.text = options.progress(buffer);
         });
 
