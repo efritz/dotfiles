@@ -35,6 +35,11 @@
 
   // Extensions settings
   "markdown-preview-enhanced.codeBlockTheme": "github.css",
+<<<<<<< Updated upstream
   "github.copilot.editor.enableAutoCompletions": true,
   "gitlens.mode.active": "review"
+=======
+  "editor.unicodeHighlight.nonBasicASCII": false,
+  "github.copilot.editor.enableAutoCompletions": true
+>>>>>>> Stashed changes
 }
