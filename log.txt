@@ -1,0 +1,101 @@
+* 21d4507a7298 (HEAD -> ef/rewrite) WIP.
+* 583028aaa4ea WIP.
+* 3e30a4e1bcb6 WIP.
+* 48478254fab5 (origin/ef/rewrite) WIP.
+* d7a6216cf7a4 WIP.
+* a5ead207772d WIP.
+* 3042e2c5b1ad WIP.
+* 885c91db8f75 WIP.
+* 809300911abe WIP.
+* 27a50d18752d WIP.
+* f5f1881d83e7 WIP.
+* 00d0883f14c2 WIP.
+* 28f1f9a89d6e WIP.
+* f5005edcb816 WIP.
+* 4c417f77753b WIP.
+* bdf4588a9569 WIP.
+* bfddbd862ec1 WIP.
+* b5c5f660b74a WIP.
+* db08cd98627f WIP.
+* 1f09b406127e WIP.
+* 6cce96c9a4e9 WIP.
+* 0e82e5c7dedd WIP.
+* e5abb76a0078 WIP.
+* a340c6e24e7b WIP.
+* d1908863cb41 WIP.
+| * eb5c049b3c91 (ef/tools) WIP.
+| * c265606cf7be WIP.
+| * 848f8cc57b74 (origin/ef/tools) WIP.
+|/  
+* 326a775c3a83 (origin/master, origin/HEAD, master) Refactor asker.
+* 78fd551ef132 Add Llama 70B via Groq.
+* 1fe1b1ed0db9 Add llama3 model.
+* 3b1ae5502a64 Expand diagnose prompt.
+* 6255536b344f Add edit prompt to edit command.
+* 5c4afd46bee6 Add mutual exclusion error message.
+* 7a42ed637d5b Show error when editing a non-existent file.
+* d6c0616662af Add rough file diff functionality.
+* ee2d434e8551 Punctuate log message.
+* 88ea9e544940 Fix bad regex replacement refactor.
+* d579ab9bc096 Fix default options.
+* bc66fc589576 Fix missing parameter.
+* a74629fb1c6a Rename llm -> ai and remove subcommands.
+* e542aa3c02f5 Add edit command to chat.
+* 9fc97eada1ab Extract handleWrites.
+* 034597b2e244 Do not clobber user input on tab for a non-meta command.
+* 93607121343a Update Sonnet options to increase output size.
+* b2440fe94c50 Add file editing functionality.
+* 601de6cddc01 Fix bad regex.
+* b0f7287b9241 Fix broken tags on edited code.
+* 2c8e81a90220 Restyle thinking output.
+* 1e5c90347189 Refactor regex matching.
+* be54b3510175 Add missing export/import.
+* f9915e5ec9c6 Add AI:THINKING blocks.
+* df7675085aad Update deps.
+* d33923f8d478 Add OS and shell metadata to system prompt.
+* fac31bec0ab3 Enable AI to ask for additional file context.
+* ce51b3c60a95 Update comments.
+* c614a10f00d4 Add missing xml file.
+* 0a3ebd876983 Standardize XML with AI prefix.
+* 3c358408aac3 Replace markdown shell blocks with XML.
+* 210618fb281f Enforce one code block per response.
+* 423478c8f9fe Add :run metacommand.
+* a0bead6b730e Remove unreferenced system prompt.
+* fd826b1052cb Add history replay.
+* 249e824e80d6 Refactor serialization for history files.
+* 017b6e51c695 Improve meta commands in llm scripts.
+* 07691b6c1161 Remove 'ask' from llm scripts.
+* e1b59cbcbd34 Fix async functions.
+* 182a54d3ffc6 Add util for reading system prompts from disk.
+* 3f3000b54c80 Colocate all llm scripts into root ai directory.
+* 26caad6a1178 Fix errors.
+* 95c07d95402b Improve code block regex in llm scripts.]
+* 447ed56dc2f5 Refactor llm scripts to smaller files.
+* dbbe8200a696 Move system prompts to external files.
+* db2600094ef9 Add ch alias.
+* 613310d66eb5 Add globs to llm chat completions.
+* 40d1bbe31385 Update output when loading multiple files in llm chat.
+* 04e1f33e3536 Allow multiple paths in llm chat load command.
+* 20c37d86f218 Improve completer in llm chat (take 2).
+* 8cdf2ca59cac Improve completer in llm chat.
+* b351f6821555 Clean up extension project.
+* 1e210d8bdfd3 Add draft llm vscode extension.
+* 169d7a9aa081 Make file optional for llm edit, output on stdout if input is from stdin.
+* 4ed893d6234a Update chat prompt.
+* c5ffa8621e3d Improve llm editor prompt and parsing.
+* 8a4224a6f150 Change default model to sonnet.
+* c34cb795fd42 Update sonnet to 3.5.
+* 18988e89aed2 Fix spelling error.
+* 45886f8b4fc0 Improve llm chat option prompts.
+* 0e52650a608a Install global rl signal handler in llm chat.
+* 649d96f4d466 Add edit flow to llm chat.
+* 5861ad22d984 Fix formatting.
+* 5d7839b95449 Format llm responses with color.
+* 454fae960b4b Show help after error in llm script.
+* 80492ee61922 Update system/context prompt to work with Claude.
+* 5dfc1aefac88 Fix non-alternating messages for Claude.
+* e3e33dfbd510 Change default behavior of llm script to be one-shot.
+* 56c771345e1b Add history features to llm chat.
+* fb9684a1d383 Make ask options default in llm script.
+* 69f35d017ecd Refactor llm script internals.
+* 5c301da2227f Make mega llm command.
