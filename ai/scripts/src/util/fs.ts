@@ -2,19 +2,20 @@ import { Dirent } from 'fs'
 import { readdir, readFile } from 'fs/promises'
 import chalk from 'chalk'
 import { glob } from 'glob'
-import { $ } from 'zx'
 import { ProgressResult, withProgress } from './progress'
 
 export function expandFilePatterns(patterns: string[]): string[] {
-    return patterns.flatMap(pattern => glob.sync(pattern, { nodir: true }))
+    return patterns.flatMap(pattern => (pattern.includes('*') ? glob.sync(pattern, { nodir: true }) : [pattern]))
 }
 
 export function expandDirectoryPatterns(patterns: string[]): string[] {
     return patterns.flatMap(pattern =>
-        glob
-            .sync(pattern, { withFileTypes: true })
-            .filter(entry => entry.isDirectory())
-            .map(({ name }) => name),
+        pattern.includes('*')
+            ? glob
+                  .sync(pattern, { withFileTypes: true })
+                  .filter(entry => entry.isDirectory())
+                  .map(({ name }) => name)
+            : [pattern],
     )
 }
 
@@ -91,17 +92,20 @@ async function readFilesystem<T extends { path: string }>(
 
     return await withProgress<T[]>(
         async update => {
-            const resolved = await Promise.all(
+            await Promise.all(
                 paths.map(async path => {
-                    const payload = { path, ...(await read(path)) } as T
-                    snapshot.push(payload)
-                    update(snapshot)
-                    return payload
+                    try {
+                        const payload = { path, ...(await read(path)) } as T
+                        snapshot.push(payload)
+                        update(snapshot)
+                        return payload
+                    } catch (error: any) {
+                        // silently ignore errors
+                    }
                 }),
             )
 
-            update(resolved)
-            return resolved
+            return snapshot
         },
         {
             progress: snapshot => formatSnapshot(options.progressPrefix, snapshot || []),

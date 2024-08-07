@@ -22,7 +22,7 @@ export function createConversation<T>({
     userMessageToParam,
     assistantMessagesToParam,
     initialMessage,
-    postPush: reducer,
+    postPush,
 }: ConversationOptions<T>): Conversation<T> {
     const chatMessages: Message[] = []
     const providerMessages: T[] = []
@@ -34,7 +34,7 @@ export function createConversation<T>({
 
         chatMessages.push({ ...message, role: 'user' })
         providerMessages.push(userMessageToParam(message))
-        reducer?.(providerMessages)
+        postPush?.(providerMessages)
     }
 
     const pushAssistant = (messages: AssistantMessage[]) => {
@@ -42,7 +42,7 @@ export function createConversation<T>({
             chatMessages.push({ ...m, role: 'assistant' })
         }
         providerMessages.push(assistantMessagesToParam(messages))
-        reducer?.(providerMessages)
+        postPush?.(providerMessages)
     }
 
     const clear = () => {

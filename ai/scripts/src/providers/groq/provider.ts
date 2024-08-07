@@ -1,6 +1,7 @@
 import Groq from 'groq-sdk'
 import { ChatCompletionChunk, ChatCompletionMessageParam } from 'groq-sdk/resources/chat/completions'
-import { tools } from '../../tools/tools'
+import { ChatCompletionTool } from 'openai/resources'
+import { tools as toolDefinitions } from '../../tools/tools'
 import { abortableIterator } from '../../util/iterator'
 import { Model, Provider, ProviderOptions, ProviderSpec } from '../provider'
 import { getKey } from '../util/keys'
@@ -63,14 +64,16 @@ async function createStream({
         stream: true,
         temperature,
         max_tokens: maxTokens,
-        tools: tools.map(({ name, description, parameters }) => ({
-            type: 'function',
-            function: {
-                name,
-                description,
-                parameters,
-            },
-        })),
+        tools: toolDefinitions.map(
+            ({ name, description, parameters }): ChatCompletionTool => ({
+                type: 'function',
+                function: {
+                    name,
+                    description,
+                    parameters,
+                },
+            }),
+        ),
     })
 
     return abortableIterator(iterable, () => iterable.controller.abort())

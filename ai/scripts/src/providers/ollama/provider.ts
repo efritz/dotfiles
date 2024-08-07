@@ -1,5 +1,5 @@
-import ollama, { ChatResponse, Message } from 'ollama'
-import { tools } from '../../tools/tools'
+import ollama, { ChatResponse, Message, Tool } from 'ollama'
+import { tools as toolDefinitions } from '../../tools/tools'
 import { abortableIterator } from '../../util/iterator'
 import { Model, Provider, ProviderOptions, ProviderSpec } from '../provider'
 import { createProvider, Stream } from '../util/provider'
@@ -58,14 +58,16 @@ async function createStream({
                 temperature,
                 num_predict: maxTokens,
             },
-            tools: tools.map(({ name, description, parameters }) => ({
-                type: '',
-                function: {
-                    name,
-                    description,
-                    parameters,
-                },
-            })),
+            tools: toolDefinitions.map(
+                ({ name, description, parameters }): Tool => ({
+                    type: '',
+                    function: {
+                        name,
+                        description,
+                        parameters,
+                    },
+                }),
+            ),
         })
 
         // https://github.com/ollama/ollama-js/issues/123
