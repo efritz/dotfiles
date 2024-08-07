@@ -168,7 +168,6 @@ async function editCommand(context: ExecutionContext, command: string): Promise<
         const { promise, reject } = invertPromise()
 
         return await context.interruptHandler.withInterruptHandler(
-            () => reject(new CancelError('User canceled edit')),
             () =>
                 Promise.race([
                     promise,
@@ -184,6 +183,7 @@ async function editCommand(context: ExecutionContext, command: string): Promise<
                         editor.catch(error => reject(new Error(`Failed to open editor: ${error.message}`)))
                     }),
                 ]),
+            { onAbort: () => reject(new CancelError('User canceled edit')) },
         )
     } finally {
         watcher.close()

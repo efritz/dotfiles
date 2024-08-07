@@ -66,9 +66,8 @@ async function chat(model: string, historyFilename?: string) {
 
     try {
         await interruptHandler.withInterruptHandler(
-            onAbort,
             () => chatWithReadline(rl, interruptHandler, model, historyFilename),
-            true,
+            { onAbort, permanent: true },
         )
     } finally {
         rl.close()

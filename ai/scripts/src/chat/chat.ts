@@ -211,12 +211,12 @@ async function promptWithProgress(context: ChatContext): Promise<ProgressResult<
     }
 
     return await context.interruptHandler.withInterruptHandler(
-        () => cancel(),
         () =>
             withProgress<Response>(prompt, {
                 progress: snapshot => formatResponse('Generating response...', snapshot),
                 success: snapshot => formatResponse('Generated response.', snapshot),
                 failure: (snapshot, error) => formatResponse('Failed to generate response.', snapshot),
             }),
+        { onAbort: () => cancel() },
     )
 }
