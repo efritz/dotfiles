@@ -5,15 +5,16 @@ import { Response } from '../messages/messages'
 import { Provider } from '../providers/provider'
 import { ProgressFunction } from '../providers/util/provider'
 import { expandFilePatterns, readFileContents } from '../util/fs'
+import { InterruptHandler } from '../util/interrupts'
 import { ProgressResult, withProgress } from '../util/progress'
 import { Prompter } from '../util/prompter'
-import { withInterruptHandler } from '../util/sigint'
 import { ExitError } from './errors'
 import { formatResponse } from './output'
 import { runToolsInMessages } from './tools'
 
 type ChatContext = {
     readline: readline.Interface
+    interruptHandler: InterruptHandler
     provider: Provider
     prompter: Prompter
 }
@@ -36,7 +37,7 @@ type CommandDescription = {
     prefix: string
     description: string
     expectsArgs?: boolean
-    handler: (ontext: ChatContext, args: string) => void
+    handler: (context: ChatContext, args: string) => void
 }
 
 export const commands: CommandDescription[] = [
@@ -209,7 +210,7 @@ async function promptWithProgress(context: ChatContext): Promise<ProgressResult<
         })
     }
 
-    return await withInterruptHandler(
+    return await context.interruptHandler.withInterruptHandler(
         context.readline,
         () => cancel(),
         () =>

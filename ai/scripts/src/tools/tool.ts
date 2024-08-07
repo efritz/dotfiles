@@ -1,5 +1,6 @@
 import readline from 'readline'
 import { Provider } from '../providers/provider'
+import { InterruptHandler } from '../util/interrupts'
 import { Prompter } from '../util/prompter'
 
 export type Tool = {
@@ -13,6 +14,7 @@ export type Tool = {
 
 export type ExecutionContext = {
     readline: readline.Interface
+    interruptHandler: InterruptHandler
     provider: Provider
     prompter: Prompter
 }

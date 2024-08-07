@@ -6,8 +6,8 @@ import { completer } from './chat/completer'
 import { replayChat } from './chat/history'
 import { Message } from './messages/messages'
 import { createProvider, modelNames } from './providers/providers'
+import { createInterruptHandler, InterruptHandler } from './util/interrupts'
 import { createPrompter } from './util/prompter'
-import { withInterruptHandler } from './util/sigint'
 
 async function main() {
     program
@@ -47,7 +47,7 @@ async function chat(model: string, historyFilename?: string) {
     let last: Date
     const threshold = 1000
 
-    const interruptHandler = () => {
+    const onAbort = () => {
         const now = new Date()
         if (last && now.getTime() - last.getTime() <= threshold) {
             console.log()
@@ -62,18 +62,31 @@ async function chat(model: string, historyFilename?: string) {
         last = now
     }
 
+    const interruptHandler = createInterruptHandler()
+
     try {
-        await withInterruptHandler(rl, interruptHandler, () => chatWithReadline(rl, model, historyFilename), true)
+        await interruptHandler.withInterruptHandler(
+            rl,
+            onAbort,
+            () => chatWithReadline(rl, interruptHandler, model, historyFilename),
+            true,
+        )
     } finally {
         rl.close()
     }
 }
 
-async function chatWithReadline(rl: readline.Interface, model: string, historyFilename?: string) {
+async function chatWithReadline(
+    rl: readline.Interface,
+    interruptHandler: InterruptHandler,
+    model: string,
+    historyFilename?: string,
+) {
     const context = {
         readline: rl,
+        interruptHandler,
         provider: createProvider(model, 'You are an assistant!'),
-        prompter: createPrompter(rl),
+        prompter: createPrompter(rl, interruptHandler),
     }
 
     if (historyFilename) {

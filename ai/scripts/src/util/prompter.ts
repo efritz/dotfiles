@@ -1,6 +1,6 @@
 import readline from 'readline/promises'
 import chalk from 'chalk'
-import { withInterruptHandler } from './sigint'
+import { InterruptHandler } from './interrupts'
 
 export interface Prompter {
     question(prompt: string): Promise<string>
@@ -14,18 +14,18 @@ type PromptOption<T> = {
     handler: () => Promise<T>
 }
 
-export function createPrompter(rl: readline.Interface): Prompter {
+export function createPrompter(rl: readline.Interface, interruptHandler: InterruptHandler): Prompter {
     return {
-        question: prompt => question(rl, prompt),
-        options: (prompt, promptOptions) => options(rl, prompt, promptOptions),
+        question: prompt => question(rl, interruptHandler, prompt),
+        options: (prompt, promptOptions) => options(rl, interruptHandler, prompt, promptOptions),
     }
 }
 
-async function question(rl: readline.Interface, prompt: string): Promise<string> {
+async function question(rl: readline.Interface, interruptHandler: InterruptHandler, prompt: string): Promise<string> {
     const controller = new AbortController()
 
     try {
-        return await withInterruptHandler<string>(
+        return await interruptHandler.withInterruptHandler<string>(
             rl,
             () => controller.abort(),
             () => rl.question(prompt, { signal: controller.signal }),
@@ -39,7 +39,12 @@ async function question(rl: readline.Interface, prompt: string): Promise<string>
     }
 }
 
-async function options<T>(rl: readline.Interface, prompt: string, options: PromptOption<T>[]): Promise<T> {
+async function options<T>(
+    rl: readline.Interface,
+    interruptHandler: InterruptHandler,
+    prompt: string,
+    options: PromptOption<T>[],
+): Promise<T> {
     const helpOption = { name: '?', description: 'print help', isDefault: false }
     const allOptions = [...options, helpOption]
 
@@ -56,7 +61,7 @@ async function options<T>(rl: readline.Interface, prompt: string, options: Promp
     const colorizedHelpText = chalk.bold.red(helpText)
 
     while (true) {
-        const value = await question(rl, colorizedPrompt)
+        const value = await question(rl, interruptHandler, colorizedPrompt)
 
         const option = options.find(
             ({ isDefault, name }) =>
