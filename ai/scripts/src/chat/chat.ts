@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs'
+import { writeFileSync } from 'fs'
 import readline from 'readline'
 import chalk from 'chalk'
 import { Response } from '../messages/messages'

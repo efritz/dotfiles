@@ -1,4 +1,3 @@
-import chalk from 'chalk'
 import { AssistantMessage, Message, UserMessage } from '../messages/messages'
 import { tools } from '../tools/tools'
 import { formatMessage } from './output'
