@@ -1,9 +1,5 @@
-import { Dirent, existsSync, readdirSync, readFileSync, writeFileSync } from 'fs'
-import { readdir } from 'fs/promises'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
 import chalk from 'chalk'
-//
-//
-
 import * as diffLib from 'diff'
 import {
     DirectoryPayload,
@@ -13,19 +9,24 @@ import {
     readDirectoryContents,
     readFileContents,
 } from '../util/fs'
-import { withProgress } from '../util/progress'
-import { Arguments, ExecutionContext, ExecutionResult, Tool, ToolResult } from './tool'
+import { Arguments, ExecutionContext, ExecutionResult, JSONSchemaDataType, Tool, ToolResult } from './tool'
 
 export const readDirectories: Tool = {
     name: 'read_directories',
-    description: 'Add contents of directories into the context.',
+    description:
+        'List directory entries. The tool result will contain a list of entries ({name, isFile, isDirectory}) for each valid input path.',
     parameters: {
-        type: 'object',
+        type: JSONSchemaDataType.Object,
+        description: 'The command payload.',
         properties: {
             paths: {
-                type: 'array',
-                description: 'A list of directory paths to read.',
-                items: { type: 'string' },
+                type: JSONSchemaDataType.Array,
+                description: 'A list of target directory paths to list.',
+                items: {
+                    type: JSONSchemaDataType.String,
+                    description:
+                        'A target directory path or glob pattern. Glob patterns are expanded into a set of matching paths. Paths that do not exist or refer to a non-directory are ignored.',
+                },
             },
         },
         required: ['paths'],
@@ -47,19 +48,25 @@ export const readDirectories: Tool = {
             return { error: result.error }
         }
     },
-    serialize: (result?: any) => JSON.stringify(result as DirectoryPayload[]),
+    serialize: (result?: any) => JSON.stringify({ contents: result as DirectoryPayload[] }),
 }
 
 export const readFiles: Tool = {
     name: 'read_files',
-    description: 'Add contents of files into the context.',
+    description:
+        'Read file contents. The tool result will contain a list of entries ({name, contents}) for each valid input path.',
     parameters: {
-        type: 'object',
+        type: JSONSchemaDataType.Object,
+        description: 'The command payload.',
         properties: {
             paths: {
-                type: 'array',
-                description: 'A list of file paths to read.',
-                items: { type: 'string' },
+                type: JSONSchemaDataType.Array,
+                description: 'A list of target file paths to read.',
+                items: {
+                    type: JSONSchemaDataType.String,
+                    description:
+                        'A target file path or glob pattern. Glob patterns are expanded into a set of matching paths. Paths that do not exist or refer to a non-file are ignored.',
+                },
             },
         },
         required: ['paths'],
@@ -76,30 +83,31 @@ export const readFiles: Tool = {
         const result = await readFileContents(expandFilePatterns(patterns))
 
         if (result.ok) {
-            return { result: JSON.stringify(result.response), reprompt: true }
+            return { result: result.response, reprompt: true }
         } else {
             return { error: result.error }
         }
     },
-    serialize: (result?: any) => JSON.stringify(result as FilePayload[]),
+    serialize: (result?: any) => JSON.stringify({ contents: result as FilePayload[] }),
 }
 
 export const writeFile: Tool = {
     name: 'write_file',
     description: 'Write file content to disk.',
     parameters: {
-        type: 'object',
+        type: JSONSchemaDataType.Object,
+        description: 'The command payload.',
         properties: {
             path: {
-                type: 'string',
+                type: JSONSchemaDataType.String,
                 description: 'The target path.',
             },
             contents: {
-                type: 'string',
+                type: JSONSchemaDataType.String,
                 description: 'The contents of the file.',
             },
         },
-        required: ['path, contents'],
+        required: ['path', 'contents'],
     },
     replay: (args: Arguments, result: ToolResult) => {
         const { path, contents } = args as { path: string; contents: string }

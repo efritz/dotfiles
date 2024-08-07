@@ -11,9 +11,6 @@ export type Tool = {
     serialize: Serializer
 }
 
-export type JSONSchemaObject = { type: 'object'; properties: { [key: string]: JSONSchemaType }; required: string[] }
-export type JSONSchemaType = { type: string; description: string; [key: string]: unknown }
-
 export type ExecutionContext = {
     readline: readline.Interface
     provider: Provider
@@ -26,3 +23,31 @@ export type ToolResult = { result?: any; error?: Error }
 export type ExecutionResult = ToolResult & { reprompt?: boolean }
 export type Replayer = (args: Arguments, result: ToolResult) => void
 export type Serializer = (result?: any) => string
+
+export enum JSONSchemaDataType {
+    Object = 'object',
+    Array = 'array',
+    String = 'string',
+    Number = 'number',
+    Boolean = 'boolean',
+}
+
+export type JSONSchemaType = JSONSchemaObject | JSONSchemaArray | JSONSchemaScalar
+
+export type JSONSchemaObject = {
+    type: JSONSchemaDataType.Object
+    description: string
+    properties: { [key: string]: JSONSchemaType }
+    required: string[]
+}
+
+export type JSONSchemaArray = {
+    type: JSONSchemaDataType.Array
+    description: string
+    items: JSONSchemaType
+}
+
+export type JSONSchemaScalar = {
+    type: JSONSchemaDataType.String | JSONSchemaDataType.Number | JSONSchemaDataType.Boolean
+    description: string
+}

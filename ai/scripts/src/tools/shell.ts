@@ -6,8 +6,7 @@ import chokidar from 'chokidar'
 import { $ } from 'zx'
 import { Updater, withProgress } from '../util/progress'
 import { invertPromise } from '../util/promise'
-import { withInterruptHandler } from '../util/sigint'
-import { Arguments, ExecutionContext, ExecutionResult, Tool, ToolResult } from './tool'
+import { Arguments, ExecutionContext, ExecutionResult, JSONSchemaDataType, Tool, ToolResult } from './tool'
 
 type OutputLine = {
     type: 'stdout' | 'stderr'
@@ -32,11 +31,12 @@ export const shellExecute: Tool = {
     name: 'shell_execute',
     description: 'Execute a zsh command.',
     parameters: {
-        type: 'object',
+        type: JSONSchemaDataType.Object,
+        description: 'The command payload.',
         properties: {
             command: {
-                type: 'string',
-                description: 'The command to execute.',
+                type: JSONSchemaDataType.String,
+                description: 'The zsh command to execute.',
             },
         },
         required: ['command'],
