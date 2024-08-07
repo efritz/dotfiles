@@ -168,7 +168,6 @@ async function editCommand(context: ExecutionContext, command: string): Promise<
         const { promise, reject } = invertPromise()
 
         return await context.interruptHandler.withInterruptHandler(
-            context.readline,
             () => reject(new CancelError('User canceled edit')),
             () =>
                 Promise.race([

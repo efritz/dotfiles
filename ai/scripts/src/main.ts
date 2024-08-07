@@ -62,11 +62,10 @@ async function chat(model: string, historyFilename?: string) {
         last = now
     }
 
-    const interruptHandler = createInterruptHandler()
+    const interruptHandler = createInterruptHandler(rl)
 
     try {
         await interruptHandler.withInterruptHandler(
-            rl,
             onAbort,
             () => chatWithReadline(rl, interruptHandler, model, historyFilename),
             true,

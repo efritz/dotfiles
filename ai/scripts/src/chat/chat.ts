@@ -211,7 +211,6 @@ async function promptWithProgress(context: ChatContext): Promise<ProgressResult<
     }
 
     return await context.interruptHandler.withInterruptHandler(
-        context.readline,
         () => cancel(),
         () =>
             withProgress<Response>(prompt, {

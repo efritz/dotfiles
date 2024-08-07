@@ -1,22 +1,12 @@
 import readline from 'readline'
 
 export interface InterruptHandler {
-    withInterruptHandler: <T>(
-        readline: readline.Interface,
-        handler: () => void,
-        f: () => Promise<T>,
-        permanent?: boolean,
-    ) => Promise<T>
+    withInterruptHandler: <T>(handler: () => void, f: () => Promise<T>, permanent?: boolean) => Promise<T>
 }
 
-export function createInterruptHandler() {
+export function createInterruptHandler(readline: readline.Interface) {
     return {
-        withInterruptHandler: async <T>(
-            readline: readline.Interface,
-            handler: () => void,
-            f: () => Promise<T>,
-            permanent = false,
-        ): Promise<T> => {
+        withInterruptHandler: async <T>(handler: () => void, f: () => Promise<T>, permanent = false): Promise<T> => {
             if (permanent) {
                 readline.on('SIGINT', handler)
             } else {

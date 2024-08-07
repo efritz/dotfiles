@@ -26,7 +26,6 @@ async function question(rl: readline.Interface, interruptHandler: InterruptHandl
 
     try {
         return await interruptHandler.withInterruptHandler<string>(
-            rl,
             () => controller.abort(),
             () => rl.question(prompt, { signal: controller.signal }),
         )
