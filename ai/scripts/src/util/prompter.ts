@@ -3,9 +3,52 @@ import chalk from 'chalk'
 import { InterruptHandler } from './interrupts'
 import { invertPromise } from './promise'
 
-export interface Prompter {
-    question(prompt: string): Promise<string>
-    options<T>(prompt: string, options: PromptOption<T>[]): Promise<T>
+export interface Prompter extends Questioner, Optioner {}
+
+export function createPrompter(rl: readline.Interface, interruptHandler: InterruptHandler): Prompter {
+    const questioner = createQuestioner(rl, interruptHandler)
+    return { ...questioner, ...createOptioner(questioner) }
+}
+
+//
+//
+
+interface Questioner {
+    question: (prompt: string) => Promise<string>
+}
+
+function createQuestioner(rl: readline.Interface, interruptHandler: InterruptHandler): Questioner {
+    return {
+        question: async (prompt: string): Promise<string> => {
+            const controller = new AbortController()
+            const { promise, reject } = invertPromise<never>()
+
+            try {
+                return await interruptHandler.withInterruptHandler<string>(
+                    () =>
+                        Promise.race([
+                            promise.catch(() => ''),
+                            new Promise<string>(resolve => rl.question(prompt, { signal: controller.signal }, resolve)),
+                        ]),
+                    {
+                        onAbort: () => {
+                            controller.abort()
+                            reject()
+                        },
+                    },
+                )
+            } catch (error: any) {
+                throw error
+            }
+        },
+    }
+}
+
+//
+//
+
+interface Optioner {
+    options: <T>(prompt: string, options: PromptOption<T>[]) => Promise<T>
 }
 
 type PromptOption<T> = {
@@ -15,68 +58,37 @@ type PromptOption<T> = {
     handler: () => Promise<T>
 }
 
-export function createPrompter(rl: readline.Interface, interruptHandler: InterruptHandler): Prompter {
+function createOptioner(questioner: Questioner): Optioner {
     return {
-        question: prompt => question(rl, interruptHandler, prompt),
-        options: (prompt, promptOptions) => options(rl, interruptHandler, prompt, promptOptions),
-    }
-}
+        options: async <T>(prompt: string, options: PromptOption<T>[]): Promise<T> => {
+            const helpOption = { name: '?', description: 'print help', isDefault: false }
+            const allOptions = [...options, helpOption]
 
-async function question(rl: readline.Interface, interruptHandler: InterruptHandler, prompt: string): Promise<string> {
-    const controller = new AbortController()
-    const { promise, reject } = invertPromise<never>()
+            const normalizedOptions = allOptions.map(({ name, ...rest }) => ({
+                name: rest.isDefault ? name.toUpperCase() : name.toLowerCase(),
+                ...rest,
+            }))
 
-    try {
-        return await interruptHandler.withInterruptHandler<string>(
-            () =>
-                Promise.race([
-                    promise.catch(() => ''),
-                    new Promise<string>(resolve => rl.question(prompt, { signal: controller.signal }, resolve)),
-                ]),
-            {
-                onAbort: () => {
-                    controller.abort()
-                    reject()
-                },
-            },
-        )
-    } catch (error: any) {
-        throw error
-    }
-}
+            const optionNames = normalizedOptions.map(({ name }) => name)
+            const formattedPrompt = `${prompt} [${optionNames.join('/')}]? `
+            const colorizedPrompt = chalk.cyanBright(formattedPrompt)
 
-async function options<T>(
-    rl: readline.Interface,
-    interruptHandler: InterruptHandler,
-    prompt: string,
-    options: PromptOption<T>[],
-): Promise<T> {
-    const helpOption = { name: '?', description: 'print help', isDefault: false }
-    const allOptions = [...options, helpOption]
+            const helpText = normalizedOptions.map(({ name, description }) => `${name} - ${description}`).join('\n')
+            const colorizedHelpText = chalk.bold.red(helpText)
 
-    const normalizedOptions = allOptions.map(({ name, ...rest }) => ({
-        name: rest.isDefault ? name.toUpperCase() : name.toLowerCase(),
-        ...rest,
-    }))
+            while (true) {
+                const value = await questioner.question(colorizedPrompt)
 
-    const optionNames = normalizedOptions.map(({ name }) => name)
-    const formattedPrompt = `${prompt} [${optionNames.join('/')}]? `
-    const colorizedPrompt = chalk.cyanBright(formattedPrompt)
+                const option = options.find(
+                    ({ isDefault, name }) =>
+                        (value === '' && isDefault) || (value !== '' && name.toLowerCase() === value[0].toLowerCase()),
+                )
+                if (option) {
+                    return option.handler()
+                }
 
-    const helpText = normalizedOptions.map(({ name, description }) => `${name} - ${description}`).join('\n')
-    const colorizedHelpText = chalk.bold.red(helpText)
-
-    while (true) {
-        const value = await question(rl, interruptHandler, colorizedPrompt)
-
-        const option = options.find(
-            ({ isDefault, name }) =>
-                (value === '' && isDefault) || (value !== '' && name.toLowerCase() === value[0].toLowerCase()),
-        )
-        if (option) {
-            return option.handler()
-        }
-
-        console.log(colorizedHelpText)
+                console.log(colorizedHelpText)
+            }
+        },
     }
 }
