@@ -14,8 +14,8 @@ export type Tool = {
 
 export type ExecutionContext = {
     interruptHandler: InterruptHandler
-    provider: Provider
     prompter: Prompter
+    provider: Provider
 }
 
 export type Executor = (context: ExecutionContext, args: Arguments) => Promise<ExecutionResult>

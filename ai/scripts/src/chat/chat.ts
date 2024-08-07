@@ -15,8 +15,8 @@ import { runToolsInMessages } from './tools'
 export type ChatContext = {
     model: string
     interruptHandler: InterruptHandler
-    provider: Provider
     prompter: Prompter
+    provider: Provider
 }
 
 export async function handler(context: ChatContext) {

@@ -5,9 +5,10 @@ import { ChatContext, handler } from './chat/chat'
 import { completer } from './chat/completer'
 import { replayChat } from './chat/history'
 import { Message } from './messages/messages'
+import { Provider } from './providers/provider'
 import { createProvider, modelNames } from './providers/providers'
 import { createInterruptHandler, InterruptHandler } from './util/interrupts'
-import { createPrompter } from './util/prompter'
+import { createPrompter, Prompter } from './util/prompter'
 
 async function main() {
     program
@@ -37,6 +38,12 @@ async function chat(model: string, historyFilename?: string) {
         throw new Error('chat command is not supported in this environment.')
     }
 
+    const system = `You are an assistant!`
+    const provider = createProvider(model, system)
+    await chatWithProvider(provider, model, historyFilename)
+}
+
+async function chatWithProvider(provider: Provider, model: string, historyFilename?: string) {
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
@@ -44,42 +51,36 @@ async function chat(model: string, historyFilename?: string) {
         completer,
     })
 
-    const interruptHandler = createInterruptHandler(rl)
-    const provider = createProvider(model, 'You are an assistant!')
-    const prompter = createPrompter(rl, interruptHandler)
-    const context = { model, interruptHandler, provider, prompter }
-
     try {
-        await context.interruptHandler.withInterruptHandler(() => chatWithReadline(context, historyFilename), {
-            permanent: true,
-            onAbort: interruptInput(rl),
-        })
+        const interruptHandler = createInterruptHandler(rl)
+        const prompter = createPrompter(rl, interruptHandler)
+
+        await interruptHandler.withInterruptHandler(
+            () => chatWithReadline(interruptHandler, prompter, provider, model, historyFilename),
+            {
+                permanent: true,
+                onAbort: interruptInput(rl),
+            },
+        )
     } finally {
         rl.close()
     }
 }
 
-function interruptInput(rl: readline.Interface): () => void {
-    let last: Date
-    const threshold = 1000
-
-    return () => {
-        const now = new Date()
-        if (last && now.getTime() - last.getTime() <= threshold) {
-            console.log()
-            console.log('Goodbye!\n')
-            rl.close()
-            process.exit(0)
-        }
-
-        rl.pause()
-        process.stdout.write('^C')
-        rl.resume()
-        last = now
+async function chatWithReadline(
+    interruptHandler: InterruptHandler,
+    prompter: Prompter,
+    provider: Provider,
+    model: string,
+    historyFilename?: string,
+) {
+    const context: ChatContext = {
+        model,
+        interruptHandler,
+        prompter,
+        provider,
     }
-}
 
-async function chatWithReadline(context: ChatContext, historyFilename?: string) {
     if (historyFilename) {
         const messages: Message[] = JSON.parse(readFileSync(historyFilename, 'utf8'), (key: string, value: any) => {
             if (value && value.type === 'ErrorMessage') {
@@ -102,6 +103,26 @@ async function chatWithReadline(context: ChatContext, historyFilename?: string) 
 
     console.log(`${historyFilename ? 'Resuming' : 'Beginning'} session with ${context.model}...\n`)
     await handler(context)
+}
+
+function interruptInput(rl: readline.Interface): () => void {
+    let last: Date
+    const threshold = 1000
+
+    return () => {
+        const now = new Date()
+        if (last && now.getTime() - last.getTime() <= threshold) {
+            console.log()
+            console.log('Goodbye!\n')
+            rl.close()
+            process.exit(0)
+        }
+
+        rl.pause()
+        process.stdout.write('^C')
+        rl.resume()
+        last = now
+    }
 }
 
 await main()
