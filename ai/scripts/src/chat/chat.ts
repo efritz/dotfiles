@@ -13,6 +13,7 @@ import { formatResponse } from './output'
 import { runToolsInMessages } from './tools'
 
 export type ChatContext = {
+    model: string
     interruptHandler: InterruptHandler
     provider: Provider
     prompter: Prompter

@@ -44,10 +44,26 @@ async function chat(model: string, historyFilename?: string) {
         completer,
     })
 
+    const interruptHandler = createInterruptHandler(rl)
+    const provider = createProvider(model, 'You are an assistant!')
+    const prompter = createPrompter(rl, interruptHandler)
+    const context = { model, interruptHandler, provider, prompter }
+
+    try {
+        await context.interruptHandler.withInterruptHandler(() => chatWithReadline(context, historyFilename), {
+            permanent: true,
+            onAbort: interruptInput(rl),
+        })
+    } finally {
+        rl.close()
+    }
+}
+
+function interruptInput(rl: readline.Interface): () => void {
     let last: Date
     const threshold = 1000
 
-    const onAbort = () => {
+    return () => {
         const now = new Date()
         if (last && now.getTime() - last.getTime() <= threshold) {
             console.log()
@@ -56,31 +72,14 @@ async function chat(model: string, historyFilename?: string) {
             process.exit(0)
         }
 
-        process.stdout.write('^C')
         rl.pause()
+        process.stdout.write('^C')
         rl.resume()
         last = now
     }
-
-    const interruptHandler = createInterruptHandler(rl)
-
-    const context = {
-        interruptHandler,
-        provider: createProvider(model, 'You are an assistant!'),
-        prompter: createPrompter(rl, interruptHandler),
-    }
-
-    try {
-        await interruptHandler.withInterruptHandler(() => chatWithReadline(context, model, historyFilename), {
-            onAbort,
-            permanent: true,
-        })
-    } finally {
-        rl.close()
-    }
 }
 
-async function chatWithReadline(context: ChatContext, model: string, historyFilename?: string) {
+async function chatWithReadline(context: ChatContext, historyFilename?: string) {
     if (historyFilename) {
         const messages: Message[] = JSON.parse(readFileSync(historyFilename, 'utf8'), (key: string, value: any) => {
             if (value && value.type === 'ErrorMessage') {
@@ -101,7 +100,7 @@ async function chatWithReadline(context: ChatContext, model: string, historyFile
         replayChat(messages)
     }
 
-    console.log(`${historyFilename ? 'Resuming' : 'Beginning'} session with ${model}...\n`)
+    console.log(`${historyFilename ? 'Resuming' : 'Beginning'} session with ${context.model}...\n`)
     await handler(context)
 }
 

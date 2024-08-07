@@ -5,15 +5,15 @@ export interface InterruptHandler {
 }
 
 export type InterruptHandlerOptions = {
-    onAbort?: () => void
     permanent?: boolean
+    onAbort?: () => void
 }
 
 export function createInterruptHandler(readline: readline.Interface) {
     return {
         withInterruptHandler: async <T>(
             f: () => Promise<T>,
-            { onAbort, permanent = false }: InterruptHandlerOptions = {},
+            { permanent = false, onAbort }: InterruptHandlerOptions = {},
         ): Promise<T> => {
             const abort = () => onAbort?.()
 
