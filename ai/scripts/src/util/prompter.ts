@@ -1,6 +1,7 @@
-import readline from 'readline/promises'
+import readline from 'readline'
 import chalk from 'chalk'
 import { InterruptHandler } from './interrupts'
+import { invertPromise } from './promise'
 
 export interface Prompter {
     question(prompt: string): Promise<string>
@@ -23,17 +24,23 @@ export function createPrompter(rl: readline.Interface, interruptHandler: Interru
 
 async function question(rl: readline.Interface, interruptHandler: InterruptHandler, prompt: string): Promise<string> {
     const controller = new AbortController()
+    const { promise, reject } = invertPromise<never>()
 
     try {
         return await interruptHandler.withInterruptHandler<string>(
-            () => rl.question(prompt, { signal: controller.signal }),
-            { onAbort: () => controller.abort() },
+            () =>
+                Promise.race([
+                    promise.catch(() => ''),
+                    new Promise<string>(resolve => rl.question(prompt, { signal: controller.signal }, resolve)),
+                ]),
+            {
+                onAbort: () => {
+                    controller.abort()
+                    reject()
+                },
+            },
         )
     } catch (error: any) {
-        if (error.name === 'AbortError') {
-            return ''
-        }
-
         throw error
     }
 }

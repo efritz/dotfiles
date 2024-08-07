@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs'
-import readline from 'readline/promises'
+import readline from 'readline'
 import { program } from 'commander'
 import { ChatContext, handler } from './chat/chat'
 import { completer } from './chat/completer'
