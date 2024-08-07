@@ -1,5 +1,5 @@
 import { OpenAI } from 'openai'
-import { ChatCompletionChunk, ChatCompletionMessageParam } from 'openai/resources'
+import { ChatCompletionChunk, ChatCompletionMessageParam, ChatCompletionTool } from 'openai/resources'
 import { tools as toolDefinitions } from '../../tools/tools'
 import { abortableIterator } from '../../util/iterator'
 import { Model, Provider, ProviderOptions, ProviderSpec } from '../provider'
@@ -67,14 +67,16 @@ async function createStream({
         stream: true,
         temperature,
         max_tokens: maxTokens,
-        tools: toolDefinitions.map(({ name, description, parameters }) => ({
-            type: 'function',
-            function: {
-                name,
-                description,
-                parameters,
-            },
-        })),
+        tools: toolDefinitions.map(
+            ({ name, description, parameters }): ChatCompletionTool => ({
+                type: 'function',
+                function: {
+                    name,
+                    description,
+                    parameters,
+                },
+            }),
+        ),
     })
 
     return abortableIterator(iterable, () => iterable.controller.abort())

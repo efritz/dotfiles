@@ -1,7 +1,7 @@
 import { Anthropic } from '@anthropic-ai/sdk'
-import { MessageParam, MessageStreamEvent } from '@anthropic-ai/sdk/resources/messages'
+import { MessageParam, MessageStreamEvent, Tool } from '@anthropic-ai/sdk/resources/messages'
 import { EventIterator } from 'event-iterator'
-import { tools } from '../../tools/tools'
+import { tools as toolDefinitions } from '../../tools/tools'
 import { Model, Provider, ProviderOptions, ProviderSpec } from '../provider'
 import { getKey } from '../util/keys'
 import { createProvider, Stream } from '../util/provider'
@@ -80,11 +80,13 @@ async function createStream({
         stream: true,
         temperature,
         max_tokens: maxTokens,
-        tools: tools.map(({ name, description, parameters }) => ({
-            name,
-            description,
-            input_schema: parameters,
-        })),
+        tools: toolDefinitions.map(
+            ({ name, description, parameters }): Tool => ({
+                name,
+                description,
+                input_schema: parameters,
+            }),
+        ),
     })
 
     const iterator = new EventIterator<MessageStreamEvent>(({ push, stop, fail }) => {

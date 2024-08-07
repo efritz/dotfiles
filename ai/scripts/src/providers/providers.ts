@@ -1,10 +1,11 @@
 import { provider as anthropicProvider } from './anthropic/provider'
+import { provider as googleProvider } from './google/provider'
 import { provider as groqProvider } from './groq/provider'
 import { provider as ollamaProvider } from './ollama/provider'
 import { provider as openAIProvider } from './openai/provider'
 import { Provider, ProviderSpec } from './provider'
 
-const providers: ProviderSpec[] = [anthropicProvider, openAIProvider, groqProvider, ollamaProvider]
+const providers: ProviderSpec[] = [anthropicProvider, openAIProvider, googleProvider, groqProvider, ollamaProvider]
 export const modelNames = providers.flatMap(({ models }) => models.map(({ name }) => name)).sort()
 
 export function createProvider(modelName: string, system: string): Provider {
