@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import readline from 'readline/promises'
 import { program } from 'commander'
-import { handler } from './chat/chat'
+import { ChatContext, handler } from './chat/chat'
 import { completer } from './chat/completer'
 import { replayChat } from './chat/history'
 import { Message } from './messages/messages'
@@ -64,29 +64,23 @@ async function chat(model: string, historyFilename?: string) {
 
     const interruptHandler = createInterruptHandler(rl)
 
-    try {
-        await interruptHandler.withInterruptHandler(
-            () => chatWithReadline(rl, interruptHandler, model, historyFilename),
-            { onAbort, permanent: true },
-        )
-    } finally {
-        rl.close()
-    }
-}
-
-async function chatWithReadline(
-    rl: readline.Interface,
-    interruptHandler: InterruptHandler,
-    model: string,
-    historyFilename?: string,
-) {
     const context = {
-        readline: rl,
         interruptHandler,
         provider: createProvider(model, 'You are an assistant!'),
         prompter: createPrompter(rl, interruptHandler),
     }
 
+    try {
+        await interruptHandler.withInterruptHandler(() => chatWithReadline(context, model, historyFilename), {
+            onAbort,
+            permanent: true,
+        })
+    } finally {
+        rl.close()
+    }
+}
+
+async function chatWithReadline(context: ChatContext, model: string, historyFilename?: string) {
     if (historyFilename) {
         const messages: Message[] = JSON.parse(readFileSync(historyFilename, 'utf8'), (key: string, value: any) => {
             if (value && value.type === 'ErrorMessage') {

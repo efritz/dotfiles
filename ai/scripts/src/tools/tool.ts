@@ -13,7 +13,6 @@ export type Tool = {
 }
 
 export type ExecutionContext = {
-    readline: readline.Interface
     interruptHandler: InterruptHandler
     provider: Provider
     prompter: Prompter

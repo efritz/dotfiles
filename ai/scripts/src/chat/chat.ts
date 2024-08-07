@@ -12,8 +12,7 @@ import { ExitError } from './errors'
 import { formatResponse } from './output'
 import { runToolsInMessages } from './tools'
 
-type ChatContext = {
-    readline: readline.Interface
+export type ChatContext = {
     interruptHandler: InterruptHandler
     provider: Provider
     prompter: Prompter
