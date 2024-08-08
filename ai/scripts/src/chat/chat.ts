@@ -176,28 +176,21 @@ async function prompt(context: ChatContext): Promise<void> {
         }
 
         const { ranTools, reprompt } = await runToolsInMessages(context, result.response.messages)
-        if (
-            !ranTools ||
-            (!reprompt &&
-                !(await context.prompter.options('Continue current prompt', [
-                    {
-                        name: 'y',
-                        description: 'Re-prompt model',
-                        handler: async () => true,
-                    },
-                    {
-                        name: 'n',
-                        description: 'Supply a new prompt',
-                        isDefault: true,
-                        handler: async () => {
-                            console.log(chalk.dim('ℹ') + ' Ending prompt.')
-                            console.log()
-                            return false
-                        },
-                    },
-                ])))
-        ) {
+        if (!ranTools) {
             break
+        }
+
+        if (!reprompt) {
+            const choice = await context.prompter.choice('Continue current prompt', [
+                { name: 'y', description: 'Re-prompt model' },
+                { name: 'n', description: 'Supply a new prompt', isDefault: true },
+            ])
+
+            if (choice === 'n') {
+                console.log(chalk.dim('ℹ') + ' Ending prompt.')
+                console.log()
+                break
+            }
         }
     }
 }

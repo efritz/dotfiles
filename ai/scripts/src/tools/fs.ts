@@ -135,30 +135,21 @@ export const writeFile: Tool = {
 
 async function confirmWrite(context: ExecutionContext, path: string, contents: string): Promise<boolean> {
     while (true) {
-        const result = await context.prompter.options(`Write contents to "${path}"`, [
-            {
-                name: 'y',
-                description: 'write file to disk',
-                handler: async () => true,
-            },
-            {
-                name: 'n',
-                description: 'skip write and continue conversation',
-                isDefault: true,
-                handler: async () => false,
-            },
-            {
-                name: 'd',
-                description: 'show file diff',
-                handler: async () => {
-                    await showDiff(context, path, contents)
-                    return undefined
-                },
-            },
+        const choice = await context.prompter.choice(`Write contents to "${path}"`, [
+            { name: 'y', description: 'write file to disk' },
+            { name: 'n', description: 'skip write and continue conversation', isDefault: true },
+            { name: 'd', description: 'show file diff' },
         ])
 
-        if (result !== undefined) {
-            return result
+        switch (choice) {
+            case 'y':
+                return true
+            case 'n':
+                return false
+
+            case 'd':
+                await showDiff(context, path, contents)
+                break
         }
     }
 }
@@ -243,19 +234,23 @@ async function displayDiffBlocks(context: ExecutionContext, blocks: string[]) {
         const hasPrev = current > 0
         const hasNext = current < blocks.length - 1
 
-        // TODO - make this a shorthand
-        const answer = await context.prompter.options('Diff navigation', [
-            ...(hasNext ? [{ name: 'n', description: 'Next block', isDefault: true, handler: async () => 'n' }] : []),
-            ...(hasPrev ? [{ name: 'p', description: 'Previous block', handler: async () => 'p' }] : []),
-            ...[{ name: 'q', description: 'Quit', isDefault: !hasNext, handler: async () => 'q' }],
+        const choice = await context.prompter.choice('Diff navigation', [
+            ...(hasNext ? [{ name: 'n', description: 'Next block', isDefault: true }] : []),
+            ...(hasPrev ? [{ name: 'p', description: 'Previous block' }] : []),
+            ...[{ name: 'q', description: 'Quit', isDefault: !hasNext }],
         ])
 
-        if (answer === 'q') {
-            break
-        } else if (answer === 'n') {
-            current++
-        } else if (answer === 'p') {
-            current--
+        switch (choice) {
+            case 'q':
+                return
+
+            case 'n':
+                current++
+                break
+
+            case 'p':
+                current--
+                break
         }
     }
 }

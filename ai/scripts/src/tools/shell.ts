@@ -118,32 +118,32 @@ export const shellExecute: Tool = {
 
 async function confirmCommand(context: ExecutionContext, command: string): Promise<string | undefined> {
     while (true) {
-        try {
-            return await context.prompter.options('Execute this command', [
-                {
-                    name: 'y',
-                    description: 'execute the command as-is',
-                    handler: async () => command,
-                },
-                {
-                    name: 'n',
-                    description: 'skip execution and continue conversation',
-                    isDefault: true,
-                    handler: async () => undefined,
-                },
-                {
-                    name: 'e',
-                    description: 'edit this command in vscode',
-                    handler: () => editCommand(context, command),
-                },
-            ])
-        } catch (error: any) {
-            if (error instanceof CancelError) {
-                console.log('User canceled edit')
-                continue
-            }
+        const choice = await context.prompter.choice('Execute this command', [
+            { name: 'y', description: 'execute the command as-is' },
+            { name: 'n', description: 'skip execution and continue conversation', isDefault: true },
+            { name: 'e', description: 'edit this command in vscode' },
+        ])
 
-            throw error
+        switch (choice) {
+            case 'y':
+                return command
+
+            case 'n':
+                return undefined
+
+            case 'e':
+                try {
+                    return await editCommand(context, command)
+                } catch (error: any) {
+                    if (error instanceof CancelError) {
+                        console.log('User canceled edit')
+                        continue
+                    }
+
+                    throw error
+                }
+
+                break
         }
     }
 }
