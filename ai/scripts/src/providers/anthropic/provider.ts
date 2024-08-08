@@ -2,6 +2,7 @@ import { Anthropic } from '@anthropic-ai/sdk'
 import { MessageParam, MessageStreamEvent, Tool } from '@anthropic-ai/sdk/resources/messages'
 import { EventIterator } from 'event-iterator'
 import { tools as toolDefinitions } from '../../tools/tools'
+import { abortableIterator } from '../../util/iterator'
 import { Model, Provider, ProviderOptions, ProviderSpec } from '../provider'
 import { getKey } from '../util/keys'
 import { createProvider, Stream } from '../util/provider'
@@ -73,7 +74,7 @@ async function createStream({
     temperature?: number
     maxTokens: number
 }): Promise<Stream<MessageStreamEvent>> {
-    const stream = client.messages.stream({
+    const iterable = client.messages.stream({
         model,
         system,
         messages,
@@ -89,21 +90,5 @@ async function createStream({
         ),
     })
 
-    const iterator = new EventIterator<MessageStreamEvent>(({ push, stop, fail }) => {
-        stream.on('streamEvent', push)
-        stream.on('abort', fail)
-        stream.on('error', fail)
-        stream.finalMessage().then(stop).catch(fail)
-
-        return () => {
-            stream.off('streamEvent', push)
-            stream.off('abort', fail)
-            stream.off('error', fail)
-        }
-    })
-
-    return {
-        iterator,
-        abort: () => stream.controller.abort(),
-    }
+    return abortableIterator(iterable, () => iterable.controller.abort())
 }
