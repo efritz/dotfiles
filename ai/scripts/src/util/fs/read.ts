@@ -1,23 +1,7 @@
 import { Dirent } from 'fs'
 import { readdir, readFile } from 'fs/promises'
 import chalk from 'chalk'
-import { glob } from 'glob'
-import { ProgressResult, withProgress } from './progress'
-
-export function expandFilePatterns(patterns: string[]): string[] {
-    return patterns.flatMap(pattern => (pattern.includes('*') ? glob.sync(pattern, { nodir: true }) : [pattern]))
-}
-
-export function expandDirectoryPatterns(patterns: string[]): string[] {
-    return patterns.flatMap(pattern =>
-        pattern.includes('*')
-            ? glob
-                  .sync(pattern, { withFileTypes: true })
-                  .filter(entry => entry.isDirectory())
-                  .map(({ name }) => name)
-            : [pattern],
-    )
-}
+import { prefixFormatter, ProgressResult, withProgress } from '../progress/progress'
 
 export type DirectoryPayload = {
     path: string
@@ -75,18 +59,11 @@ async function readFilesystem<T extends { path: string }>(
         failurePrefix: string
     },
 ): Promise<ProgressResult<T[]>> {
-    const formatSnapshot = (prefix: string, snapshot: T[]) => {
-        const progress = (snapshot || [])
+    const formatSnapshot = (snapshot?: T[]) =>
+        (snapshot || [])
             .sort(({ path: a }, { path: b }) => a.localeCompare(b))
             .map(progressFormatter)
             .join('\n')
-
-        if (progress) {
-            return prefix + '\n' + progress
-        }
-
-        return prefix
-    }
 
     const snapshot: T[] = []
 
@@ -108,9 +85,9 @@ async function readFilesystem<T extends { path: string }>(
             return snapshot
         },
         {
-            progress: snapshot => formatSnapshot(options.progressPrefix, snapshot || []),
-            success: snapshot => formatSnapshot(options.successPrefix, snapshot || []),
-            failure: (snapshot, error) => `${options.failurePrefix}\n\n${chalk.red(`Error: ${error}`)}`, // TODO - roll into formatting above
+            progress: prefixFormatter(options.progressPrefix, formatSnapshot),
+            success: prefixFormatter(options.successPrefix, formatSnapshot),
+            failure: prefixFormatter(options.failurePrefix, formatSnapshot),
         },
     )
 }

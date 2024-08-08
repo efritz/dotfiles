@@ -5,9 +5,10 @@ import chalk from 'chalk'
 import chokidar from 'chokidar'
 import treeKill from 'tree-kill'
 import { $ } from 'zx'
-import { CancelError } from '../util/interrupts'
-import { Updater, withProgress } from '../util/progress'
-import { Arguments, ExecutionContext, ExecutionResult, JSONSchemaDataType, Tool, ToolResult } from './tool'
+import { CancelError } from '../../util/interrupts/interrupts'
+import { prefixFormatter, Updater, withProgress } from '../../util/progress/progress'
+import { ExecutionContext } from '../context'
+import { Arguments, ExecutionResult, JSONSchemaDataType, Tool, ToolResult } from '../tool'
 
 type OutputLine = {
     type: 'stdout' | 'stderr'
@@ -79,9 +80,9 @@ export const shellExecute: Tool = {
         }
 
         const response = await withProgress<OutputLine[]>(update => runCommand(context, editedCommand, update), {
-            progress: snapshot => formatSnapshot('Executing command...', snapshot),
-            success: snapshot => formatSnapshot('Command succeeded.', snapshot),
-            failure: (snapshot, error) => formatSnapshot('Command failed.', snapshot, error),
+            progress: prefixFormatter('Executing command...', formatOutput),
+            success: prefixFormatter('Command succeeded.', formatOutput),
+            failure: prefixFormatter('Command failed.', formatOutput),
         })
 
         if (!response.ok) {
@@ -218,27 +219,19 @@ function formatCommand(command: string): string {
         .join('\n')
 }
 
-function formatSnapshot(prefix: string, snapshot?: OutputLine[], error?: any): string {
-    if (!snapshot) {
-        return prefix
-    }
+function formatOutput(output?: OutputLine[]): string {
+    const lines = (output || []).map(o => ({ ...o }))
 
-    return prefix + '\n\n' + formatOutput(snapshot)
-}
-
-function formatOutput(output: OutputLine[]): string {
-    output = output.map(o => ({ ...o }))
-
-    while (output.length) {
-        const n = output.length
-        const trimmed = output[n - 1].content.trimEnd()
-        output[n - 1].content = trimmed
+    while (lines.length) {
+        const n = lines.length
+        const trimmed = lines[n - 1].content.trimEnd()
+        lines[n - 1].content = trimmed
         if (trimmed) {
             break
         }
 
-        output.pop()
+        lines.pop()
     }
 
-    return output.map(({ content, type }) => (type === 'stdout' ? chalk.cyanBright.bold : chalk.red)(content)).join('')
+    return lines.map(({ content, type }) => (type === 'stdout' ? chalk.cyanBright.bold : chalk.red)(content)).join('')
 }

@@ -1,5 +1,7 @@
-import { readDirectories, readFiles, writeFile } from './fs'
-import { shellExecute } from './shell'
+import { readDirectories } from './fs/read_directories'
+import { readFiles } from './fs/read_files'
+import { writeFile } from './fs/write_file'
+import { shellExecute } from './shell/shell_execute'
 import { Tool, ToolResult } from './tool'
 
 export const tools: Tool[] = [shellExecute, readDirectories, readFiles, writeFile]

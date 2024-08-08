@@ -1,5 +1,5 @@
 import { AssistantMessage, ToolResult, ToolUse } from '../messages/messages'
-import { ExecutionContext } from '../tools/tool'
+import { ExecutionContext } from '../tools/context'
 import { findTool } from '../tools/tools'
 
 export async function runToolsInMessages(

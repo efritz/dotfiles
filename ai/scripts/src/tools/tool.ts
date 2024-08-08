@@ -1,7 +1,4 @@
-import readline from 'readline'
-import { Provider } from '../providers/provider'
-import { InterruptHandler } from '../util/interrupts'
-import { Prompter } from '../util/prompter'
+import { ExecutionContext } from './context'
 
 export type Tool = {
     name: string
@@ -10,12 +7,6 @@ export type Tool = {
     execute: Executor
     replay: Replayer
     serialize: Serializer
-}
-
-export type ExecutionContext = {
-    interruptHandler: InterruptHandler
-    prompter: Prompter
-    provider: Provider
 }
 
 export type Executor = (context: ExecutionContext, args: Arguments) => Promise<ExecutionResult>

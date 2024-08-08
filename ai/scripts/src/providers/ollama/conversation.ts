@@ -1,7 +1,7 @@
 import { Message as OllamaMessage, ToolCall } from 'ollama'
 import { AssistantMessage, UserMessage } from '../../messages/messages'
 import { serializeToolResult } from '../../tools/tools'
-import { Conversation, createConversation as createGenericConversation } from '../util/conversation'
+import { Conversation, createConversation as createGenericConversation } from '../conversation'
 
 export function createConversation(system: string): Conversation<OllamaMessage> {
     return createGenericConversation({

@@ -1,14 +1,14 @@
-import { AssistantMessage, Message, UserMessage } from '../../messages/messages'
+import { AssistantMessage, Message, UserMessage } from '../messages/messages'
+
+export type Conversation<T> = ConversationManager & {
+    messages: T[]
+}
 
 export type ConversationManager = {
     pushUser(message: UserMessage): void
     pushAssistant(messages: AssistantMessage[]): void
     clear(): void
     serialize(): Message[]
-}
-
-export type Conversation<T> = ConversationManager & {
-    messages: T[]
 }
 
 type ConversationOptions<T> = {

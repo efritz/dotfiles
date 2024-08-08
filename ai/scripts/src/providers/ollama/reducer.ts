@@ -1,6 +1,6 @@
 import { ChatResponse, ToolCall } from 'ollama'
 import { AssistantMessage } from '../../messages/messages'
-import { Reducer } from '../util/reducer'
+import { Reducer } from '../reducer'
 
 export function createStreamReducer(): Reducer<ChatResponse> {
     const messages: AssistantMessage[] = []

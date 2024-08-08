@@ -1,14 +1,13 @@
-import { readFileSync } from 'fs'
 import readline from 'readline'
 import { program } from 'commander'
-import { ChatContext, handler } from './chat/chat'
 import { completer } from './chat/completer'
-import { replayChat } from './chat/history'
-import { Message } from './messages/messages'
+import { ChatContext } from './chat/context'
+import { handler } from './chat/handler'
+import { loadHistory } from './chat/history'
 import { Provider } from './providers/provider'
 import { createProvider, modelNames } from './providers/providers'
-import { createInterruptHandler, InterruptHandler, InterruptHandlerOptions } from './util/interrupts'
-import { createPrompter, Prompter } from './util/prompter'
+import { createInterruptHandler, InterruptHandler, InterruptHandlerOptions } from './util/interrupts/interrupts'
+import { createPrompter, Prompter } from './util/prompter/prompter'
 
 async function main() {
     program
@@ -33,14 +32,14 @@ async function main() {
     program.parse(process.argv)
 }
 
+const system = `You are an assistant!`
+
 async function chat(model: string, historyFilename?: string) {
     if (!process.stdin.setRawMode) {
         throw new Error('chat command is not supported in this environment.')
     }
 
-    const system = `You are an assistant!`
-    const provider = createProvider(model, system)
-    await chatWithProvider(provider, model, historyFilename)
+    await chatWithProvider(createProvider(model, system), model, historyFilename)
 }
 
 async function chatWithProvider(provider: Provider, model: string, historyFilename?: string) {
@@ -106,23 +105,7 @@ async function chatWithReadline(
     }
 
     if (historyFilename) {
-        const messages: Message[] = JSON.parse(readFileSync(historyFilename, 'utf8'), (key: string, value: any) => {
-            if (value && value.type === 'ErrorMessage') {
-                return new Error(value.message)
-            }
-
-            return value
-        })
-
-        for (const message of messages) {
-            if (message.role === 'user') {
-                context.provider.conversationManager.pushUser(message)
-            } else {
-                context.provider.conversationManager.pushAssistant([message])
-            }
-        }
-
-        replayChat(messages)
+        loadHistory(context, historyFilename)
     }
 
     console.log(`${historyFilename ? 'Resuming' : 'Beginning'} session with ${context.model}...\n`)

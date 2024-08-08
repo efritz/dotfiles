@@ -1,95 +1,8 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import chalk from 'chalk'
 import * as diffLib from 'diff'
-import {
-    DirectoryPayload,
-    expandDirectoryPatterns,
-    expandFilePatterns,
-    FilePayload,
-    readDirectoryContents,
-    readFileContents,
-} from '../util/fs'
-import { Arguments, ExecutionContext, ExecutionResult, JSONSchemaDataType, Tool, ToolResult } from './tool'
-
-export const readDirectories: Tool = {
-    name: 'read_directories',
-    description:
-        'List directory entries. The tool result will contain a list of entries ({name, isFile, isDirectory}) for each valid input path.',
-    parameters: {
-        type: JSONSchemaDataType.Object,
-        description: 'The command payload.',
-        properties: {
-            paths: {
-                type: JSONSchemaDataType.Array,
-                description: 'A list of target directory paths to list.',
-                items: {
-                    type: JSONSchemaDataType.String,
-                    description:
-                        'A target directory path or glob pattern. Glob patterns are expanded into a set of matching paths. Paths that do not exist or refer to a non-directory are ignored.',
-                },
-            },
-        },
-        required: ['paths'],
-    },
-    replay: (args: Arguments, result: ToolResult) => {
-        const { paths } = args as { paths: string[] }
-
-        for (const path of paths) {
-            console.log(`${chalk.dim('ℹ')} Read directory "${chalk.red(path)}" into context.`)
-        }
-    },
-    execute: async (context: ExecutionContext, args: Arguments): Promise<ExecutionResult> => {
-        const { paths: patterns } = args as { paths: string[] }
-        const result = await readDirectoryContents(expandDirectoryPatterns(patterns))
-
-        if (result.ok) {
-            return { result: result.response, reprompt: true }
-        } else {
-            return { error: result.error }
-        }
-    },
-    serialize: (result?: any) => JSON.stringify({ contents: result as DirectoryPayload[] }),
-}
-
-export const readFiles: Tool = {
-    name: 'read_files',
-    description:
-        'Read file contents. The tool result will contain a list of entries ({name, contents}) for each valid input path.',
-    parameters: {
-        type: JSONSchemaDataType.Object,
-        description: 'The command payload.',
-        properties: {
-            paths: {
-                type: JSONSchemaDataType.Array,
-                description: 'A list of target file paths to read.',
-                items: {
-                    type: JSONSchemaDataType.String,
-                    description:
-                        'A target file path or glob pattern. Glob patterns are expanded into a set of matching paths. Paths that do not exist or refer to a non-file are ignored.',
-                },
-            },
-        },
-        required: ['paths'],
-    },
-    replay: (args: Arguments, result: ToolResult) => {
-        const { paths } = args as { paths: string[] }
-
-        for (const path of paths) {
-            console.log(`${chalk.dim('ℹ')} Read file "${chalk.red(path)}" into context.`)
-        }
-    },
-    execute: async (context: ExecutionContext, args: Arguments): Promise<ExecutionResult> => {
-        const { paths: patterns } = args as { paths: string[] }
-        const result = await readFileContents(expandFilePatterns(patterns))
-
-        if (result.ok) {
-            return { result: result.response, reprompt: true }
-        } else {
-            return { error: result.error }
-        }
-    },
-    serialize: (result?: any) => JSON.stringify({ contents: result as FilePayload[] }),
-}
+import { ExecutionContext } from '../context'
+import { Arguments, ExecutionResult, JSONSchemaDataType, Tool, ToolResult } from '../tool'
 
 export const writeFile: Tool = {
     name: 'write_file',
@@ -177,7 +90,7 @@ async function showDiff(context: ExecutionContext, path: string, newContents: st
 
 function createDiffBlocks(oldContents: string, newContents: string): string[] {
     const diff = diffLib.diffLines(oldContents, newContents)
-    const blocks = []
+    const blocks: string[] = []
     let currentBlock: string[] = []
     let unchangedLines = 0
     const contextLines = 3

@@ -1,8 +1,7 @@
 import ollama, { ChatResponse, Message, Tool } from 'ollama'
 import { tools as toolDefinitions } from '../../tools/tools'
-import { abortableIterator } from '../../util/iterator'
+import { abortableIterator, createProvider, Stream } from '../factory'
 import { Model, Provider, ProviderOptions, ProviderSpec } from '../provider'
-import { createProvider, Stream } from '../util/provider'
 import { createConversation } from './conversation'
 import { createStreamReducer } from './reducer'
 

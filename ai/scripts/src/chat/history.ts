@@ -1,8 +1,30 @@
+import { readFileSync } from 'fs'
 import { AssistantMessage, Message, UserMessage } from '../messages/messages'
 import { tools } from '../tools/tools'
+import { ChatContext } from './context'
 import { formatMessage } from './output'
 
-export function replayChat(messages: Message[]): void {
+export function loadHistory(context: ChatContext, historyFilename: string): void {
+    const messages: Message[] = JSON.parse(readFileSync(historyFilename, 'utf8'), (key: string, value: any) => {
+        if (value && value.type === 'ErrorMessage') {
+            return new Error(value.message)
+        }
+
+        return value
+    })
+
+    for (const message of messages) {
+        if (message.role === 'user') {
+            context.provider.conversationManager.pushUser(message)
+        } else {
+            context.provider.conversationManager.pushAssistant([message])
+        }
+    }
+
+    replayChat(messages)
+}
+
+function replayChat(messages: Message[]): void {
     for (const message of messages) {
         switch (message.role) {
             case 'user':

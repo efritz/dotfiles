@@ -4,7 +4,7 @@ import {
     RawMessageStreamEvent,
 } from '@anthropic-ai/sdk/resources'
 import { AssistantMessage, TextMessage, ToolUseMessage } from '../../messages/messages'
-import { Reducer } from '../util/reducer'
+import { Reducer } from '../reducer'
 
 export function createStreamReducer(): Reducer<RawMessageStreamEvent> {
     const messages: AssistantMessage[] = []

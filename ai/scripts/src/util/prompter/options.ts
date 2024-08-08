@@ -1,58 +1,22 @@
-import readline from 'readline'
 import chalk from 'chalk'
-import { CancelError, InterruptHandler } from './interrupts'
+import { Questioner } from './questions'
 
-export interface Prompter extends Questioner, Optioner {}
-
-export function createPrompter(rl: readline.Interface, interruptHandler: InterruptHandler): Prompter {
-    const questioner = createQuestioner(rl, interruptHandler)
-    return { ...questioner, ...createOptioner(questioner) }
-}
-
-//
-//
-
-interface Questioner {
-    question: (prompt: string) => Promise<string>
-}
-
-function createQuestioner(rl: readline.Interface, interruptHandler: InterruptHandler): Questioner {
-    return {
-        question: async (prompt: string): Promise<string> => {
-            try {
-                return await interruptHandler.withInterruptHandler<string>(
-                    signal => new Promise<string>(resolve => rl.question(prompt, { signal }, resolve)),
-                )
-            } catch (error: any) {
-                if (error instanceof CancelError) {
-                    return ''
-                }
-
-                throw error
-            }
-        },
-    }
-}
-
-//
-//
-
-interface Optioner {
+export interface Optioner {
     choice: (prompt: string, options: ChoiceOption[]) => Promise<string>
     options: <T>(prompt: string, options: PromptOption<T>[]) => Promise<T>
 }
 
-interface ChoiceOption {
+export interface ChoiceOption {
     name: string
     description: string
     isDefault?: boolean
 }
 
-interface PromptOption<T> extends ChoiceOption {
+export interface PromptOption<T> extends ChoiceOption {
     handler: () => Promise<T>
 }
 
-function createOptioner(questioner: Questioner): Optioner {
+export function createOptioner(questioner: Questioner): Optioner {
     const options = async <T>(prompt: string, opts: PromptOption<T>[]): Promise<T> => {
         const helpOption = { name: '?', description: 'print help', isDefault: false }
         const allOptions = [...opts, helpOption]

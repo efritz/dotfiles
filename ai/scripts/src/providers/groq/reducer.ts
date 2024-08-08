@@ -1,6 +1,6 @@
 import { ChatCompletionChunk } from 'groq-sdk/resources/chat/completions'
 import { AssistantMessage } from '../../messages/messages'
-import { Reducer } from '../util/reducer'
+import { Reducer } from '../reducer'
 
 export function createStreamReducer(): Reducer<ChatCompletionChunk> {
     const messages: AssistantMessage[] = []

@@ -1,7 +1,7 @@
 import { Content, Part } from '@google/generative-ai'
 import { AssistantMessage, UserMessage } from '../../messages/messages'
 import { serializeToolResult } from '../../tools/tools'
-import { Conversation, createConversation as createGenericConversation } from '../util/conversation'
+import { Conversation, createConversation as createGenericConversation } from '../conversation'
 
 export function createConversation(): Conversation<Content> {
     return createGenericConversation<Content>({

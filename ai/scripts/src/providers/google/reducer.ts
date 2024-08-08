@@ -1,6 +1,6 @@
 import { EnhancedGenerateContentResponse } from '@google/generative-ai'
 import { AssistantMessage } from '../../messages/messages'
-import { Reducer } from '../util/reducer'
+import { Reducer } from '../reducer'
 
 export function createStreamReducer(): Reducer<EnhancedGenerateContentResponse> {
     const messages: AssistantMessage[] = []

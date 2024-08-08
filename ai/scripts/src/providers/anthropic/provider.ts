@@ -1,11 +1,9 @@
 import { Anthropic } from '@anthropic-ai/sdk'
 import { MessageParam, MessageStreamEvent, Tool } from '@anthropic-ai/sdk/resources/messages'
-import { EventIterator } from 'event-iterator'
 import { tools as toolDefinitions } from '../../tools/tools'
-import { abortableIterator } from '../../util/iterator'
+import { abortableIterator, createProvider, Stream } from '../factory'
+import { getKey } from '../keys'
 import { Model, Provider, ProviderOptions, ProviderSpec } from '../provider'
-import { getKey } from '../util/keys'
-import { createProvider, Stream } from '../util/provider'
 import { createConversation } from './conversation'
 import { createStreamReducer } from './reducer'
 

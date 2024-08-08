@@ -1,11 +1,8 @@
-import { Response } from '../../messages/messages'
-import { Provider } from '../provider'
+import { CancelError } from '../util/interrupts/interrupts'
+import { invertPromise } from '../util/promise'
 import { ConversationManager } from './conversation'
+import { Aborter, AbortRegisterer, ProgressFunction, Provider } from './provider'
 import { Reducer, reduceStream } from './reducer'
-
-export type Aborter = () => void
-export type AbortRegisterer = (abort: Aborter) => void
-export type ProgressFunction = (r?: Response) => void
 
 export type Stream<T> = { iterator: AsyncIterable<T>; abort: Aborter }
 export type StreamFactory<T> = () => Promise<Stream<T>>
@@ -38,4 +35,21 @@ export function createProvider<T>({
     }
 
     return { conversationManager, prompt }
+}
+
+export function abortableIterator<T>(iterable: AsyncIterable<T>, abortIterable: () => void): Stream<T> {
+    const { promise: aborted, reject: abort } = invertPromise()
+    const innerIterator = iterable[Symbol.asyncIterator]()
+    const iterator: AsyncIterableIterator<T> = {
+        [Symbol.asyncIterator]: () => iterator, // return self
+        next: () => Promise.race([innerIterator.next(), aborted]), // AsyncIterator
+    }
+
+    return {
+        iterator,
+        abort: () => {
+            abortIterable()
+            abort(new CancelError('Provider stream canceled'))
+        },
+    }
 }

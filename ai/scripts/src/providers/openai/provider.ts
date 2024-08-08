@@ -1,10 +1,9 @@
 import { OpenAI } from 'openai'
 import { ChatCompletionChunk, ChatCompletionMessageParam, ChatCompletionTool } from 'openai/resources'
 import { tools as toolDefinitions } from '../../tools/tools'
-import { abortableIterator } from '../../util/iterator'
+import { abortableIterator, createProvider, Stream } from '../factory'
+import { getKey } from '../keys'
 import { Model, Provider, ProviderOptions, ProviderSpec } from '../provider'
-import { getKey } from '../util/keys'
-import { createProvider, Stream } from '../util/provider'
 import { createConversation } from './conversation'
 import { createStreamReducer } from './reducer'
 

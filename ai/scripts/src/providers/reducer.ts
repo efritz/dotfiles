@@ -1,4 +1,4 @@
-import { AssistantMessage, Response } from '../../messages/messages'
+import { AssistantMessage, Response } from '../messages/messages'
 import { ProgressFunction } from './provider'
 
 export type Reducer<T> = {

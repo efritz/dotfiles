@@ -1,12 +1,15 @@
 import { Response } from '../messages/messages'
-import { ConversationManager } from './util/conversation'
-import { AbortRegisterer, ProgressFunction } from './util/provider'
+import { ConversationManager } from './conversation'
 
 export type Model = {
     name: string
     model: string
     options?: any
 }
+
+export type Aborter = () => void
+export type AbortRegisterer = (abort: Aborter) => void
+export type ProgressFunction = (r?: Response) => void
 
 export type Provider = {
     conversationManager: ConversationManager

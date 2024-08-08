@@ -1,3 +1,4 @@
+import chalk from 'chalk'
 import ora from 'ora'
 
 export type Updater<T> = (snapshot?: T, error?: Error) => void
@@ -33,5 +34,24 @@ export async function withProgress<T>(f: ProgressSubject<T>, options: ProgressOp
         return { ok: false, snapshot, error }
     } finally {
         console.log()
+    }
+}
+
+export function prefixFormatter<T>(prefix: string, serialize: (snapshot?: T) => string): Formatter<T> {
+    return (snapshot?: T, error?: Error) => {
+        let content = serialize(snapshot)
+
+        if (error) {
+            if (content) {
+                content += '\n\n'
+            }
+            content += chalk.bold.red(`error: ${error.message}`)
+        }
+
+        if (!content) {
+            return prefix
+        }
+
+        return prefix + '\n\n' + content
     }
 }
