@@ -3,6 +3,7 @@ import { randomBytes } from 'crypto'
 import { readFileSync, unlinkSync, writeFileSync } from 'fs'
 import chalk from 'chalk'
 import chokidar from 'chokidar'
+import treeKill from 'tree-kill'
 import { $ } from 'zx'
 import { CancelError } from '../util/interrupts'
 import { Updater, withProgress } from '../util/progress'
@@ -77,7 +78,7 @@ export const shellExecute: Tool = {
             edit.userEditedCommand = editedCommand
         }
 
-        const response = await withProgress<OutputLine[]>(update => runCommand(editedCommand, update), {
+        const response = await withProgress<OutputLine[]>(update => runCommand(context, editedCommand, update), {
             progress: snapshot => formatSnapshot('Executing command...', snapshot),
             success: snapshot => formatSnapshot('Command succeeded.', snapshot),
             failure: (snapshot, error) => formatSnapshot('Command failed.', snapshot, error),
@@ -178,24 +179,34 @@ async function editCommand(context: ExecutionContext, command: string): Promise<
     }
 }
 
-async function runCommand(command: string, update: Updater<OutputLine[]>): Promise<OutputLine[]> {
-    return new Promise((resolve, reject) => {
-        let output: OutputLine[] = []
-        const aggregate = (type: 'stdout' | 'stderr', s: string) => {
-            output.push({ content: s, type })
-            update(output)
-        }
-
-        const cmd = spawn('zsh', ['-c', command])
-        cmd.stdout.on('data', data => aggregate('stdout', data.toString()))
-        cmd.stderr.on('data', data => aggregate('stderr', data.toString()))
-
-        cmd.on('exit', exitCode => {
-            if (exitCode === 0) {
-                resolve(output)
-            } else {
-                reject(new Error(`exit code ${exitCode}`))
+async function runCommand(
+    context: ExecutionContext,
+    command: string,
+    update: Updater<OutputLine[]>,
+): Promise<OutputLine[]> {
+    return await context.interruptHandler.withInterruptHandler(signal => {
+        return new Promise((resolve, reject) => {
+            const output: OutputLine[] = []
+            const aggregate = (type: 'stdout' | 'stderr', s: string) => {
+                if (!signal.aborted) {
+                    output.push({ content: s, type })
+                    update(output)
+                }
             }
+
+            const cmd = spawn('zsh', ['-c', command])
+            cmd.stdout.on('data', data => aggregate('stdout', data.toString()))
+            cmd.stderr.on('data', data => aggregate('stderr', data.toString()))
+
+            signal.addEventListener('abort', () => treeKill(cmd.pid!, 'SIGKILL'))
+
+            cmd.on('exit', exitCode => {
+                if (exitCode === 0 && !signal.aborted) {
+                    resolve(output)
+                } else {
+                    reject(new Error(`exit code ${exitCode}`))
+                }
+            })
         })
     })
 }
