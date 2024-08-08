@@ -4,8 +4,8 @@ import { readFileSync, unlinkSync, writeFileSync } from 'fs'
 import chalk from 'chalk'
 import chokidar from 'chokidar'
 import { $ } from 'zx'
+import { CancelError } from '../util/interrupts'
 import { Updater, withProgress } from '../util/progress'
-import { invertPromise } from '../util/promise'
 import { Arguments, ExecutionContext, ExecutionResult, JSONSchemaDataType, Tool, ToolResult } from './tool'
 
 type OutputLine = {
@@ -19,13 +19,6 @@ type ShellResult =
           userEditedCommand?: string
           output: OutputLine[]
       }
-
-class CancelError extends Error {
-    constructor(message: string) {
-        super(message)
-        this.name = 'CancelError'
-    }
-}
 
 export const shellExecute: Tool = {
     name: 'shell_execute',
@@ -165,25 +158,19 @@ async function editCommand(context: ExecutionContext, command: string): Promise<
     })
 
     try {
-        const { promise, reject } = invertPromise()
-
         return await context.interruptHandler.withInterruptHandler(
             () =>
-                Promise.race([
-                    promise,
-                    new Promise<string>((resolve, reject) => {
-                        watcher.on('change', () => {
-                            const newContent = readFileSync(tempPath, 'utf-8')
-                            if (newContent !== command) {
-                                resolve(newContent)
-                            }
-                        })
+                new Promise<string>((resolve, reject) => {
+                    watcher.on('change', () => {
+                        const newContent = readFileSync(tempPath, 'utf-8')
+                        if (newContent !== command) {
+                            resolve(newContent)
+                        }
+                    })
 
-                        const editor = $`e ${tempPath}`
-                        editor.catch(error => reject(new Error(`Failed to open editor: ${error.message}`)))
-                    }),
-                ]),
-            { onAbort: () => reject(new CancelError('User canceled edit')) },
+                    const editor = $`e ${tempPath}`
+                    editor.catch(error => reject(new Error(`Failed to open editor: ${error.message}`)))
+                }),
         )
     } finally {
         watcher.close()

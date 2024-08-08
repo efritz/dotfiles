@@ -7,7 +7,7 @@ import { replayChat } from './chat/history'
 import { Message } from './messages/messages'
 import { Provider } from './providers/provider'
 import { createProvider, modelNames } from './providers/providers'
-import { createInterruptHandler, InterruptHandler } from './util/interrupts'
+import { createInterruptHandler, InterruptHandler, InterruptHandlerOptions } from './util/interrupts'
 import { createPrompter, Prompter } from './util/prompter'
 
 async function main() {
@@ -54,16 +54,40 @@ async function chatWithProvider(provider: Provider, model: string, historyFilena
     try {
         const interruptHandler = createInterruptHandler(rl)
         const prompter = createPrompter(rl, interruptHandler)
+        const interruptInputOptions = rootInterruptHandlerOptions(rl)
 
         await interruptHandler.withInterruptHandler(
             () => chatWithReadline(interruptHandler, prompter, provider, model, historyFilename),
-            {
-                permanent: true,
-                onAbort: interruptInput(rl),
-            },
+            interruptInputOptions,
         )
     } finally {
         rl.close()
+    }
+}
+
+function rootInterruptHandlerOptions(rl: readline.Interface): InterruptHandlerOptions {
+    let last: Date
+    const threshold = 1000
+
+    const onAbort = () => {
+        const now = new Date()
+        if (last && now.getTime() - last.getTime() <= threshold) {
+            console.log()
+            console.log('Goodbye!\n')
+            rl.close()
+            process.exit(0)
+        }
+
+        rl.pause()
+        process.stdout.write('^C')
+        rl.resume()
+        last = now
+    }
+
+    return {
+        permanent: true,
+        throwOnCancel: false,
+        onAbort,
     }
 }
 
@@ -103,26 +127,6 @@ async function chatWithReadline(
 
     console.log(`${historyFilename ? 'Resuming' : 'Beginning'} session with ${context.model}...\n`)
     await handler(context)
-}
-
-function interruptInput(rl: readline.Interface): () => void {
-    let last: Date
-    const threshold = 1000
-
-    return () => {
-        const now = new Date()
-        if (last && now.getTime() - last.getTime() <= threshold) {
-            console.log()
-            console.log('Goodbye!\n')
-            rl.close()
-            process.exit(0)
-        }
-
-        rl.pause()
-        process.stdout.write('^C')
-        rl.resume()
-        last = now
-    }
 }
 
 await main()

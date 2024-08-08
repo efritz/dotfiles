@@ -5,7 +5,7 @@ import { Response } from '../messages/messages'
 import { Provider } from '../providers/provider'
 import { ProgressFunction } from '../providers/util/provider'
 import { expandFilePatterns, readFileContents } from '../util/fs'
-import { InterruptHandler } from '../util/interrupts'
+import { CancelError, InterruptHandler } from '../util/interrupts'
 import { ProgressResult, withProgress } from '../util/progress'
 import { Prompter } from '../util/prompter'
 import { ExitError } from './errors'
@@ -217,6 +217,9 @@ async function promptWithProgress(context: ChatContext): Promise<ProgressResult<
                 success: snapshot => formatResponse('Generated response.', snapshot),
                 failure: (snapshot, error) => formatResponse('Failed to generate response.', snapshot),
             }),
-        { onAbort: () => cancel() },
+        {
+            throwOnCancel: false,
+            onAbort: () => cancel(),
+        },
     )
 }

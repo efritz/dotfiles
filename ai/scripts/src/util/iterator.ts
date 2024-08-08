@@ -1,4 +1,5 @@
 import { Stream } from '../providers/util/provider'
+import { CancelError } from './interrupts'
 import { invertPromise } from './promise'
 
 export function abortableIterator<T>(iterable: AsyncIterable<T>, abortIterable: () => void): Stream<T> {
@@ -13,7 +14,7 @@ export function abortableIterator<T>(iterable: AsyncIterable<T>, abortIterable: 
         iterator,
         abort: () => {
             abortIterable()
-            abort(new Error('Stream aborted'))
+            abort(new CancelError('Provider stream canceled'))
         },
     }
 }

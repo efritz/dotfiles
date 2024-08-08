@@ -1,7 +1,6 @@
 import readline from 'readline'
 import chalk from 'chalk'
-import { InterruptHandler } from './interrupts'
-import { invertPromise } from './promise'
+import { CancelError, InterruptHandler } from './interrupts'
 
 export interface Prompter extends Questioner, Optioner {}
 
@@ -20,24 +19,15 @@ interface Questioner {
 function createQuestioner(rl: readline.Interface, interruptHandler: InterruptHandler): Questioner {
     return {
         question: async (prompt: string): Promise<string> => {
-            const controller = new AbortController()
-            const { promise, reject } = invertPromise<never>()
-
             try {
                 return await interruptHandler.withInterruptHandler<string>(
-                    () =>
-                        Promise.race([
-                            promise.catch(() => ''),
-                            new Promise<string>(resolve => rl.question(prompt, { signal: controller.signal }, resolve)),
-                        ]),
-                    {
-                        onAbort: () => {
-                            controller.abort()
-                            reject()
-                        },
-                    },
+                    signal => new Promise<string>(resolve => rl.question(prompt, { signal }, resolve)),
                 )
             } catch (error: any) {
+                if (error instanceof CancelError) {
+                    return ''
+                }
+
                 throw error
             }
         },
