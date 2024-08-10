@@ -6,8 +6,8 @@ import { handler } from './chat/handler'
 import { loadHistory } from './chat/history'
 import { Provider } from './providers/provider'
 import { createProvider, modelNames } from './providers/providers'
-import { createInterruptHandler, InterruptHandler, InterruptHandlerOptions } from './util/interrupts/interrupts'
-import { createPrompter, Prompter } from './util/prompter/prompter'
+import { createInterruptHandler, InterruptHandlerOptions } from './util/interrupts/interrupts'
+import { createPrompter } from './util/prompter/prompter'
 
 async function main() {
     program
