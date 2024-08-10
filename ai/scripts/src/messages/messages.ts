@@ -34,7 +34,9 @@ export type ToolResult = {
     error?: Error
 }
 
-export type MetaMessage = SavepointMessage | RollbackMessage
+export type MetaMessage = UndoMessage | RedoMessage | SavepointMessage | RollbackMessage
 
+export type UndoMessage = { type: 'undo' }
+export type RedoMessage = { type: 'redo' }
 export type SavepointMessage = { type: 'savepoint'; name: string }
 export type RollbackMessage = { type: 'rollback'; target: string }

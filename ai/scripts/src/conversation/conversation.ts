@@ -14,6 +14,9 @@ export type ConversationManager = {
     savepoints(): string[]
     addSavepoint(name: string): boolean
     rollbackToSavepoint(name: string): boolean
+
+    undo(): boolean
+    redo(): boolean
 }
 
 type ConversationOptions<T> = {
@@ -31,8 +34,9 @@ export function createConversation<T>({
 }: ConversationOptions<T>): Conversation<T> {
     const chatMessages: Message[] = []
     const providerMessages: T[] = []
+    const undoStack: Message[][] = []
 
-    const setMessages = (messages: Message[]) => {
+    const setMessages = (messages: Message[], preserveUndoStack = false) => {
         chatMessages.length = 0
         providerMessages.length = 0
 
@@ -43,7 +47,7 @@ export function createConversation<T>({
                     break
 
                 case 'user':
-                    pushUser(message)
+                    pushUser(message, preserveUndoStack)
                     break
 
                 case 'assistant':
@@ -57,7 +61,7 @@ export function createConversation<T>({
         chatMessages.push({ ...message, role: 'meta' })
     }
 
-    const pushUser = (message: UserMessage) => {
+    const pushUser = (message: UserMessage, preserveUndoStack = false) => {
         if (providerMessages.length === 0 && initialMessage) {
             providerMessages.push(initialMessage)
         }
@@ -65,6 +69,10 @@ export function createConversation<T>({
         chatMessages.push({ ...message, role: 'user' })
         providerMessages.push(userMessageToParam(message))
         postPush?.(providerMessages)
+
+        if (!preserveUndoStack) {
+            undoStack.length = 0
+        }
     }
 
     const pushAssistant = (messages: AssistantMessage[]) => {
@@ -91,18 +99,48 @@ export function createConversation<T>({
         return true
     }
 
-    const rollbackToSavepoint = (name: string): boolean => {
-        const prefix: Message[] = []
-        for (const message of chatMessages) {
-            if (message.role === 'meta' && message.type === 'savepoint' && message.name === name) {
-                setMessages(prefix)
-                return true
+    const lastIndexMatching = (predicate: (message: Message) => boolean): number => {
+        for (let i = chatMessages.length - 1; i >= 0; i--) {
+            if (predicate(chatMessages[i])) {
+                return i
             }
-
-            prefix.push(message)
         }
 
-        return false
+        return -1
+    }
+
+    const rollbackToSavepoint = (name: string): boolean => {
+        const index = lastIndexMatching(
+            message => message.role === 'meta' && message.type === 'savepoint' && message.name === name,
+        )
+        if (index < 0) {
+            return false
+        }
+
+        setMessages(chatMessages.slice(0, index), false)
+        return true
+    }
+
+    const undo = (): boolean => {
+        const index = lastIndexMatching(message => message.role === 'user')
+        if (index < 0) {
+            return false
+        }
+
+        const top = chatMessages.splice(index)
+        undoStack.push(top)
+        setMessages([...chatMessages], true)
+        return true
+    }
+
+    const redo = (): boolean => {
+        const messagesToRedo = undoStack.pop()
+        if (!messagesToRedo) {
+            return false
+        }
+
+        setMessages([...chatMessages, ...messagesToRedo], true)
+        return true
     }
 
     return {
@@ -114,5 +152,7 @@ export function createConversation<T>({
         savepoints,
         addSavepoint,
         rollbackToSavepoint,
+        undo,
+        redo,
     }
 }
