@@ -13,7 +13,7 @@ export const saveCommand: CommandDescription = {
             return
         }
 
-        const messages = context.provider.conversationManager.serialize()
+        const messages = context.provider.conversationManager.messages()
         const filename = `chat-${Math.floor(Date.now() / 1000)}.json`
         writeFileSync(
             filename,

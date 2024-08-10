@@ -5,10 +5,10 @@ export type Conversation<T> = ConversationManager & {
 }
 
 export type ConversationManager = {
+    messages(): Message[]
     pushUser(message: UserMessage): void
     pushAssistant(messages: AssistantMessage[]): void
     clear(): void
-    serialize(): Message[]
 }
 
 type ConversationOptions<T> = {
@@ -70,9 +70,11 @@ export function createConversation<T>({
         }
     }
 
-    const serialize = () => {
-        return chatMessages
+    return {
+        providerMessages: () => providerMessages,
+        messages: () => chatMessages,
+        pushUser,
+        pushAssistant,
+        clear,
     }
-
-    return { providerMessages: () => providerMessages, pushUser, pushAssistant, clear, serialize }
 }
