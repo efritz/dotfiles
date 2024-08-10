@@ -1,5 +1,4 @@
 import chalk from 'chalk'
-import { Message } from '../../../messages/messages'
 import { ChatContext } from '../../context'
 import { CommandDescription } from './../command'
 
@@ -19,18 +18,11 @@ async function handleSavepoint(context: ChatContext, args: string) {
     }
     const name = parts[0]
 
-    if (savepoints(context.provider.conversationManager.messages()).includes(name)) {
+    if (!context.provider.conversationManager.addSavepoint(name)) {
         console.log(chalk.red.bold(`Savepoint "${name}" already exists.`))
         console.log()
         return
     }
 
-    context.provider.conversationManager.pushMeta({ type: 'savepoint', name })
     console.log(`Savepoint "${name}" registered.\n`)
-}
-
-export function savepoints(messages: Message[]): string[] {
-    return messages
-        .filter(message => message.role === 'meta' && message.type === 'savepoint')
-        .map(message => message.name)
 }

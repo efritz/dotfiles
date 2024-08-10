@@ -7,9 +7,13 @@ export type Conversation<T> = ConversationManager & {
 export type ConversationManager = {
     messages(): Message[]
     setMessages(messages: Message[]): void
-    pushMeta(message: MetaMessage): void
+
     pushUser(message: UserMessage): void
     pushAssistant(messages: AssistantMessage[]): void
+
+    savepoints(): string[]
+    addSavepoint(name: string): boolean
+    rollbackToSavepoint(name: string): boolean
 }
 
 type ConversationOptions<T> = {
@@ -72,12 +76,43 @@ export function createConversation<T>({
         postPush?.(providerMessages)
     }
 
+    const savepoints = (): string[] => {
+        return chatMessages
+            .filter(message => message.role === 'meta' && message.type === 'savepoint')
+            .map(message => message.name)
+    }
+
+    const addSavepoint = (name: string): boolean => {
+        if (savepoints().includes(name)) {
+            return false
+        }
+
+        chatMessages.push({ role: 'meta', type: 'savepoint', name })
+        return true
+    }
+
+    const rollbackToSavepoint = (name: string): boolean => {
+        const prefix: Message[] = []
+        for (const message of chatMessages) {
+            if (message.role === 'meta' && message.type === 'savepoint' && message.name === name) {
+                setMessages(prefix)
+                return true
+            }
+
+            prefix.push(message)
+        }
+
+        return false
+    }
+
     return {
         providerMessages: () => providerMessages,
         messages: () => chatMessages,
         setMessages,
-        pushMeta,
         pushUser,
         pushAssistant,
+        savepoints,
+        addSavepoint,
+        rollbackToSavepoint,
     }
 }

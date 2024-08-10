@@ -1,9 +1,7 @@
 import { CompleterResult } from 'readline'
 import chalk from 'chalk'
-import { Message } from '../../../messages/messages'
 import { ChatContext } from '../../context'
 import { CommandDescription } from './../command'
-import { savepoints } from './savepoint'
 
 export const rollbackCommand: CommandDescription = {
     prefix: ':rollback',
@@ -22,29 +20,16 @@ async function handleRollback(context: ChatContext, args: string): Promise<void>
     }
     const name = parts[0]
 
-    if (rollback(context, name)) {
-        console.log(`Rolled back to savepoint "${name}".`)
-        console.log()
-    } else {
+    if (!context.provider.conversationManager.rollbackToSavepoint(name)) {
         console.log(chalk.red.bold(`Savepoint "${name}" not found.`))
         console.log()
-    }
-}
-
-function rollback(context: ChatContext, name: string): boolean {
-    const prefix: Message[] = []
-    for (const message of context.provider.conversationManager.messages()) {
-        if (message.role === 'meta' && message.type === 'savepoint' && message.name === name) {
-            context.provider.conversationManager.setMessages(prefix)
-            return true
-        }
-
-        prefix.push(message)
+        return
     }
 
-    return false
+    console.log(`Rolled back to savepoint "${name}".`)
+    console.log()
 }
 
 function completeRollback(context: ChatContext, args: string): CompleterResult {
-    return [savepoints(context.provider.conversationManager.messages()).filter(name => name.startsWith(args)), args]
+    return [context.provider.conversationManager.savepoints().filter(name => name.startsWith(args)), args]
 }
