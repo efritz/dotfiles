@@ -2,9 +2,13 @@ export type Response = {
     messages: AssistantMessage[]
 }
 
+export type Message =
+    | ({ role: 'user' } & UserMessage)
+    | ({ role: 'assistant' } & AssistantMessage)
+    | ({ role: 'meta' } & MetaMessage)
+
 export type UserMessage = TextMessage | ToolResult
 export type AssistantMessage = TextMessage | ToolUseMessage
-export type Message = ({ role: 'user' } & UserMessage) | ({ role: 'assistant' } & AssistantMessage)
 
 export type TextMessage = {
     type: 'text'
@@ -29,3 +33,8 @@ export type ToolResult = {
     result?: any
     error?: Error
 }
+
+export type MetaMessage = SavepointMessage | RollbackMessage
+
+export type SavepointMessage = { type: 'savepoint'; name: string }
+export type RollbackMessage = { type: 'rollback'; target: string }

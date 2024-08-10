@@ -1,4 +1,4 @@
-import { AssistantMessage, Message, UserMessage } from '../messages/messages'
+import { AssistantMessage, Message, MetaMessage, UserMessage } from '../messages/messages'
 
 export type Conversation<T> = ConversationManager & {
     providerMessages: () => T[]
@@ -7,6 +7,7 @@ export type Conversation<T> = ConversationManager & {
 export type ConversationManager = {
     messages(): Message[]
     setMessages(messages: Message[]): void
+    pushMeta(message: MetaMessage): void
     pushUser(message: UserMessage): void
     pushAssistant(messages: AssistantMessage[]): void
 }
@@ -33,6 +34,10 @@ export function createConversation<T>({
 
         for (const message of messages) {
             switch (message.role) {
+                case 'meta':
+                    pushMeta(message)
+                    break
+
                 case 'user':
                     pushUser(message)
                     break
@@ -42,6 +47,10 @@ export function createConversation<T>({
                     break
             }
         }
+    }
+
+    const pushMeta = (message: MetaMessage) => {
+        chatMessages.push({ ...message, role: 'meta' })
     }
 
     const pushUser = (message: UserMessage) => {
@@ -67,6 +76,7 @@ export function createConversation<T>({
         providerMessages: () => providerMessages,
         messages: () => chatMessages,
         setMessages,
+        pushMeta,
         pushUser,
         pushAssistant,
     }

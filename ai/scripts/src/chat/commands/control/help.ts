@@ -6,19 +6,21 @@ import { commands } from '../commands'
 export const helpCommand: CommandDescription = {
     prefix: ':help',
     description: 'Show this message',
-    handler: async (context: ChatContext, args: string) => {
-        if (args !== '') {
-            console.log(chalk.red.bold('Unexpected arguments supplied to :help.'))
-            console.log()
-            return
-        }
+    handler: handleHelp,
+}
 
-        const maxWidth = commands.reduce((max, { prefix }) => Math.max(max, prefix.length), 0)
+async function handleHelp(context: ChatContext, args: string) {
+    if (args !== '') {
+        console.log(chalk.red.bold('Unexpected arguments supplied to :help.'))
+        console.log()
+        return
+    }
 
-        console.log()
-        for (const { prefix, description } of commands) {
-            console.log(`${prefix.padEnd(maxWidth)} - ${description}`)
-        }
-        console.log()
-    },
+    const maxWidth = commands.reduce((max, { prefix }) => Math.max(max, prefix.length), 0)
+
+    console.log()
+    for (const { prefix, description } of commands) {
+        console.log(`${prefix.padEnd(maxWidth)} - ${description}`)
+    }
+    console.log()
 }
