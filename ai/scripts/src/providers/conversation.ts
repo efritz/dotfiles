@@ -6,9 +6,9 @@ export type Conversation<T> = ConversationManager & {
 
 export type ConversationManager = {
     messages(): Message[]
+    setMessages(messages: Message[]): void
     pushUser(message: UserMessage): void
     pushAssistant(messages: AssistantMessage[]): void
-    clear(): void
 }
 
 type ConversationOptions<T> = {
@@ -27,6 +27,23 @@ export function createConversation<T>({
     const chatMessages: Message[] = []
     const providerMessages: T[] = []
 
+    const setMessages = (messages: Message[]) => {
+        chatMessages.length = 0
+        providerMessages.length = 0
+
+        for (const message of messages) {
+            switch (message.role) {
+                case 'user':
+                    pushUser(message)
+                    break
+
+                case 'assistant':
+                    pushAssistant([message])
+                    break
+            }
+        }
+    }
+
     const pushUser = (message: UserMessage) => {
         if (providerMessages.length === 0 && initialMessage) {
             providerMessages.push(initialMessage)
@@ -41,40 +58,16 @@ export function createConversation<T>({
         for (const m of messages) {
             chatMessages.push({ ...m, role: 'assistant' })
         }
+
         providerMessages.push(assistantMessagesToParam(messages))
         postPush?.(providerMessages)
-    }
-
-    const clear = () => {
-        chatMessages.length = 0
-        providerMessages.length = 0
-    }
-
-    const set = (messages: Message[]) => {
-        clear()
-
-        for (const message of messages) {
-            switch (message.role) {
-                case 'meta':
-                    pushMeta(message)
-                    break
-
-                case 'user':
-                    pushUser(message)
-                    break
-
-                case 'assistant':
-                    pushAssistant([message])
-                    break
-            }
-        }
     }
 
     return {
         providerMessages: () => providerMessages,
         messages: () => chatMessages,
+        setMessages,
         pushUser,
         pushAssistant,
-        clear,
     }
 }

@@ -12,7 +12,7 @@ export const clearCommand: CommandDescription = {
             return
         }
 
-        context.provider.conversationManager.clear()
+        context.provider.conversationManager.setMessages([])
         console.log('Chat history cleared.\n')
     },
 }

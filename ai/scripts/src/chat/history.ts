@@ -13,14 +13,7 @@ export function loadHistory(context: ChatContext, historyFilename: string): void
         return value
     })
 
-    for (const message of messages) {
-        if (message.role === 'user') {
-            context.provider.conversationManager.pushUser(message)
-        } else {
-            context.provider.conversationManager.pushAssistant([message])
-        }
-    }
-
+    context.provider.conversationManager.setMessages(messages)
     replayChat(messages)
 }
 
