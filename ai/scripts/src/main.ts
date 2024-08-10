@@ -43,11 +43,13 @@ async function chat(model: string, historyFilename?: string) {
 }
 
 async function chatWithProvider(provider: Provider, model: string, historyFilename?: string) {
+    let context: ChatContext
+
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
         terminal: true,
-        completer,
+        completer: (line: string) => (context ? completer(context, line) : undefined),
     })
 
     try {
@@ -55,8 +57,15 @@ async function chatWithProvider(provider: Provider, model: string, historyFilena
         const prompter = createPrompter(rl, interruptHandler)
         const interruptInputOptions = rootInterruptHandlerOptions(rl)
 
+        context = {
+            model,
+            interruptHandler,
+            prompter,
+            provider,
+        }
+
         await interruptHandler.withInterruptHandler(
-            () => chatWithReadline(interruptHandler, prompter, provider, model, historyFilename),
+            () => chatWithReadline(context, historyFilename),
             interruptInputOptions,
         )
     } finally {
@@ -90,20 +99,7 @@ function rootInterruptHandlerOptions(rl: readline.Interface): InterruptHandlerOp
     }
 }
 
-async function chatWithReadline(
-    interruptHandler: InterruptHandler,
-    prompter: Prompter,
-    provider: Provider,
-    model: string,
-    historyFilename?: string,
-) {
-    const context: ChatContext = {
-        model,
-        interruptHandler,
-        prompter,
-        provider,
-    }
-
+async function chatWithReadline(context: ChatContext, historyFilename?: string) {
     if (historyFilename) {
         loadHistory(context, historyFilename)
     }

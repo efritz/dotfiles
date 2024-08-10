@@ -31,7 +31,7 @@ export async function handleCommand(context: ChatContext, message: string): Prom
     return false
 }
 
-export function completeCommand(message: string): CompleterResult | undefined {
+export function completeCommand(context: ChatContext, message: string): CompleterResult | undefined {
     const parts = message.split(' ')
     const command = parts[0]
     const args = parts.slice(1).join(' ').trim()
@@ -42,7 +42,7 @@ export function completeCommand(message: string): CompleterResult | undefined {
 
     for (const { prefix, complete } of commands) {
         if (complete && command === prefix) {
-            return complete(args)
+            return complete(context, args)
         }
     }
 

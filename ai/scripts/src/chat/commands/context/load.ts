@@ -40,7 +40,7 @@ async function handleLoad(context: ChatContext, args: string): Promise<void> {
 // Expand files for loading that expand the last entry of the current list of files
 // the user has provided. If a user has added a space to the previous file, we consider
 // that "done" and won't suggest further expansion.
-function completeLoad(line: string): CompleterResult {
+function completeLoad(context: ChatContext, line: string): CompleterResult {
     const last = line.split(' ').pop()!
     const prefix = canonicalizePathPrefix(last)
 

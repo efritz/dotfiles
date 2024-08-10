@@ -1,10 +1,11 @@
 import { CompleterResult } from 'readline'
 import { commands, completeCommand } from './commands/commands'
+import { ChatContext } from './context'
 
 const commandPrefixes = commands.map(({ prefix, expectsArgs }) => prefix + (expectsArgs ? ' ' : ''))
 
-export function completer(line: string): CompleterResult {
-    const result = completeCommand(line)
+export function completer(context: ChatContext, line: string): CompleterResult {
+    const result = completeCommand(context, line)
     if (result) {
         return result
     }
