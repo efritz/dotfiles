@@ -1,5 +1,5 @@
+import { ConversationManager } from '../conversation/conversation'
 import { Response } from '../messages/messages'
-import { ConversationManager } from './conversation'
 
 export type Model = {
     name: string

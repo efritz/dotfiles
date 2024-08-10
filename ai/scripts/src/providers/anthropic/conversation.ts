@@ -4,9 +4,9 @@ import {
     ToolResultBlockParam,
     ToolUseBlockParam,
 } from '@anthropic-ai/sdk/resources/messages'
+import { Conversation, createConversation as createGenericConversation } from '../../conversation/conversation'
 import { AssistantMessage, UserMessage } from '../../messages/messages'
 import { serializeToolResult } from '../../tools/tools'
-import { Conversation, createConversation as createGenericConversation } from '../conversation'
 
 type UserContent = TextBlockParam | ToolResultBlockParam
 type AssistantContent = TextBlockParam | ToolUseBlockParam

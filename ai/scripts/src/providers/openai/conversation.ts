@@ -6,9 +6,9 @@ import {
     ChatCompletionToolMessageParam,
     ChatCompletionUserMessageParam,
 } from 'openai/resources'
+import { Conversation, createConversation as createGenericConversation } from '../../conversation/conversation'
 import { AssistantMessage, UserMessage } from '../../messages/messages'
 import { serializeToolResult } from '../../tools/tools'
-import { Conversation, createConversation as createGenericConversation } from '../conversation'
 
 type UserParam = ChatCompletionUserMessageParam | ChatCompletionToolMessageParam
 type AssistantParam = ChatCompletionAssistantMessageParam
