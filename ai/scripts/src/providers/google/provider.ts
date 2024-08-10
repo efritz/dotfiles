@@ -31,7 +31,7 @@ function createGoogleProvider({
 }: ProviderOptions): Provider {
     const apiKey = getKey('google')
     const client = new GoogleGenerativeAI(apiKey)
-    const { messages, ...conversationManager } = createConversation()
+    const { providerMessages, ...conversationManager } = createConversation()
 
     return createProvider({
         createStream: () =>
@@ -39,7 +39,7 @@ function createGoogleProvider({
                 client,
                 modelName,
                 system,
-                messages,
+                messages: providerMessages(),
                 temperature,
                 maxTokens,
             }),

@@ -31,14 +31,14 @@ function createOpenAIProvider({
 }: ProviderOptions): Provider {
     const apiKey = getKey('openai')
     const client = new OpenAI({ apiKey })
-    const { messages, ...conversationManager } = createConversation(system)
+    const { providerMessages, ...conversationManager } = createConversation(system)
 
     return createProvider({
         createStream: () =>
             createStream({
                 client,
                 model,
-                messages,
+                messages: providerMessages(),
                 temperature,
                 maxTokens,
             }),

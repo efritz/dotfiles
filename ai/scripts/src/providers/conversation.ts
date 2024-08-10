@@ -1,7 +1,7 @@
 import { AssistantMessage, Message, UserMessage } from '../messages/messages'
 
 export type Conversation<T> = ConversationManager & {
-    messages: T[]
+    providerMessages: () => T[]
 }
 
 export type ConversationManager = {
@@ -50,9 +50,29 @@ export function createConversation<T>({
         providerMessages.length = 0
     }
 
+    const set = (messages: Message[]) => {
+        clear()
+
+        for (const message of messages) {
+            switch (message.role) {
+                case 'meta':
+                    pushMeta(message)
+                    break
+
+                case 'user':
+                    pushUser(message)
+                    break
+
+                case 'assistant':
+                    pushAssistant([message])
+                    break
+            }
+        }
+    }
+
     const serialize = () => {
         return chatMessages
     }
 
-    return { messages: providerMessages, pushUser, pushAssistant, clear, serialize }
+    return { providerMessages: () => providerMessages, pushUser, pushAssistant, clear, serialize }
 }

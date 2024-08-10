@@ -40,7 +40,7 @@ function createAnthropicProvider({
     const apiKey = getKey('anthropic')
     const defaultHeaders = modelOptions?.headers
     const client = new Anthropic({ apiKey: apiKey, defaultHeaders })
-    const { messages, ...conversationManager } = createConversation()
+    const { providerMessages, ...conversationManager } = createConversation()
 
     return createProvider({
         createStream: () =>
@@ -48,7 +48,7 @@ function createAnthropicProvider({
                 client,
                 system,
                 model,
-                messages,
+                messages: providerMessages(),
                 temperature,
                 maxTokens,
             }),

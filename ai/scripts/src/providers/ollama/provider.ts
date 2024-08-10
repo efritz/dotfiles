@@ -23,13 +23,13 @@ function createOllamaProvider({
     temperature = 0.0,
     maxTokens = 4096,
 }: ProviderOptions): Provider {
-    const { messages, ...conversationManager } = createConversation(system)
+    const { providerMessages, ...conversationManager } = createConversation(system)
 
     return createProvider({
         createStream: () =>
             createStream({
                 model,
-                messages,
+                messages: providerMessages(),
                 temperature,
                 maxTokens,
             }),

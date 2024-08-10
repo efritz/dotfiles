@@ -28,14 +28,14 @@ function createGroqProvider({
 }: ProviderOptions): Provider {
     const apiKey = getKey('groq')
     const client = new Groq({ apiKey })
-    const { messages, ...conversationManager } = createConversation(system)
+    const { providerMessages, ...conversationManager } = createConversation(system)
 
     return createProvider({
         createStream: () =>
             createStream({
                 client,
                 model,
-                messages,
+                messages: providerMessages(),
                 temperature,
                 maxTokens,
             }),
