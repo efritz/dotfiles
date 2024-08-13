@@ -23,14 +23,16 @@ export function createProvider<T>({
         const { iterator, abort } = await createStream()
         abortRegisterer?.(abort)
 
-        const reducerOptions = {
+        const response = await reduceStream({
             iterator,
             reducer: createStreamReducer(),
             progress,
+        })
+
+        for (const message of response.messages) {
+            conversationManager.pushAssistant(message)
         }
 
-        const response = await reduceStream(reducerOptions)
-        conversationManager.pushAssistant(response.messages)
         return response
     }
 

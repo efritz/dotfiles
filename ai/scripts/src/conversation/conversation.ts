@@ -9,7 +9,7 @@ export type ConversationManager = {
     setMessages(messages: Message[]): void
 
     pushUser(message: UserMessage): void
-    pushAssistant(messages: AssistantMessage[]): void
+    pushAssistant(message: AssistantMessage): void
 
     savepoints(): string[]
     addSavepoint(name: string): boolean
@@ -51,7 +51,7 @@ export function createConversation<T>({
                     break
 
                 case 'assistant':
-                    pushAssistant([message])
+                    pushAssistant(message)
                     break
             }
         }
@@ -75,12 +75,9 @@ export function createConversation<T>({
         }
     }
 
-    const pushAssistant = (messages: AssistantMessage[]) => {
-        for (const m of messages) {
-            chatMessages.push({ ...m, role: 'assistant' })
-        }
-
-        providerMessages.push(assistantMessagesToParam(messages))
+    const pushAssistant = (message: AssistantMessage) => {
+        chatMessages.push({ ...message, role: 'assistant' })
+        providerMessages.push(assistantMessagesToParam([message]))
         postPush?.(providerMessages)
     }
 
