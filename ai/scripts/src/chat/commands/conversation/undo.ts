@@ -1,5 +1,6 @@
 import chalk from 'chalk'
 import { ChatContext } from '../../context'
+import { replayMessages } from '../../history'
 import { CommandDescription } from '../command'
 
 export const undoCommand: CommandDescription = {
@@ -21,6 +22,8 @@ async function handleUndo(context: ChatContext, args: string) {
         return
     }
 
-    console.log('Last action undone.')
+    console.clear()
+    replayMessages(context.provider.conversationManager.visibleMessages())
+    console.log(chalk.yellow('Undid last action.'))
     console.log()
 }

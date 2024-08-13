@@ -11,7 +11,8 @@ import { runToolsInMessages } from './tools'
 export async function handler(context: ChatContext) {
     while (true) {
         try {
-            await handle(context, (await context.prompter.question('$ ')).trim())
+            const currentBranch = context.provider.conversationManager.currentBranch()
+            await handle(context, (await context.prompter.question(`[${currentBranch}] $ `)).trim())
         } catch (error) {
             if (error instanceof ExitError) {
                 return
@@ -32,7 +33,12 @@ async function handle(context: ChatContext, message: string): Promise<void> {
         return
     }
 
-    context.provider.conversationManager.pushUser({ type: 'text', content: message })
+    const prunedBranches = context.provider.conversationManager.pushUser({ type: 'text', content: message })
+    if (prunedBranches.length > 0) {
+        console.log(chalk.yellow(`${chalk.dim('𐌖')} Pruned branches: ${prunedBranches.join(', ')}`))
+        console.log()
+    }
+
     await prompt(context)
 }
 

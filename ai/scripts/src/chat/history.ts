@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs'
-import { AssistantMessage, Message, UserMessage } from '../messages/messages'
+import chalk from 'chalk'
+import { AssistantMessage, Message, MetaMessage, UserMessage } from '../messages/messages'
 import { tools } from '../tools/tools'
 import { ChatContext } from './context'
 import { formatMessage } from './output'
@@ -14,12 +15,16 @@ export function loadHistory(context: ChatContext, historyFilename: string): void
     })
 
     context.provider.conversationManager.setMessages(messages)
-    replayChat(messages)
+    replayMessages(context.provider.conversationManager.visibleMessages())
 }
 
-function replayChat(messages: Message[]): void {
+export function replayMessages(messages: Message[]): void {
     for (const message of messages) {
         switch (message.role) {
+            case 'meta':
+                replayMetaMessage(message)
+                break
+
             case 'user':
                 replayUserMessage(message)
                 break
@@ -28,6 +33,20 @@ function replayChat(messages: Message[]): void {
                 replayAssistantMessage(message)
                 break
         }
+    }
+}
+
+function replayMetaMessage(message: MetaMessage): void {
+    switch (message.type) {
+        case 'branch':
+            console.log(`${chalk.dim('𐌖')} Created branch "${message.name}"`)
+            console.log()
+            break
+
+        case 'savepoint':
+            console.log(`${chalk.dim('📌')} Saved state as "${message.name}"`)
+            console.log()
+            break
     }
 }
 

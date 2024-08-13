@@ -24,5 +24,6 @@ async function handleSavepoint(context: ChatContext, args: string) {
         return
     }
 
-    console.log(`Savepoint "${name}" registered.\n`)
+    console.log(`${chalk.dim('📌')} Savepoint "${name}" registered.`)
+    console.log()
 }

@@ -1,3 +1,4 @@
+import { clearScreenDown, cursorTo } from 'readline'
 import chalk from 'chalk'
 import { ChatContext } from '../../context'
 import { CommandDescription } from './../command'
@@ -16,5 +17,8 @@ async function handleClear(context: ChatContext, args: string) {
     }
 
     context.provider.conversationManager.setMessages([])
-    console.log('Chat history cleared.\n')
+
+    console.clear()
+    console.log('Chat history cleared.')
+    console.log()
 }
