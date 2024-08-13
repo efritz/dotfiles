@@ -24,25 +24,20 @@ export const commands: CommandDescription[] = [
     redoCommand,
 ]
 
-export async function handleCommand(context: ChatContext, message: string): Promise<boolean> {
+export async function handleCommand(context: ChatContext, message: string): Promise<void> {
     const parts = message.split(' ')
     const command = parts[0]
     const args = parts.slice(1).join(' ').trim()
 
-    if (!command.startsWith(':')) {
-        return false
-    }
-
     for (const { prefix, handler } of commands) {
         if (command === prefix) {
             await handler(context, args)
-            return true
+            return
         }
     }
 
     console.log(chalk.red.bold(`Unknown command`))
     console.log()
-    return false
 }
 
 export function completeCommand(context: ChatContext, message: string): CompleterResult | undefined {

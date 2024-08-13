@@ -27,8 +27,8 @@ async function handle(context: ChatContext, message: string): Promise<void> {
         return
     }
 
-    const handledCommand = await handleCommand(context, message)
-    if (handledCommand) {
+    if (message.startsWith(':')) {
+        await handleCommand(context, message)
         return
     }
 
