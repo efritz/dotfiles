@@ -1,5 +1,6 @@
 import chalk from 'chalk'
 import { ChatContext } from '../../context'
+import { replayMessages } from '../../history'
 import { CommandDescription } from '../command'
 
 export const redoCommand: CommandDescription = {
@@ -21,6 +22,8 @@ async function handleRedo(context: ChatContext, args: string) {
         return
     }
 
-    console.log('Last undone action redone.')
+    console.clear()
+    replayMessages(context.provider.conversationManager.visibleMessages())
+    console.log(chalk.yellow('Redid last undone action.'))
     console.log()
 }

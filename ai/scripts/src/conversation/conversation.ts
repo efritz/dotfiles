@@ -1,22 +1,38 @@
+import { v4 as uuidv4 } from 'uuid'
 import { AssistantMessage, Message, MetaMessage, UserMessage } from '../messages/messages'
 
 export type Conversation<T> = ConversationManager & {
     providerMessages: () => T[]
 }
 
+export type Branch = {
+    name: string
+    parent?: string
+    messages: Message[]
+}
+
 export type ConversationManager = {
     messages(): Message[]
+    visibleMessages(): Message[]
     setMessages(messages: Message[]): void
 
-    pushUser(message: UserMessage): void
+    pushUser(message: UserMessage): string[]
     pushAssistant(message: AssistantMessage): void
 
     savepoints(): string[]
     addSavepoint(name: string): boolean
-    rollbackToSavepoint(name: string): boolean
+    rollbackToSavepoint(name: string): { success: boolean; prunedBranches: string[] }
 
     undo(): boolean
     redo(): boolean
+
+    branchMetadata(): Record<string, Branch>
+    branches(): string[]
+    currentBranch(): string
+    branch(name: string): boolean
+    switchBranch(name: string): boolean
+    renameBranch(oldName: string, newName: string): boolean
+    removeBranch(name: string): { success: boolean; prunedBranches: string[] }
 }
 
 type ConversationOptions<T> = {
@@ -32,57 +48,98 @@ export function createConversation<T>({
     initialMessage,
     postPush,
 }: ConversationOptions<T>): Conversation<T> {
-    const chatMessages: Message[] = []
-    const providerMessages: T[] = []
+    let chatMessages: Message[] = []
     const undoStack: Message[][] = []
+    const redoStack: Message[][] = []
 
-    const setMessages = (messages: Message[], preserveUndoStack = false) => {
-        chatMessages.length = 0
-        providerMessages.length = 0
+    const setMessages = (messages: Message[]) => {
+        chatMessages = messages
+    }
 
-        for (const message of messages) {
-            switch (message.role) {
-                case 'meta':
-                    pushMeta(message)
-                    break
+    const saveSnapshot = (): void => {
+        undoStack.push([...chatMessages])
+        redoStack.length = 0
+    }
 
-                case 'user':
-                    pushUser(message, preserveUndoStack)
-                    break
+    const branchMetadata = (): Record<string, Branch> => {
+        const branches: Record<string, Branch> = { main: { name: 'main', messages: [] } }
 
-                case 'assistant':
-                    pushAssistant(message)
-                    break
+        let currentBranch = 'main'
+        for (const message of chatMessages) {
+            if (message.role === 'meta') {
+                switch (message.type) {
+                    case 'branch':
+                        const name = message.name
+                        const parent = currentBranch
+                        branches[parent].messages.push(message)
+                        const messages = [...branches[parent].messages]
+
+                        currentBranch = message.name
+                        branches[currentBranch] = { name, parent, messages }
+                        continue
+
+                    case 'switch':
+                        currentBranch = message.name
+                        break
+                }
             }
+
+            branches[currentBranch].messages.push(message)
         }
+
+        return branches
     }
 
-    const pushMeta = (message: MetaMessage) => {
-        chatMessages.push({ ...message, role: 'meta' })
+    const visibleMessages = (): Message[] => {
+        return branchMetadata()[currentBranch()].messages.filter(m => !(m.role === 'meta' && m.type === 'switch'))
     }
 
-    const pushUser = (message: UserMessage, preserveUndoStack = false) => {
-        if (providerMessages.length === 0 && initialMessage) {
+    const providerMessages = (): T[] => {
+        const providerMessages: T[] = []
+        if (initialMessage) {
             providerMessages.push(initialMessage)
         }
 
-        chatMessages.push({ ...message, role: 'user' })
-        providerMessages.push(userMessageToParam(message))
-        postPush?.(providerMessages)
+        for (const message of visibleMessages()) {
+            switch (message.role) {
+                case 'user':
+                    providerMessages.push(userMessageToParam(message))
+                    postPush?.(providerMessages)
+                    break
 
-        if (!preserveUndoStack) {
-            undoStack.length = 0
+                case 'assistant':
+                    providerMessages.push(assistantMessagesToParam([message]))
+                    postPush?.(providerMessages)
+                    break
+            }
         }
+
+        return providerMessages
+    }
+
+    const addMessage = (message: Message) => {
+        if (isUndoTarget(message)) {
+            saveSnapshot()
+        }
+
+        setMessages([...chatMessages, message])
+    }
+
+    const pushMeta = (message: MetaMessage) => {
+        addMessage({ ...message, id: uuidv4(), role: 'meta' })
+    }
+
+    const pushUser = (message: UserMessage): string[] => {
+        addMessage({ ...message, id: uuidv4(), role: 'user' })
+        return removeBranches(childBranches(currentBranch()).map(({ name }) => name))
     }
 
     const pushAssistant = (message: AssistantMessage) => {
-        chatMessages.push({ ...message, role: 'assistant' })
-        providerMessages.push(assistantMessagesToParam([message]))
-        postPush?.(providerMessages)
+        addMessage({ ...message, id: uuidv4(), role: 'assistant' })
     }
 
     const savepoints = (): string[] => {
-        return chatMessages
+        return visibleMessages()
             .filter(message => message.role === 'meta' && message.type === 'savepoint')
             .map(message => message.name)
     }
@@ -92,57 +149,212 @@ export function createConversation<T>({
             return false
         }
 
-        chatMessages.push({ role: 'meta', type: 'savepoint', name })
+        pushMeta({ type: 'savepoint', name })
         return true
     }
 
-    const lastIndexMatching = (predicate: (message: Message) => boolean): number => {
-        for (let i = chatMessages.length - 1; i >= 0; i--) {
-            if (predicate(chatMessages[i])) {
-                return i
+    const rollbackToSavepoint = (name: string): { success: boolean; prunedBranches: string[] } => {
+        const isMatchingSavepoint = (message: Message): boolean =>
+            message.role === 'meta' && message.type === 'savepoint' && message.name === name
+
+        const branches = branchMetadata()
+        const visibleMessages = branches[currentBranch()].messages
+
+        const messageIdsToRemove: string[] = []
+        const children: string[] = []
+        let foundMatchingSavepoint = false
+
+        for (const message of visibleMessages) {
+            if (isMatchingSavepoint(message)) {
+                foundMatchingSavepoint = true
+            }
+
+            if (foundMatchingSavepoint) {
+                if (message.role === 'meta' && message.type === 'branch') {
+                    children.push(message.name)
+                }
+
+                messageIdsToRemove.push(message.id)
             }
         }
 
-        return -1
-    }
-
-    const rollbackToSavepoint = (name: string): boolean => {
-        const index = lastIndexMatching(
-            message => message.role === 'meta' && message.type === 'savepoint' && message.name === name,
-        )
-        if (index < 0) {
-            return false
+        if (!foundMatchingSavepoint) {
+            return { success: false, prunedBranches: [] }
         }
 
-        setMessages(chatMessages.slice(0, index), false)
-        return true
+        let branchName: string = currentBranch()
+        while (true) {
+            const parent = branches[branchName].parent
+            if (parent && branches[parent].messages.some(isMatchingSavepoint)) {
+                branchName = parent
+            } else {
+                break
+            }
+        }
+
+        saveSnapshot()
+        const prunedBranches = removeBranches(children)
+        setMessages(chatMessages.filter(message => !messageIdsToRemove.includes(message.id)))
+        pushMeta({ type: 'switch', name: branchName })
+        return { success: true, prunedBranches }
+    }
+
+    const isUndoTarget = (message: Message): boolean => {
+        switch (message.role) {
+            case 'meta':
+                return true
+
+            case 'user':
+                return message.type === 'text'
+        }
+
+        return false
     }
 
     const undo = (): boolean => {
-        const index = lastIndexMatching(message => message.role === 'user')
-        if (index < 0) {
+        if (undoStack.length === 0) {
             return false
         }
 
-        const top = chatMessages.splice(index)
-        undoStack.push(top)
-        setMessages([...chatMessages], true)
+        redoStack.push([...chatMessages])
+        setMessages(undoStack.pop()!)
         return true
     }
 
     const redo = (): boolean => {
-        const messagesToRedo = undoStack.pop()
-        if (!messagesToRedo) {
+        if (redoStack.length === 0) {
             return false
         }
 
-        setMessages([...chatMessages, ...messagesToRedo], true)
+        undoStack.push([...chatMessages])
+        setMessages(redoStack.pop()!)
         return true
     }
 
+    const branches = (): string[] => {
+        return Object.keys(branchMetadata())
+    }
+
+    const childBranches = (name: string): Branch[] => {
+        const branches = branchMetadata()
+        return Object.values(branches).filter(branch => branch.parent === name)
+    }
+
+    const currentBranch = () => {
+        for (let i = chatMessages.length - 1; i >= 0; i--) {
+            const message = chatMessages[i]
+
+            if (message.role === 'meta' && (message.type === 'branch' || message.type === 'switch')) {
+                return message.name
+            }
+        }
+
+        return 'main'
+    }
+
+    const branch = (name: string): boolean => {
+        if (branches().includes(name)) {
+            return false
+        }
+
+        pushMeta({ type: 'branch', name })
+        return true
+    }
+
+    const switchBranch = (name: string): boolean => {
+        if (!branches().includes(name)) {
+            return false
+        }
+
+        pushMeta({ type: 'switch', name })
+        return true
+    }
+
+    const renameBranch = (oldName: string, newName: string): boolean => {
+        if (!branches().includes(oldName) || branches().includes(newName)) {
+            return false
+        }
+
+        const renameBranchMessage = (message: Message): Message => {
+            if (message.role === 'meta') {
+                if (message.type === 'branch' || message.type === 'switch') {
+                    if (message.name === oldName) {
+                        return { ...message, name: newName }
+                    }
+                }
+            }
+
+            return message
+        }
+
+        saveSnapshot()
+        setMessages(chatMessages.map(renameBranchMessage))
+        return true
+    }
+
+    const removeBranch = (name: string): { success: boolean; prunedBranches: string[] } => {
+        if (!branches().includes(name) || name === 'main') {
+            return { success: false, prunedBranches: [] }
+        }
+
+        const bx = branchMetadata()
+        let newBranchName: string | undefined = undefined
+        let b = currentBranch()
+        while (true) {
+            const br = bx[b].parent
+            if (!br) {
+                break
+            }
+
+            if (b === name) {
+                newBranchName = br
+                break
+            }
+            b = br
+        }
+
+        saveSnapshot()
+        const prunedBranches = doRemoveBranch(name)
+        if (newBranchName) {
+            console.log('SWITCHING TO AVAILABLE PARENT')
+            pushMeta({ type: 'switch', name: newBranchName })
+        }
+        return { success: true, prunedBranches }
+    }
+
+    const doRemoveBranch = (name: string): string[] => {
+        const children = removeBranches(childBranches(name).map(({ name }) => name))
+        removeBranchMessages(name)
+        return [name, ...children]
+    }
+
+    const removeBranches = (names: string[]): string[] => {
+        const removed: string[] = []
+        for (const name of names) {
+            removed.push(...doRemoveBranch(name))
+        }
+
+        return removed
+    }
+
+    const removeBranchMessages = (name: string): void => {
+        const branch = branchMetadata()[name]
+        if (branch) {
+            const branchIds = branch.messages.map(m => m.id)
+            const parentIds = branch.parent ? branchMetadata()[branch.parent].messages.map(m => m.id) : []
+            const uniqueIds = branchIds.filter(id => !parentIds.includes(id))
+
+            const createMessage = chatMessages.find(m => m.role === 'meta' && m.type === 'branch' && m.name === name)
+            const idsToRemove = [...uniqueIds, ...(createMessage ? [createMessage.id] : [])]
+
+            setMessages(chatMessages.filter(m => !idsToRemove.includes(m.id)))
+        }
+    }
+
     return {
-        providerMessages: () => providerMessages,
+        providerMessages,
         messages: () => chatMessages,
+        visibleMessages,
         setMessages,
         pushUser,
         pushAssistant,
@@ -151,5 +363,12 @@ export function createConversation<T>({
         rollbackToSavepoint,
         undo,
         redo,
+        branchMetadata,
+        branches,
+        currentBranch,
+        branch,
+        switchBranch,
+        renameBranch,
+        removeBranch,
     }
 }

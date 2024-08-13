@@ -2,7 +2,9 @@ export type Response = {
     messages: AssistantMessage[]
 }
 
-export type Message =
+export type Message = { id: string } & TaggedMessage
+
+export type TaggedMessage =
     | ({ role: 'user' } & UserMessage)
     | ({ role: 'assistant' } & AssistantMessage)
     | ({ role: 'meta' } & MetaMessage)
@@ -34,9 +36,11 @@ export type ToolResult = {
     error?: Error
 }
 
-export type MetaMessage = UndoMessage | RedoMessage | SavepointMessage | RollbackMessage
+export type MetaMessage = UndoMessage | RedoMessage | SavepointMessage | RollbackMessage | BranchMessage | SwitchMessage
 
 export type UndoMessage = { type: 'undo' }
 export type RedoMessage = { type: 'redo' }
 export type SavepointMessage = { type: 'savepoint'; name: string }
 export type RollbackMessage = { type: 'rollback'; target: string }
+export type BranchMessage = { type: 'branch'; name: string }
+export type SwitchMessage = { type: 'switch'; name: string }
