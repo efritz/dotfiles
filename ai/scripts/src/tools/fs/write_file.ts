@@ -1,4 +1,5 @@
-import { existsSync, readFileSync, writeFileSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
+import { dirname } from 'path'
 import chalk from 'chalk'
 import * as diffLib from 'diff'
 import { ExecutionContext } from '../context'
@@ -6,7 +7,7 @@ import { Arguments, ExecutionResult, JSONSchemaDataType, Tool, ToolResult } from
 
 export const writeFile: Tool = {
     name: 'write_file',
-    description: 'Write file content to disk.',
+    description: 'Write file content to disk, creating intermediate directories if necessary.',
     parameters: {
         type: JSONSchemaDataType.Object,
         description: 'The command payload.',
@@ -35,6 +36,11 @@ export const writeFile: Tool = {
         console.log(formatContent(contents))
 
         if (await confirmWrite(context, path, contents)) {
+            const dir = dirname(path)
+            if (!existsSync(dir)) {
+                mkdirSync(dir, { recursive: true })
+            }
+
             writeFileSync(path, contents)
             console.log(`${chalk.dim('ℹ')} Wrote file.`)
             return { result: { userCanceled: false } }
