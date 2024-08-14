@@ -49,7 +49,7 @@ function assistantMessagesToParam(messages: AssistantMessage[]): Content {
                     parts.push({
                         functionCall: {
                             name: tool.name,
-                            args: JSON.parse(tool.parameters),
+                            args: tool.parameters ? JSON.parse(tool.parameters) : {},
                         },
                     })
                 }

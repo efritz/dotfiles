@@ -85,7 +85,7 @@ function assistantMessagesToParam(messages: AssistantMessage[]): AssistantParam 
                         type: 'tool_use',
                         id,
                         name,
-                        input: JSON.parse(parameters),
+                        input: parameters ? JSON.parse(parameters) : {},
                     }))
                 }
             }

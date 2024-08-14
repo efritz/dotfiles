@@ -52,7 +52,7 @@ function assistantMessagesToParam(messages: AssistantMessage[]): OllamaMessage {
                     ...message.tools.map(({ name, parameters }) => ({
                         function: {
                             name,
-                            arguments: JSON.parse(parameters),
+                            arguments: parameters ? JSON.parse(parameters) : {},
                         },
                     })),
                 )

@@ -1,10 +1,11 @@
 import { readDirectories } from './fs/read_directories'
 import { readFiles } from './fs/read_files'
 import { writeFile } from './fs/write_file'
+import { projectInfo } from './project/project_info'
 import { shellExecute } from './shell/shell_execute'
 import { Tool, ToolResult } from './tool'
 
-export const tools: Tool[] = [shellExecute, readDirectories, readFiles, writeFile]
+export const tools: Tool[] = [shellExecute, readDirectories, readFiles, writeFile, projectInfo]
 
 export function findTool(name: string): Tool {
     const tool = tools.find(tool => tool.name === name)
