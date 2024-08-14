@@ -1,5 +1,6 @@
 import chalk from 'chalk'
 import { expandFilePatterns } from '../../util/fs/glob'
+import { filterIgnoredPaths } from '../../util/fs/ignore'
 import { FilePayload, readFileContents } from '../../util/fs/read'
 import { ExecutionContext } from '../context'
 import { Arguments, ExecutionResult, JSONSchemaDataType, Tool, ToolResult } from '../tool'
@@ -33,8 +34,8 @@ export const readFiles: Tool = {
     },
     execute: async (context: ExecutionContext, args: Arguments): Promise<ExecutionResult> => {
         const { paths: patterns } = args as { paths: string[] }
-        const result = await readFileContents(expandFilePatterns(patterns))
 
+        const result = await readFileContents(filterIgnoredPaths(expandFilePatterns(patterns)))
         if (result.ok) {
             return { result: result.response, reprompt: true }
         } else {

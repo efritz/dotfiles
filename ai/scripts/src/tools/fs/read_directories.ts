@@ -1,5 +1,6 @@
 import chalk from 'chalk'
 import { expandDirectoryPatterns } from '../../util/fs/glob'
+import { filterIgnoredPaths } from '../../util/fs/ignore'
 import { DirectoryPayload, readDirectoryContents } from '../../util/fs/read'
 import { ExecutionContext } from '../context'
 import { Arguments, ExecutionResult, JSONSchemaDataType, Tool, ToolResult } from '../tool'
@@ -33,8 +34,8 @@ export const readDirectories: Tool = {
     },
     execute: async (context: ExecutionContext, args: Arguments): Promise<ExecutionResult> => {
         const { paths: patterns } = args as { paths: string[] }
-        const result = await readDirectoryContents(expandDirectoryPatterns(patterns))
 
+        const result = await readDirectoryContents(filterIgnoredPaths(expandDirectoryPatterns(patterns)))
         if (result.ok) {
             return { result: result.response, reprompt: true }
         } else {

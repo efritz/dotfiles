@@ -1,4 +1,5 @@
 import { homedir } from 'os'
+import { sep } from 'path'
 import { CompleterResult } from 'readline'
 import chalk from 'chalk'
 import { expandFilePatterns, expandPrefixes } from '../../../util/fs/glob'
@@ -66,8 +67,8 @@ function canonicalizePathPrefix(prefix: string): string {
     }
 
     // Canonicalize relative paths
-    if (!prefix.startsWith('/') && !prefix.startsWith('./') && !prefix.startsWith('../')) {
-        prefix = `./${prefix}`
+    if (!prefix.startsWith(`${sep}`) && !prefix.startsWith(`.${sep}`) && !prefix.startsWith(`..${sep}`)) {
+        prefix = `.${sep}${prefix}`
     }
 
     return prefix

@@ -1,4 +1,5 @@
 import { lstatSync } from 'fs'
+import { sep } from 'path'
 import { glob } from 'glob'
 
 export function expandFilePatterns(patterns: string[]): string[] {
@@ -11,7 +12,7 @@ export function expandDirectoryPatterns(patterns: string[]): string[] {
             ? glob
                   .sync(pattern, { withFileTypes: true })
                   .filter(entry => entry.isDirectory())
-                  .map(({ name }) => name)
+                  .map(r => r.relativePosix() + sep)
             : [pattern],
     )
 }
@@ -25,9 +26,9 @@ export function expandPrefixes(prefixes: string[]): string[] {
         glob
             .sync(prefix + '*')
             // Add a trailing slash to directories
-            .map(path => `${path}${isDir(path) ? '/' : ''}`)
+            .map(path => `${path}${isDir(path) ? sep : ''}`)
             // Do not complete directories to themselves
-            .filter(path => !(path.endsWith('/') && path === prefix)),
+            .filter(path => !(path.endsWith(sep) && path === prefix)),
     )
 }
 
