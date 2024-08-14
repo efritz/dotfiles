@@ -36,7 +36,8 @@
 	wip = !git-wip && :
 	squash = !git-squash && :
 	pr = !git-pr && :
-	# (used transitively by the above aliases)
+	yeet = !git-yeet && :
+	nuke = !git-nuke && :
 	merge-default = !git-merge-default && :
 	reset-default = !git-reset-default && :
 
