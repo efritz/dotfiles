@@ -11,7 +11,7 @@ export function expandDirectoryPatterns(patterns: string[]): string[] {
             ? glob
                   .sync(pattern, { withFileTypes: true })
                   .filter(entry => entry.isDirectory())
-                  .map(({ name }) => name)
+                  .map(({ name }) => name) // TODO - need to get full filepath?
             : [pattern],
     )
 }

@@ -1,0 +1,112 @@
+[
+    {
+        "type": "text",
+        "content": "recursively read the current directory",
+        "id": "6a672666-d8d8-440d-a9ae-5768e3db291d",
+        "role": "user"
+    },
+    {
+        "type": "tool_use",
+        "tools": [
+            {
+                "id": "call_WiSnxSWfigzUhAhSNb5NOWYx",
+                "name": "read_directories",
+                "parameters": "{\"paths\":[\".\"]}"
+            }
+        ],
+        "id": "051b1a3b-2bd6-4b12-b41b-d83f7ee9f84a",
+        "role": "assistant"
+    },
+    {
+        "type": "tool_result",
+        "toolUse": {
+            "id": "call_WiSnxSWfigzUhAhSNb5NOWYx",
+            "name": "read_directories",
+            "parameters": "{\"paths\":[\".\"]}"
+        },
+        "result": [
+            {
+                "path": ".",
+                "entries": [
+                    {
+                        "name": ".DS_Store",
+                        "isFile": true,
+                        "isDirectory": false
+                    },
+                    {
+                        "name": ".gitignore",
+                        "isFile": true,
+                        "isDirectory": false
+                    },
+                    {
+                        "name": ".prettierignore",
+                        "isFile": true,
+                        "isDirectory": false
+                    },
+                    {
+                        "name": ".prettierrc.cjs",
+                        "isFile": true,
+                        "isDirectory": false
+                    },
+                    {
+                        "name": ".vscode",
+                        "isFile": false,
+                        "isDirectory": true
+                    },
+                    {
+                        "name": "aidev.ignore",
+                        "isFile": true,
+                        "isDirectory": false
+                    },
+                    {
+                        "name": "aidev.yaml",
+                        "isFile": true,
+                        "isDirectory": false
+                    },
+                    {
+                        "name": "dist",
+                        "isFile": false,
+                        "isDirectory": true
+                    },
+                    {
+                        "name": "eslint.config.cjs",
+                        "isFile": true,
+                        "isDirectory": false
+                    },
+                    {
+                        "name": "keys",
+                        "isFile": false,
+                        "isDirectory": true
+                    },
+                    {
+                        "name": "node_modules",
+                        "isFile": false,
+                        "isDirectory": true
+                    },
+                    {
+                        "name": "package.json",
+                        "isFile": true,
+                        "isDirectory": false
+                    },
+                    {
+                        "name": "src",
+                        "isFile": false,
+                        "isDirectory": true
+                    },
+                    {
+                        "name": "tsconfig.json",
+                        "isFile": true,
+                        "isDirectory": false
+                    },
+                    {
+                        "name": "yarn.lock",
+                        "isFile": true,
+                        "isDirectory": false
+                    }
+                ]
+            }
+        ],
+        "id": "27dff0dd-5449-492d-8449-6658b007a00b",
+        "role": "user"
+    }
+]

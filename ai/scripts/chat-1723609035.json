@@ -1,0 +1,799 @@
+[
+	{
+		"type": "text",
+		"content": "list files recursively from this directory",
+		"id": "c2c55004-6772-47fe-928e-5c1bab5f2bfe",
+		"role": "user"
+	},
+	{
+		"type": "text",
+		"content": "Certainly! I can help you list files recursively from the current directory. To do this, we'll use the `read_directories` function, which can list directory entries. We'll use a glob pattern to recursively list all files and directories.\n\nLet's make the function call:",
+		"id": "ba75c7a1-4b00-4905-a1fc-8e8bf06e9f81",
+		"role": "assistant"
+	},
+	{
+		"type": "tool_use",
+		"tools": [
+			{
+				"id": "toolu_01C8eYHd5agcdd1LX1eV926W",
+				"name": "read_directories",
+				"parameters": "{\"paths\": [\"**/*\"]}"
+			}
+		],
+		"id": "730f5093-6bcf-45fd-8fce-d31b5a8d376f",
+		"role": "assistant"
+	},
+	{
+		"type": "tool_result",
+		"toolUse": {
+			"id": "toolu_01C8eYHd5agcdd1LX1eV926W",
+			"name": "read_directories",
+			"parameters": "{\"paths\": [\"**/*\"]}"
+		},
+		"result": [
+			{
+				"path": "keys",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": ".gitignore",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "anthropic.key",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "google.key",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "groq.key",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "openai.key",
+						"isFile": true,
+						"isDirectory": false
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			},
+			{
+				"path": "src",
+				"entries": [
+					{
+						"name": ".DS_Store",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "chat",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "conversation",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "main.ts",
+						"isFile": true,
+						"isDirectory": false
+					},
+					{
+						"name": "messages",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "providers",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "tools",
+						"isFile": false,
+						"isDirectory": true
+					},
+					{
+						"name": "util",
+						"isFile": false,
+						"isDirectory": true
+					}
+				]
+			}
+		],
+		"id": "8f5dd5c3-e142-4811-82fd-f412c24b5759",
+		"role": "user"
+	},
+	{
+		"type": "text",
+		"content": "\n\nBased on the results, I can provide you with a recursive listing of files and directories from the current directory. Here's a summary of the structure:\n\n1. keys/\n   - .DS_Store\n   - .gitignore\n   - anthropic.key\n   - google.key\n   - groq.key\n   - openai.key\n\n2. src/\n   - .DS_Store\n   - main.ts\n   - chat/ (directory)\n   - conversation/ (directory)\n   - messages/ (directory)\n   - providers/ (directory)\n   - tools/ (directory)\n   - util/ (directory)\n\nIt appears that the current directory contains two main subdirectories: `keys` and `src`. \n\nThe `keys` directory contains several key files for different services (Anthropic, Google, Groq, OpenAI) along with a .gitignore file and a .DS_Store file.\n\nThe `src` directory seems to be the main source code directory, containing:\n- A main.ts file\n- Several subdirectories (chat, conversation, messages, providers, tools, util) which likely contain more source code files.\n\nNote that the .DS_Store files are typically hidden system files on macOS used to store custom attributes of a folder.\n\nIs there any specific part of this directory structure you'd like more information about?",
+		"id": "e6d589e7-1bfa-476e-9dcb-c1fee05426d4",
+		"role": "assistant"
+	}
+]
