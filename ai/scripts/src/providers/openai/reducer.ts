@@ -1,5 +1,5 @@
 import { ChatCompletionChunk } from 'openai/resources'
-import { AssistantMessage } from '../../messages/messages'
+import { AssistantMessage, ToolUse } from '../../messages/messages'
 import { Reducer } from '../reducer'
 
 export function createStreamReducer(): Reducer<ChatCompletionChunk> {
@@ -17,27 +17,26 @@ export function createStreamReducer(): Reducer<ChatCompletionChunk> {
     const handleToolCallChunk = (toolCalls: ChatCompletionChunk.Choice.Delta.ToolCall[]) => {
         const last = messages[messages.length - 1]
         if (last && last.type === 'tool_use') {
-            while (last.tools.length < toolCalls.length) {
-                last.tools.push({
-                    id: toolCalls[last.tools.length].id || '',
-                    name: '',
-                    parameters: '',
-                })
-            }
-
             for (const call of toolCalls) {
-                last.tools[call.index].name += call.function?.name || ''
-                last.tools[call.index].parameters += call.function?.arguments || ''
+                const prev = last.tools[call.index]
+
+                last.tools[call.index] = {
+                    id: (prev?.id ?? '') + (call.id ?? ''),
+                    name: (prev?.name ?? '') + (call.function?.name ?? ''),
+                    parameters: (prev?.parameters ?? '') + (call.function?.arguments ?? ''),
+                }
             }
         } else {
-            messages.push({
-                type: 'tool_use',
-                tools: toolCalls.map(call => ({
-                    id: call.id || '',
-                    name: call.function?.name || '',
-                    parameters: call.function?.arguments || '',
-                })),
-            })
+            const tools: ToolUse[] = []
+            for (const call of toolCalls) {
+                tools[call.index] = {
+                    id: call.id ?? '',
+                    name: call.function?.name ?? '',
+                    parameters: call.function?.arguments ?? '',
+                }
+            }
+
+            messages.push({ type: 'tool_use', tools })
         }
     }
 
