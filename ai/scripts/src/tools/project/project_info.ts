@@ -41,7 +41,7 @@ export const projectInfo: Tool = {
     },
     replay: (args: Arguments, { result, error }: ToolResult) => {
         if (error) {
-            console.log(`${chalk.red('✖')} Failed to read project manifest..`)
+            console.log(`${chalk.red('✖')} Failed to read project manifest.`)
             console.log()
             return
         }
