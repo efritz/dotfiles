@@ -13,6 +13,10 @@ const models: Model[] = [
         model: 'gpt-4o-2024-08-06',
     },
     {
+        name: 'gpt-4o-latest',
+        model: 'chatgpt-4o-latest',
+    },
+    {
         name: 'gpt-4',
         model: 'gpt-4',
     },
