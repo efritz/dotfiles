@@ -52,7 +52,7 @@ function completeLoad(context: ChatContext, args: string): CompleterResult {
         }
 
         // If there are any matches, return a SINGLE result as a string with a trailing space.
-        // THis will replace the entry with the expanded paths, rather than simply suggesting
+        // This will replace the entry with the expanded paths, rather than simply suggesting
         // all of them for individual selection.
         return [[entries.join(' ') + ' '], last]
     }
