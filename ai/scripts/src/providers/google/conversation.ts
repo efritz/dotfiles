@@ -26,7 +26,7 @@ function userMessageToParam(message: UserMessage): Content {
                     {
                         functionResponse: {
                             name: message.toolUse.name,
-                            response: JSON.parse(serializeToolResult(message.toolUse.name, message)), // TODO
+                            response: JSON.parse(serializeToolResult(message.toolUse.name, message)),
                         },
                     },
                 ],
