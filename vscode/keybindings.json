@@ -1,0 +1,15 @@
+[
+  {
+    "key": "cmd+c",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus && terminalProcessSupported",
+    "args": {
+      "text": "\u0003"
+    }
+  },
+  {
+    "key": "cmd+l",
+    "command": "workbench.action.terminal.clear",
+    "when": "terminalFocus && terminalProcessSupported"
+  }
+]
