@@ -12,6 +12,7 @@ includes=(
     ~/.zsh/completions
     ~/.zsh/paths
     ~/.zsh/plugins
+    ~/.zsh/update_check
     ~/.fzf.zsh
     ~/.zsh/zshrc-`hostname -s`
 )

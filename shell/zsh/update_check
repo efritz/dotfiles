@@ -1,0 +1,16 @@
+check_dotfiles_updates() {
+    local dotfiles_dir="$HOME/.dotfiles"
+    if [ -d "$dotfiles_dir" ]; then
+        cd "$dotfiles_dir"
+        git remote update > /dev/null 2>&1
+        local commits_behind=$(git rev-list HEAD..origin/main --count 2>/dev/null)
+        if [ "$commits_behind" -gt 0 ]; then
+            echo "\033[0;33mYour dotfiles are $commits_behind commit(s) behind the remote repository.\033[0m"
+            echo "To update, run: cd $dotfiles_dir && git pull"
+        fi
+        cd - > /dev/null 2>&1
+    fi
+}
+
+# Run the update check
+check_dotfiles_updates
