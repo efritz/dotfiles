@@ -8,3 +8,5 @@ export USE_EDITOR=$EDITOR
 export VISUAL=$EDITOR
 
 export RIPGREP_CONFIG_PATH=~/.ripgreprc
+
+export AIDEV_KEY_DIR=~/.dotfiles/secrets/aidev-keys
