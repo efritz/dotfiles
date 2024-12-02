@@ -42,5 +42,6 @@
   // Extensions settings
   "markdown-preview-enhanced.codeBlockTheme": "github.css",
   "editor.unicodeHighlight.nonBasicASCII": false,
-  "github.copilot.editor.enableAutoCompletions": true
+  "github.copilot.editor.enableAutoCompletions": true,
+  "cSpell.enabled": false
 }
