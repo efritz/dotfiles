@@ -73,7 +73,7 @@ brew "pgcli"
 brew "pkgconf"
 brew "postgresql@16", restart_service: true
 brew "pre-commit"
-brew "python-yq", link: false
+brew "python-yq"
 brew "python@3.10"
 brew "python@3.11"
 brew "pytorch"
