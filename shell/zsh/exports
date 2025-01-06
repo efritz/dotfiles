@@ -9,4 +9,5 @@ export VISUAL=$EDITOR
 
 export RIPGREP_CONFIG_PATH=~/.ripgreprc
 
-export AIDEV_KEY_DIR=~/.dotfiles/secrets/aidev-keys
+export AIDEV_KEY_DIR=~/.dotfiles/aidev/secrets
+export AIDEV_PREFERENCES_DIR=~/.dotfiles/aidev
