@@ -43,5 +43,11 @@
   "markdown-preview-enhanced.codeBlockTheme": "github.css",
   "editor.unicodeHighlight.nonBasicASCII": false,
   "github.copilot.editor.enableAutoCompletions": true,
-  "cSpell.enabled": false
+  "cSpell.enabled": false,
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": false,
+    "scminput": false
+  }
 }
