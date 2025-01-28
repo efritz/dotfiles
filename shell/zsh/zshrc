@@ -22,3 +22,10 @@ for config in $includes; do
         source $config
     fi
 done
+
+# bun completions
+[ -s "/Users/efritz/.bun/_bun" ] && source "/Users/efritz/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
