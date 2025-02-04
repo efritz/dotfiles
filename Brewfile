@@ -1,5 +1,6 @@
 tap "homebrew/bundle"
 tap "homebrew/services"
+brew "sqlite"
 brew "cloc"
 brew "direnv"
 brew "dive"
