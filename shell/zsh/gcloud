@@ -1,5 +1,0 @@
-source "$(brew --prefix)/share/google-cloud-sdk/path.zsh.inc"
-source "$(brew --prefix)/share/google-cloud-sdk/completion.zsh.inc"
-
-export USE_GKE_GCLOUD_AUTH_PLUGIN='True'
-export CLOUDSDK_PYTHON='/opt/homebrew/bin/python3.10'

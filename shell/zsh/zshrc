@@ -1,11 +1,8 @@
 includes=(
     ~/.zsh/homebrew # must come before $(brew --prefix) calls
     ~/.zsh/aliases
-    ~/.zsh/asdf
     ~/.zsh/autocorrect
-    ~/.zsh/nvm
     ~/.zsh/exports
-    ~/.zsh/gcloud
     ~/.zsh/history
     ~/.zsh/hooks
     ~/.zsh/oh-my-zsh

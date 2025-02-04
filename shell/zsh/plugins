@@ -2,7 +2,6 @@ plugins=(
     brew
     docker
     git
-    kubectl
     macos
     pass
     vscode
