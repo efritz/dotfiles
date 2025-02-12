@@ -1,0 +1,10 @@
+theme = Nocturnal Winter
+
+quit-after-last-window-closed = true
+working-directory = /Users/efritz
+window-inherit-working-directory = false
+
+keybind = cmd+c=text:\x03
+keybind = cmd+d=text:\x04
+keybind = cmd+l=text:\x0C
+keybind = cmd+shift+c=copy_to_clipboard
