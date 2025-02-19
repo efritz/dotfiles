@@ -4,3 +4,11 @@ source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 autoload -U +X bashcompinit && bashcompinit
+
+# Bun completions
+source ~/.bun/_bun
+
+# Docker CLI completions
+fpath=(~/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
