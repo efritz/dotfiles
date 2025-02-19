@@ -6,5 +6,8 @@ window-inherit-working-directory = false
 
 keybind = cmd+c=text:\x03
 keybind = cmd+d=text:\x04
+keybind = cmd+k=text:\x0B
 keybind = cmd+l=text:\x0C
+keybind = cmd+r=text:\x12
 keybind = cmd+shift+c=copy_to_clipboard
+keybind = cmd+shift+v=paste_from_clipboard
