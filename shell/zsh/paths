@@ -2,7 +2,7 @@ paths=(
     /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
     /opt/homebrew/opt/postgresql@16/bin
     "${GOBIN}"
-    "{BUN_INSTALL}/bin"
+    "${BUN_INSTALL}/bin"
     ~/.local/bin # pipx
     ~/.dotfiles/bin
 )
