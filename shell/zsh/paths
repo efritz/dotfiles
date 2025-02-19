@@ -3,6 +3,7 @@ paths=(
     /opt/homebrew/opt/postgresql@16/bin
     "${GOBIN}"
     "{BUN_INSTALL}/bin"
+    ~/.local/bin # pipx
     ~/.dotfiles/bin
 )
 
