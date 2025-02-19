@@ -1,8 +1,8 @@
 paths=(
     /Applications/Visual\ Studio\ Code.app/Contents/Resources/app/bin
     /opt/homebrew/opt/postgresql@16/bin
-    ~/.bun/bin
     "${GOBIN}"
+    "{BUN_INSTALL}/bin"
     ~/.dotfiles/bin
 )
 

@@ -2,6 +2,8 @@ export GOPATH=~/go
 export GOBIN="${GOPATH}/bin"
 export GOFLAGS="-ldflags=-linkmode=internal"
 
+export BUN_INSTALL=~/.bun
+
 export LC_ALL=en_US.UTF-8
 export EDITOR=code
 export USE_EDITOR=$EDITOR
