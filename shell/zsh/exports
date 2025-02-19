@@ -10,8 +10,8 @@ export USE_EDITOR=$EDITOR
 export VISUAL=$EDITOR
 
 export GPG_TTY=$(tty)
-
 export RIPGREP_CONFIG_PATH=~/.ripgreprc
+export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR=/opt/homebrew/share/zsh-syntax-highlighting/highlighters
 
 export AIDEV_KEY_DIR=~/.dotfiles/aidev/secrets
 export AIDEV_PREFERENCES_DIR=~/.dotfiles/aidev
