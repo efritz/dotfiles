@@ -1,0 +1,3 @@
+#!/bin/bash
+
+jq -c '.' | grep "$1" | jq '.'
