@@ -49,5 +49,29 @@
     "plaintext": false,
     "markdown": false,
     "scminput": false
+  },
+  "editor.accessibilitySupport": "off",
+  "[dockerfile]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-containers"
+  },
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "editor.inlineSuggest.edits.showCollapsed": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "docker.extension.enableComposeLanguageServer": false,
+  "atlascode.jira.enabled": false,
+  "atlascode.bitbucket.pipelines.monitorEnabled": false,
+  "[dockercompose]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.autoIndent": "advanced",
+    "editor.quickSuggestions": {
+      "other": true,
+      "comments": false,
+      "strings": true
+    },
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "[github-actions-workflow]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
   }
 }

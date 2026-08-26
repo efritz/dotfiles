@@ -11,5 +11,13 @@
     "key": "cmd+l",
     "command": "workbench.action.terminal.clear",
     "when": "terminalFocus && terminalProcessSupported"
+  },
+  {
+    "key": "shift+enter",
+    "command": "workbench.action.terminal.sendSequence",
+    "when": "terminalFocus",
+    "args": { 
+      "text": "\u001b[27;2;13~"
+    }
   }
 ]
