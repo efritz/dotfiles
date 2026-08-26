@@ -1,2 +1,8 @@
 [user]
-    signingkey=058AB062AA5E74E7F571CD2308351BC3D28E20D3
+	name = Eric Fritz
+	email = efritz@atlassian.com
+	signingkey = 08351BC3D28E20D3
+
+[url "git@bitbucket.org:"]
+	insteadOf = git://bitbucket.org/
+	insteadOf = https://bitbucket.org/

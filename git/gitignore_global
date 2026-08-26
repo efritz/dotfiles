@@ -426,3 +426,9 @@ TSWLatexianTemp*
 # option is specified. Footnotes are the stored in a file with suffix Notes.bib.
 # Uncomment the next line to have this generated file ignored.
 #*Notes.bib
+
+tmp_code_*
+
+**/.claude/settings.local.json
+
+**/.claude/.cc-writes/
