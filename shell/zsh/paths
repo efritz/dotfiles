@@ -5,6 +5,7 @@ paths=(
     "${BUN_INSTALL}/bin"
     ~/.local/bin # pipx
     ~/.dotfiles/bin
+    /opt/homebrew/Cellar/mvnvm/1.0.29/bin
 )
 
 for dir in "${paths[@]}"; do

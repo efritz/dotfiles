@@ -19,3 +19,22 @@ for config in $includes; do
         source $config
     fi
 done
+
+# #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+# export SDKMAN_DIR="$HOME/.sdkman"
+# [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+# export PATH="/Users/efritz/.orbit/bin:$PATH"
+
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# # zprof
+# export BROWSER="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
