@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Usage: ./relative-time.sh <ISO-8601-timestamp>
+# Example: ./relative-time.sh 2026-03-22T19:00:58.374669Z
+ 
+set -euo pipefail
+ 
+if [[ $# -lt 1 ]]; then
+  echo "Usage: $0 <timestamp>" >&2
+  echo "Example: $0 2026-03-22T19:00:58.374669Z" >&2
+  exit 1
+fi
+ 
+ts="$1"
+ 
+# Get epoch seconds for the timestamp and current time.
+# Uses Python for portable ISO 8601 parsing (works on macOS & Linux).
+read -r ts_epoch now_epoch < <(
+  python3 -c "
+from datetime import datetime, timezone
+import re, sys
+ 
+raw = sys.argv[1]
+ 
+# Strip fractional seconds beyond 6 digits (for older Python compat)
+cleaned = re.sub(r'(\.\d{6})\d+', r'\1', raw)
+cleaned = cleaned.replace('Z', '+00:00')
+ 
+ts = datetime.fromisoformat(cleaned).astimezone(timezone.utc)
+now = datetime.now(timezone.utc)
+ 
+print(int(ts.timestamp()), int(now.timestamp()))
+" "$ts"
+)
+ 
+diff=$((now_epoch - ts_epoch))
+ 
+if [[ $diff -lt 0 ]]; then
+  direction="from now"
+  diff=$((-diff))
+else
+  direction="ago"
+fi
+ 
+days=$((diff / 86400))
+hours=$(( (diff % 86400) / 3600 ))
+minutes=$(( (diff % 3600) / 60 ))
+seconds=$((diff % 60))
+ 
+# Build human-readable string
+parts=()
+((days > 0))    && parts+=("${days}d")
+((hours > 0))   && parts+=("${hours}h")
+((minutes > 0)) && parts+=("${minutes}m")
+((seconds > 0 || ${#parts[@]} == 0)) && parts+=("${seconds}s")
+ 
+echo "${parts[*]} ${direction}"
