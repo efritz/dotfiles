@@ -22,6 +22,7 @@
 	nuke = !git-nuke && :
 	merge-default = !git-merge-default && :
 	reset-default = !git-reset-default && :
+	prune-branches = !git-prune-branches && :
 	sign-commits = "!f() { git rebase --exec \"git commit --amend --no-edit -n -S\" -i \"${1:-$(git merge-base HEAD main)}\"; }; f"
 [status]
 	showuntrackedfiles = all
