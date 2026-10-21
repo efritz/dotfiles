@@ -1,0 +1,37 @@
+#!/bin/bash
+
+dry_run=false
+if [ "$1" = '-n' ] || [ "$1" = '--dry-run' ]; then
+    dry_run=true
+fi
+
+default_branch=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||')
+if [ -z "${default_branch}" ]; then
+    default_branch=$(git remote show origin 2>/dev/null | sed -n '/HEAD branch/s/.*: //p')
+fi
+if [ -z "${default_branch}" ]; then
+    default_branch=$(git config init.defaultBranch)
+fi
+if [ -z "${default_branch}" ]; then
+    echo 'Could not determine default branch.' >&2
+    exit 1
+fi
+
+# The main working tree is included here, so this also covers the current branch.
+worktree_branches=$(git worktree list --porcelain | sed -n 's|^branch refs/heads/||p')
+
+protected=$(printf '%s\n%s\n' "${default_branch}" "${worktree_branches}")
+branches=$(git for-each-ref --format='%(refname:short)' refs/heads/ | grep -vxF "${protected}")
+
+if [ -z "${branches}" ]; then
+    echo 'No branches to delete.'
+    exit 0
+fi
+
+if [ "${dry_run}" = true ]; then
+    echo 'Would delete:'
+    echo "${branches}" | sed 's/^/  /'
+    exit 0
+fi
+
+echo "${branches}" | xargs git branch -D
