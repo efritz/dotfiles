@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+"""Snapshot every live interactive Claude Code session to a JSON file.
+
+Usage: python3 ~/claude-sessions-save.py [--file PATH]
+
+Run it from a normal terminal (not inside Claude's sandbox): it needs `ps`
+and `kill -0` to tell live sessions from stale registry entries.
+Default snapshot: ~/.claude-sessions.json
+"""
+import argparse
+import glob
+import json
+import os
+import subprocess
+import sys
+import time
+
+HOME = os.path.expanduser("~")
+
+
+def ps(pid, field):
+    r = subprocess.run(["ps", "-o", field + "=", "-p", str(pid)], capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 else ""
+
+
+def alive_claude(pid):
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        pass
+    # Guard against PID reuse: the process must still look like claude.
+    return "claude" in ps(pid, "command")
+
+
+def title_for(sid):
+    hits = glob.glob(os.path.join(HOME, ".claude/projects/*/%s.jsonl" % sid))
+    title = first = None
+    if not hits:
+        return None
+    with open(hits[0]) as f:
+        for line in f:
+            try:
+                d = json.loads(line)
+            except ValueError:
+                continue
+            t = d.get("type")
+            if t in ("custom-title", "ai-title", "summary"):
+                title = d.get("customTitle") or d.get("aiTitle") or d.get("title") or d.get("summary") or title
+            if first is None and t == "user":
+                c = d.get("message", {}).get("content")
+                if isinstance(c, list):
+                    c = " ".join(x.get("text", "") for x in c if isinstance(x, dict))
+                if c and not c.startswith("<"):
+                    first = c.strip().replace("\n", " ")[:80]
+    return title or first
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--file", default=os.path.join(HOME, ".claude-sessions.json"))
+    args = ap.parse_args()
+
+    sessions = []
+    for path in glob.glob(os.path.join(HOME, ".claude/sessions/*.json")):
+        try:
+            s = json.load(open(path))
+        except ValueError:
+            continue
+        pid = s.get("pid")
+        if not pid or s.get("kind") != "interactive" or not alive_claude(pid):
+            continue
+        tty = ps(pid, "tty")
+        sessions.append({
+            "title": title_for(s["sessionId"]) or s.get("name") or s["sessionId"],
+            "cwd": s["cwd"],
+            "sessionId": s["sessionId"],
+            "tty": tty,
+            "status": s.get("status"),
+        })
+
+    # Terminal numbers (ttys004, ttys012, ...) are allocated in tab-creation order.
+    def tty_key(x):
+        digits = "".join(c for c in x["tty"] if c.isdigit())
+        return int(digits) if digits else 1 << 30
+
+    sessions.sort(key=tty_key)
+    if not sessions:
+        print("no live sessions found; refusing to overwrite %s" % args.file, file=sys.stderr)
+        return 2
+
+    tmp = args.file + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump({"savedAt": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "sessions": sessions}, f, indent=2)
+        f.write("\n")
+    os.replace(tmp, args.file)
+    print("saved %d sessions to %s" % (len(sessions), args.file))
+    for i, s in enumerate(sessions, 1):
+        print("%2d. %s  [%s]" % (i, s["title"], s["cwd"].split("/.claude/worktrees/")[-1]))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
